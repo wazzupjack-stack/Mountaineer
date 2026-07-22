@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mountaineer — Peak Prediction Markets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #eef3f9;
+  --bg2: #f6f9fd;
+  --surface: #ffffff;
+  --surface2: #fbfdff;
+  --border: rgba(18,38,68,0.10);
+  --border2: rgba(18,38,68,0.06);
+  --text: #17253c;
+  --muted: #5b6b84;
+  --dim: #93a3ba;
+  --green: #059669;
+  --amber: #d97706;
+  --red: #dc2626;
+  --indigo: #6366f1;
+  --shadow: 0 1px 2px rgba(23,37,60,0.05), 0 6px 20px rgba(23,37,60,0.06);
+  --shadow-lg: 0 4px 8px rgba(23,37,60,0.06), 0 16px 44px rgba(23,37,60,0.12);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: linear-gradient(180deg, #e8eff8 0%, var(--bg) 30%, var(--bg) 100%);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(23,37,60,0.035) 1px, transparent 1px);
+  background-size: 30px 30px;
+  pointer-events: none;
+  z-index: 0;
+}
+* { position: relative; z-index: 1; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(23,37,60,0.18); border-radius: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ── HEADER ── */
+header {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; height: 58px;
+  background: rgba(255,255,255,0.85);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(16px);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-mark { color: var(--green); font-size: 18px; line-height: 1; }
+.logo-name {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 18px; letter-spacing: 0.1em; color: var(--text);
+}
+.logo-tag { font-size: 9px; color: var(--dim); letter-spacing: 0.18em; margin-left: 2px; }
+
+.main-nav { display: flex; gap: 2px; }
+.main-nav a {
+  font-size: 10px; letter-spacing: 0.1em; text-decoration: none;
+  color: var(--muted); padding: 6px 12px; border-radius: 6px;
+  transition: all 0.15s;
+}
+.main-nav a:hover { color: var(--text); background: rgba(23,37,60,0.05); }
+
+.header-nav { display: flex; align-items: center; gap: 16px; }
+.nav-stat { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+.nav-label { color: var(--muted); }
+.nav-value { color: var(--text); font-weight: 700; }
+.nav-divider { width: 1px; height: 18px; background: var(--border); }
+
+.live-indicator { display: flex; align-items: center; gap: 5px; font-size: 10px; }
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 6px rgba(5,150,105,0.6);
+  animation: blink 2s ease-in-out infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+.wallet-btn {
+  padding: 8px 16px; font-size: 11px; font-weight: 700;
+  font-family: inherit; letter-spacing: 0.06em;
+  background: var(--green); border: 1px solid var(--green);
+  border-radius: 8px; color: #fff; cursor: pointer; transition: all 0.2s;
+  white-space: nowrap; box-shadow: 0 2px 6px rgba(5,150,105,0.25);
+}
+.wallet-btn:hover { filter: brightness(1.06); transform: translateY(-1px); }
+.wallet-btn.connected {
+  color: var(--text); background: var(--surface); border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 1080px) { .main-nav { display: none; } }
+@media (max-width: 860px) { .hide-sm { display: none !important; } }
+@media (max-width: 620px) { .hide-xs { display: none !important; } }
+
+/* ── HERO ── */
+.hero-wrap {
+  background:
+    radial-gradient(1100px 420px at 78% -60px, rgba(99,102,241,0.10), transparent 60%),
+    radial-gradient(900px 380px at 12% -40px, rgba(5,150,105,0.10), transparent 55%);
+  border-bottom: 1px solid var(--border2);
+}
+.hero { padding: 56px 32px 8px; max-width: 760px; }
+.hero-eyebrow {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 9px; color: var(--muted); letter-spacing: 0.2em; margin-bottom: 14px;
+}
+.hero-eyebrow::before { content: ''; display: inline-block; width: 24px; height: 1px; background: var(--muted); }
+.hero-title {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 46px; line-height: 1.08; color: var(--text); margin-bottom: 14px;
+}
+.hero-title em { font-style: normal; color: var(--green); }
+.hero-body { font-size: 12.5px; color: var(--muted); line-height: 1.8; max-width: 520px; }
+
+/* ── HOW IT WORKS ── */
+.how-it-works {
+  display: flex; gap: 0;
+  margin: 28px 32px 36px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  max-width: 860px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.hiw-step {
+  flex: 1; padding: 16px 18px;
+  border-right: 1px solid var(--border2);
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.hiw-step:last-child { border-right: none; }
+.hiw-num {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 13px;
+  width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(5,150,105,0.1); color: var(--green);
+}
+.hiw-text { font-size: 10.5px; color: var(--muted); line-height: 1.6; }
+.hiw-text b { color: var(--text); font-weight: 700; }
+@media (max-width: 680px) {
+  .how-it-works { flex-direction: column; margin-left: 16px; margin-right: 16px; }
+  .hiw-step { border-right: none; border-bottom: 1px solid var(--border2); }
+  .hiw-step:last-child { border-bottom: none; }
+}
+
+/* ── GLOBAL BAR ── */
+.global-bar {
+  display: flex; gap: 0; flex-wrap: wrap;
+  border-top: 1px solid var(--border2);
+  border-bottom: 1px solid var(--border2);
+  background: rgba(255,255,255,0.6);
+}
+.gbar-stat {
+  flex: 1 1 20%; padding: 16px 24px;
+  border-right: 1px solid var(--border2);
+  min-width: 170px;
+}
+.gbar-stat:last-child { border-right: none; }
+.gbar-label { font-size: 8px; color: var(--dim); letter-spacing: 0.14em; margin-bottom: 5px; }
+.gbar-value { font-size: 21px; font-weight: 700; color: var(--text); }
+.gbar-value.green { color: var(--green); }
+.gbar-value.amber { color: var(--amber); }
+.gbar-sub { font-size: 9px; color: var(--muted); margin-top: 2px; }
+@media (max-width: 900px) {
+  .gbar-stat { flex: 1 1 50%; border-right: none; border-bottom: 1px solid var(--border2); }
+}
+@media (max-width: 480px) { .gbar-stat { flex: 1 1 100%; } }
+
+/* ── SECTION HEAD ── */
+.section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 40px 32px 18px;
+  flex-wrap: wrap; gap: 10px;
+}
+.section-title-row { display: flex; align-items: center; gap: 10px; }
+.section-title {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px;
+  color: var(--text); letter-spacing: 0.02em;
+}
+.section-count {
+  font-size: 9px; color: var(--muted); background: var(--surface);
+  border: 1px solid var(--border); padding: 3px 9px; border-radius: 12px;
+  letter-spacing: 0.08em;
+}
+.filter-row { display: flex; gap: 4px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 6px 13px; font-size: 10px; font-family: inherit;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 7px; color: var(--muted); cursor: pointer; transition: all 0.15s;
+  letter-spacing: 0.06em;
+}
+.filter-btn:hover { color: var(--text); border-color: rgba(18,38,68,0.22); }
+.filter-btn.active { background: var(--text); border-color: var(--text); color: #fff; }
+
+/* ── MOUNTAIN GRID ── */
+.mountain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  padding: 0 32px 46px;
+}
+@media (max-width: 1060px) { .mountain-grid { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 680px)  { .mountain-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+  header, .hero, .section-head, .mountain-grid, .portfolio-section,
+  .leaderboard-section, .feed-section, footer { padding-left: 16px; padding-right: 16px; }
+}
+
+/* ── CARD ── */
+.mcard {
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  overflow: hidden;
+  transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+.mcard:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+
+.mcard-visual { position: relative; height: 150px; overflow: hidden; }
+.mcard-visual svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+.round-badge {
+  position: absolute; top: 10px; right: 10px;
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.08em; z-index: 5;
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(4px);
+  border: 1px solid;
+}
+.round-badge.open     { border-color: rgba(5,150,105,0.35); color: var(--green); }
+.round-badge.climbing { border-color: rgba(99,102,241,0.4); color: var(--indigo); }
+.round-badge.resolved { border-color: rgba(217,119,6,0.4); color: var(--amber); }
+.badge-pip { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.badge-pip.pulse { animation: blink 1.4s ease-in-out infinite; }
+
+.live-mult {
+  position: absolute; top: 10px; left: 12px;
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 26px; line-height: 1; z-index: 5;
+  letter-spacing: -0.02em;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 2px 10px rgba(255,255,255,0.6);
+}
+.mult-sub {
+  position: absolute; top: 38px; left: 13px; z-index: 5;
+  font-size: 8px; letter-spacing: 0.1em; color: var(--muted);
+}
+
+/* Card body */
+.mcard-body { padding: 15px 17px 17px; }
+.mcard-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 3px; }
+.mcard-name {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 20px; color: var(--text); line-height: 1;
+}
+.risk-tag {
+  padding: 3px 9px; border-radius: 5px;
+  font-size: 8px; font-weight: 700; letter-spacing: 0.1em;
+  border: 1px solid; flex-shrink: 0; margin-top: 2px;
+  cursor: help;
+}
+.mcard-elev { font-size: 10px; color: var(--muted); margin-bottom: 12px; letter-spacing: 0.04em; }
+
+/* Bracket board — the market itself */
+.bk-label-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 7px;
+}
+.bk-title { font-size: 8px; color: var(--dim); letter-spacing: 0.12em; cursor: help; }
+.bk-lockstate { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; }
+.bk-board { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+.bk-row {
+  display: grid;
+  grid-template-columns: 74px 1fr 44px 44px;
+  align-items: center; gap: 8px;
+  padding: 6px 9px; border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--bg2);
+  font-size: 9.5px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.bk-row.current-zone { border-color: rgba(99,102,241,0.5); background: rgba(99,102,241,0.06); }
+.bk-row.won-zone { border-color: rgba(5,150,105,0.5); background: rgba(5,150,105,0.07); }
+.bk-row.your-pick { box-shadow: inset 2.5px 0 0 var(--text); }
+.bk-name { font-weight: 700; color: var(--text); font-size: 9px; letter-spacing: 0.03em; }
+.bk-range { font-size: 8px; color: var(--dim); display: block; }
+.bk-barwrap { height: 5px; border-radius: 3px; background: rgba(18,38,68,0.07); overflow: hidden; }
+.bk-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.bk-prob { text-align: right; font-weight: 700; color: var(--muted); font-size: 9.5px; }
+.bk-mult { text-align: right; font-weight: 700; font-size: 9.5px; }
+
+/* Peak history */
+.peak-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.peak-chip {
+  padding: 2.5px 7px; border-radius: 4px;
+  font-size: 9px; font-weight: 700; letter-spacing: 0.02em;
+  border: 1px solid;
+}
+
+/* Stats */
+.mcard-stats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 0; padding: 10px 0;
+  border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border2);
+  margin-bottom: 12px;
+}
+.mstat { padding: 0 4px; }
+.mstat:first-child { padding-left: 0; }
+.mstat-label { font-size: 8px; color: var(--dim); letter-spacing: 0.1em; margin-bottom: 4px; cursor: help; }
+.mstat-value { font-size: 13.5px; font-weight: 700; color: var(--text); }
+
+/* Forecast banner (your position) */
+.stake-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 12px; border-radius: 10px; border: 1px solid;
+  margin-bottom: 12px;
+}
+.sb-info { min-width: 0; }
+.sb-label { font-size: 8px; color: var(--muted); letter-spacing: 0.06em; margin-bottom: 3px; }
+.sb-value { font-size: 11px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sb-cancel {
+  font-family: inherit; font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
+  padding: 8px 11px; border-radius: 7px; border: none; cursor: pointer; flex-shrink: 0;
+  background: rgba(23,37,60,0.07); color: var(--muted); transition: filter 0.15s;
+}
+.sb-cancel:hover { filter: brightness(0.94); }
+
+/* Enter button */
+.enter-btn {
+  width: 100%; padding: 12px 0;
+  font-family: inherit; font-size: 11px;
+  font-weight: 700; letter-spacing: 0.08em;
+  border-radius: 9px;
+  cursor: pointer; transition: all 0.18s; outline: none;
+}
+.enter-btn:hover { filter: brightness(1.04); transform: translateY(-1px); }
+.enter-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+/* ── PORTFOLIO ── */
+.portfolio-section { padding: 0 32px 46px; }
+.portfolio-grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
+@media (max-width: 900px) { .portfolio-grid { grid-template-columns: 1fr; } }
+.pf-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px; box-shadow: var(--shadow);
+}
+.pf-card-title { font-size: 9px; color: var(--dim); letter-spacing: 0.14em; margin-bottom: 14px; }
+.pf-balance {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 30px;
+  color: var(--text); line-height: 1; margin-bottom: 4px;
+}
+.pf-balance-sub { font-size: 10px; color: var(--muted); margin-bottom: 16px; }
+.pf-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pf-tile { background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px; padding: 10px 12px; }
+.pf-tile-label { font-size: 8px; color: var(--dim); letter-spacing: 0.1em; margin-bottom: 4px; }
+.pf-tile-value { font-size: 14px; font-weight: 700; color: var(--text); }
+.pf-open-list { display: flex; flex-direction: column; gap: 7px; margin-top: 14px; }
+.pf-open-row {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 10px; padding: 9px 11px;
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: 9px;
+}
+.pf-open-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pf-open-name { font-weight: 700; color: var(--text); }
+.pf-open-detail { color: var(--muted); flex: 1; text-align: right; }
+.pf-empty { font-size: 10.5px; color: var(--dim); padding: 10px 0 2px; line-height: 1.6; }
+
+.pf-table { width: 100%; border-collapse: collapse; font-size: 10px; }
+.pf-table th {
+  text-align: left; font-size: 8px; color: var(--dim); letter-spacing: 0.12em;
+  font-weight: 700; padding: 0 7px 9px; border-bottom: 1px solid var(--border);
+}
+.pf-table td { padding: 8px 7px; border-bottom: 1px solid var(--border2); color: var(--muted); }
+.pf-table tr:last-child td { border-bottom: none; }
+.pf-table .num { text-align: right; }
+.pf-mtn { font-weight: 700; }
+.pf-pl-pos { color: var(--green); font-weight: 700; }
+.pf-pl-neg { color: var(--red); font-weight: 700; }
+
+/* ── LEADERBOARD ── */
+.leaderboard-section { padding: 0 32px 46px; }
+.lb-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+@media (max-width: 780px) { .lb-grid { grid-template-columns: 1fr; } }
+.lb-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px; box-shadow: var(--shadow);
+}
+.lb-card-title { font-size: 9px; color: var(--dim); letter-spacing: 0.14em; margin-bottom: 12px; }
+.lb-row {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--border2);
+  font-size: 11px;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-rank { font-size: 9px; color: var(--dim); width: 16px; flex-shrink: 0; }
+.lb-av {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; flex-shrink: 0;
+}
+.lb-name { color: var(--muted); flex: 1; }
+.lb-val { font-weight: 700; font-size: 11px; }
+
+/* ── GLOBAL FEED ── */
+.feed-section { padding: 0 32px 50px; }
+.global-feed { display: flex; flex-direction: column; gap: 4px; }
+.gfeed-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px; border-radius: 10px;
+  background: var(--surface); border: 1px solid var(--border2);
+  font-size: 11px; animation: fdrop 0.35s ease;
+}
+@keyframes fdrop { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+.gfeed-av {
+  width: 24px; height: 24px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; font-weight: 700; flex-shrink: 0;
+}
+.gfeed-body { flex: 1; color: var(--dim); font-size: 11px; }
+.gfeed-body b { color: var(--muted); }
+.gfeed-mtn { font-weight: 700; font-size: 10px; }
+.gfeed-result { font-weight: 700; min-width: 64px; text-align: right; font-size: 11px; }
+.gfeed-time { font-size: 9px; color: var(--dim); }
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 28px 32px 34px;
+  display: flex; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+}
+.foot-brand { max-width: 360px; }
+.foot-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.foot-text { font-size: 10px; color: var(--muted); line-height: 1.7; }
+.foot-col-title { font-size: 9px; color: var(--dim); letter-spacing: 0.14em; margin-bottom: 10px; }
+.foot-links { display: flex; flex-direction: column; gap: 7px; }
+.foot-links a { font-size: 10.5px; color: var(--muted); text-decoration: none; }
+.foot-links a:hover { color: var(--text); }
+.demo-pill {
+  display: inline-block; margin-top: 12px;
+  font-size: 9px; letter-spacing: 0.08em; color: var(--amber);
+  border: 1px solid rgba(217,119,6,0.35); background: rgba(217,119,6,0.07);
+  padding: 4px 10px; border-radius: 12px;
+}
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(23,37,60,0.35); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.stake-modal {
+  width: 100%; max-width: 460px; max-height: 88vh; overflow-y: auto;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 18px; padding: 24px; animation: modalIn 0.2s ease;
+  box-shadow: var(--shadow-lg);
+}
+@keyframes modalIn { from{opacity:0;transform:translateY(8px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+.modal-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px; gap: 10px; }
+.modal-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 23px; }
+.modal-sub { font-size: 10px; color: var(--muted); margin-top: 4px; letter-spacing: 0.02em; }
+.modal-close {
+  font-family: inherit; font-size: 20px; line-height: 1; background: none; border: none;
+  color: var(--dim); cursor: pointer; padding: 2px 6px; flex-shrink: 0;
+}
+.modal-close:hover { color: var(--text); }
+.modal-phase-note {
+  font-size: 11px; color: var(--muted); line-height: 1.65; margin-bottom: 16px;
+  padding: 11px 13px; background: var(--bg2); border: 1px solid var(--border2); border-radius: 10px;
+}
+.modal-phase-note b { color: var(--text); }
+
+/* Bracket selector in modal */
+.bk-select { display: flex; flex-direction: column; gap: 5px; margin-bottom: 6px; }
+.bk-option {
+  display: grid;
+  grid-template-columns: 1fr 52px 52px;
+  align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer; text-align: left;
+  font-family: inherit; font-size: 10.5px;
+  transition: border-color 0.15s, background 0.15s;
+  width: 100%;
+}
+.bk-option:hover { border-color: rgba(18,38,68,0.28); }
+.bk-option.selected { border-color: var(--text); background: var(--bg2); box-shadow: inset 3px 0 0 var(--text); }
+.bko-name { font-weight: 700; color: var(--text); font-size: 10.5px; }
+.bko-range { font-size: 8.5px; color: var(--dim); display: block; margin-top: 2px; }
+.bko-prob { text-align: right; color: var(--muted); font-weight: 700; }
+.bko-prob small { display: block; font-size: 7px; color: var(--dim); font-weight: 400; letter-spacing: 0.08em; }
+.bko-mult { text-align: right; font-weight: 700; }
+.bko-mult small { display: block; font-size: 7px; color: var(--dim); font-weight: 400; letter-spacing: 0.08em; }
+
+.modal-position { border: 1px solid; border-radius: 12px; padding: 15px; margin-bottom: 6px; }
+.mp-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); padding: 5px 0; gap: 10px; }
+.mp-row span:last-child { color: var(--text); font-weight: 700; text-align: right; }
+.mp-total { border-top: 1px solid var(--border2); margin-top: 4px; padding-top: 9px; font-size: 12px; }
+.mp-warn { font-size: 9.5px; color: var(--amber); margin-top: 9px; line-height: 1.5; }
+.mp-note { font-size: 10px; color: var(--muted); margin: 8px 0; line-height: 1.5; }
+.modal-cancel {
+  width: 100%; padding: 11px 0; border-radius: 9px; border: 1px solid var(--border);
+  background: transparent; color: var(--muted); font-family: inherit; font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.06em; cursor: pointer; margin-top: 4px;
+}
+.modal-cancel:hover { color: var(--text); border-color: rgba(18,38,68,0.25); }
+
+.modal-form { display: flex; flex-direction: column; gap: 6px; }
+.mf-label { font-size: 9px; color: var(--dim); letter-spacing: 0.1em; margin-top: 8px; }
+.mf-input {
+  font-family: inherit; font-size: 13px; padding: 11px 13px; border-radius: 9px;
+  background: var(--bg2); border: 1px solid var(--border); color: var(--text); outline: none;
+  width: 100%;
+}
+.mf-input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+.chip-row { display: flex; gap: 6px; flex-wrap: wrap; margin: 2px 0 4px; }
+.chip-btn {
+  font-family: inherit; font-size: 10px; padding: 6px 12px; border-radius: 7px;
+  background: var(--surface); border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+}
+.chip-btn:hover { border-color: rgba(18,38,68,0.25); color: var(--text); }
+.mf-preview { font-size: 10.5px; color: var(--muted); margin: 6px 0 4px; line-height: 1.6; }
+.modal-stake-btn {
+  width: 100%; margin-top: 10px; padding: 13px 0; border-radius: 9px;
+  font-family: inherit; font-size: 12px; font-weight: 800; letter-spacing: 0.06em; cursor: pointer;
+  transition: filter 0.15s; border: 1px solid;
+}
+.modal-stake-btn:hover { filter: brightness(1.04); }
+.modal-stake-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.modal-wallet { font-size: 10px; color: var(--dim); margin-top: 14px; text-align: center; }
+.modal-wallet b { color: var(--text); }
+.rake-note { font-size: 8.5px; color: var(--dim); margin-top: 10px; text-align: center; letter-spacing: 0.04em; }
+
+/* ── TOASTS ── */
+.toast-stack {
+  position: fixed; top: 70px; right: 20px; z-index: 600;
+  display: flex; flex-direction: column; gap: 8px; width: 310px; max-width: calc(100vw - 40px);
+  pointer-events: none;
+}
+.toast {
+  padding: 12px 14px; border-radius: 11px; font-size: 11px; line-height: 1.5;
+  background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--dim);
+  color: var(--text); box-shadow: var(--shadow-lg);
+  transition: opacity 0.3s, transform 0.3s;
+}
+.toast-win  { border-left-color: var(--green); }
+.toast-loss { border-left-color: var(--red); }
+.toast-info { border-left-color: var(--indigo); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <span class="logo-mark">▲</span>
+    <span class="logo-name">MOUNTAINEER</span>
+    <span class="logo-tag hide-xs">PEAK PREDICTION MARKETS</span>
+  </div>
+  <nav class="main-nav">
+    <a href="#markets">MARKETS</a>
+    <a href="#portfolio">PORTFOLIO</a>
+    <a href="#leaderboard">LEADERBOARD</a>
+    <a href="#feed">ACTIVITY</a>
+  </nav>
+  <div class="header-nav">
+    <div class="live-indicator hide-sm">
+      <div class="live-dot"></div>
+      <span style="color:var(--muted);font-size:10px" id="hdr-live-count">6 markets open</span>
+    </div>
+    <div class="nav-divider hide-xs"></div>
+    <div class="nav-stat hide-xs">
+      <span class="nav-label">Pooled</span>
+      <span class="nav-value" id="hdr-pool">—</span>
+    </div>
+    <div class="nav-divider hide-sm"></div>
+    <div class="nav-stat hide-sm">
+      <span class="nav-label">24h Vol</span>
+      <span class="nav-value" style="color:var(--green)" id="hdr-vol">14.2M</span>
+    </div>
+    <div class="nav-divider"></div>
+    <button class="wallet-btn" id="walletBtn">CONNECT WALLET</button>
+  </div>
+</header>
+
+<!-- TOASTS -->
+<div class="toast-stack" id="toastStack"></div>
+
+<!-- HERO -->
+<div class="hero-wrap">
+  <section class="hero">
+    <div class="hero-eyebrow">PARIMUTUEL POOLS · CROWD-SET ODDS · EVERY ROUND RESOLVES</div>
+    <h1 class="hero-title">Forecast the peak.<br>The crowd sets<br>the <em>odds.</em></h1>
+    <p class="hero-body">Every round, each mountain climbs to a hidden peak. The market's question: which altitude bracket does it land in? Back a bracket while betting is open — the pooled stakes set the implied odds — and when the peak resolves, the winning bracket splits everyone else's pool.</p>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-it-works">
+    <div class="hiw-step">
+      <div class="hiw-num">1</div>
+      <div class="hiw-text"><b>Back a bracket</b> while the market is open — will this round peak low, mid, high, or beyond?</div>
+    </div>
+    <div class="hiw-step">
+      <div class="hiw-num">2</div>
+      <div class="hiw-text"><b>The crowd sets the price.</b> Each bracket's share of the pool is its implied probability; thinner brackets pay more.</div>
+    </div>
+    <div class="hiw-step">
+      <div class="hiw-num">3</div>
+      <div class="hiw-text"><b>The peak resolves the market.</b> Winners split the full pot pro-rata, minus a 5% rake. Wrong bracket, stake goes to the pot.</div>
+    </div>
+  </div>
+</div>
+
+<!-- GLOBAL STATS BAR -->
+<div class="global-bar">
+  <div class="gbar-stat">
+    <div class="gbar-label">ACTIVE FORECASTERS</div>
+    <div class="gbar-value" id="gb-players">4,831</div>
+    <div class="gbar-sub">across all markets</div>
+  </div>
+  <div class="gbar-stat">
+    <div class="gbar-label">TOTAL POOLED</div>
+    <div class="gbar-value green" id="gb-pool">1.84M TKN</div>
+    <div class="gbar-sub">current rounds</div>
+  </div>
+  <div class="gbar-stat">
+    <div class="gbar-label">MARKETS RESOLVED TODAY</div>
+    <div class="gbar-value" id="gb-rounds">2,114</div>
+    <div class="gbar-sub">rounds settled</div>
+  </div>
+  <div class="gbar-stat">
+    <div class="gbar-label">HIGHEST PEAK TODAY</div>
+    <div class="gbar-value amber" id="gb-highest">284.5×</div>
+    <div class="gbar-sub" id="gb-highest-sub">on K2</div>
+  </div>
+  <div class="gbar-stat">
+    <div class="gbar-label">CROWD HIT RATE</div>
+    <div class="gbar-value" id="gb-crowd">61%</div>
+    <div class="gbar-sub">favourite bracket won, last 500</div>
+  </div>
+</div>
+
+<!-- MARKETS -->
+<div class="section-head" id="markets">
+  <div class="section-title-row">
+    <div class="section-title">Markets</div>
+    <div class="section-count">6 MOUNTAINS · ROLLING ROUNDS</div>
+  </div>
+  <div class="filter-row">
+    <button class="filter-btn active" data-filter="all">ALL</button>
+    <button class="filter-btn" data-filter="open">BETTING OPEN</button>
+    <button class="filter-btn" data-filter="climbing">IN PROGRESS</button>
+    <button class="filter-btn" data-filter="low">LOW VARIANCE</button>
+    <button class="filter-btn" data-filter="high">HIGH VARIANCE</button>
+    <button class="filter-btn" data-filter="mine">MY FORECASTS</button>
+  </div>
+</div>
+<div class="mountain-grid" id="grid"></div>
+
+<!-- PORTFOLIO -->
+<div class="section-head" id="portfolio">
+  <div class="section-title-row">
+    <div class="section-title">Your Portfolio</div>
+    <div class="section-count">THIS SESSION</div>
+  </div>
+</div>
+<div class="portfolio-section">
+  <div class="portfolio-grid">
+    <div class="pf-card">
+      <div class="pf-card-title">WALLET</div>
+      <div class="pf-balance" id="pf-balance">—</div>
+      <div class="pf-balance-sub" id="pf-balance-sub">Connect a wallet to start forecasting</div>
+      <div class="pf-tiles">
+        <div class="pf-tile">
+          <div class="pf-tile-label">SESSION P/L</div>
+          <div class="pf-tile-value" id="pf-pl">0 TKN</div>
+        </div>
+        <div class="pf-tile">
+          <div class="pf-tile-label">FORECAST HIT RATE</div>
+          <div class="pf-tile-value" id="pf-winrate">—</div>
+        </div>
+        <div class="pf-tile">
+          <div class="pf-tile-label">TOTAL STAKED</div>
+          <div class="pf-tile-value" id="pf-staked">0 TKN</div>
+        </div>
+        <div class="pf-tile">
+          <div class="pf-tile-label">BEST PAYOUT</div>
+          <div class="pf-tile-value" id="pf-best">—</div>
+        </div>
+      </div>
+      <div class="pf-card-title" style="margin-top:18px">OPEN FORECASTS</div>
+      <div class="pf-open-list" id="pf-open"></div>
+    </div>
+    <div class="pf-card">
+      <div class="pf-card-title">FORECAST HISTORY · THIS SESSION</div>
+      <div id="pf-history"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="section-head" id="leaderboard">
+  <div class="section-title-row">
+    <div class="section-title">Leaderboard</div>
+    <div class="section-count">LIVE RANKINGS</div>
+  </div>
+</div>
+<div class="leaderboard-section">
+  <div class="lb-grid" id="lb-grid"></div>
+</div>
+
+<!-- GLOBAL FEED -->
+<div class="section-head" id="feed">
+  <div class="section-title-row">
+    <div class="section-title">Global Activity</div>
+    <div class="section-count" id="feed-count">— EVENTS TODAY</div>
+  </div>
+</div>
+<div class="feed-section">
+  <div class="global-feed" id="gfeed"></div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-brand">
+    <div class="foot-logo">
+      <span class="logo-mark">▲</span>
+      <span class="logo-name" style="font-size:15px">MOUNTAINEER</span>
+    </div>
+    <div class="foot-text">A parimutuel prediction market on simulated ascents. There is no house position: all stakes flow into shared bracket pools, odds are set purely by where the crowd's money sits, and every round's peak is derived from a pre-committed fairness seed published before betting opens.</div>
+    <div class="demo-pill">DEMO BUILD · PLAY TOKENS ONLY · NO REAL FUNDS</div>
+  </div>
+  <div>
+    <div class="foot-col-title">PLATFORM</div>
+    <div class="foot-links">
+      <a href="#markets">Markets</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="#feed">Activity feed</a>
+    </div>
+  </div>
+  <div>
+    <div class="foot-col-title">MARKET RULES</div>
+    <div class="foot-links">
+      <a href="#" onclick="toast('Parimutuel: all bracket pools are combined at lock. Winners split the full pot pro-rata to their stake, minus a 5% rake. No house position.','info');return false">How pools pay out</a>
+      <a href="#" onclick="toast('Each round\'s peak is derived from a pre-committed seed hash published before betting opens, so results can be verified after resolution.','info');return false">Fairness &amp; resolution</a>
+      <a href="#" onclick="toast('This is a demo build — all balances are play tokens with no monetary value. Stake only what you would be comfortable losing.','info');return false">Demo terms</a>
+    </div>
+  </div>
+</footer>
+
+<!-- MARKET MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+  <div class="stake-modal" id="stakeModal"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   MARKET CONSTANTS
+═══════════════════════════════════════════ */
+const RAKE = 0.05;
+const OPEN_MS = 12000;      // betting window
+const RESOLVED_MS = 3000;   // resolution display
+
+/* Bracket ladders per variance tier. Named as climbing zones. */
+const BRACKET_SETS = {
+  1: [ { min: 1.00, max: 1.4,  name: 'BASE CAMP' },
+       { min: 1.4,  max: 2.0,  name: 'CAMP II' },
+       { min: 2.0,  max: 3.0,  name: 'HIGH CAMP' },
+       { min: 3.0,  max: null, name: 'SUMMIT' } ],
+  2: [ { min: 1.00, max: 1.5,  name: 'BASE CAMP' },
+       { min: 1.5,  max: 2.5,  name: 'CAMP II' },
+       { min: 2.5,  max: 5.0,  name: 'HIGH CAMP' },
+       { min: 5.0,  max: null, name: 'SUMMIT' } ],
+  3: [ { min: 1.00, max: 1.6,  name: 'BASE CAMP' },
+       { min: 1.6,  max: 3.0,  name: 'CAMP II' },
+       { min: 3.0,  max: 8.0,  name: 'HIGH CAMP' },
+       { min: 8.0,  max: null, name: 'SUMMIT' } ],
+  4: [ { min: 1.00, max: 1.5,  name: 'BASE CAMP' },
+       { min: 1.5,  max: 4.0,  name: 'CAMP II' },
+       { min: 4.0,  max: 15.0, name: 'HIGH CAMP' },
+       { min: 15.0, max: null, name: 'SUMMIT' } ]
+};
+
+const RISK_SPEED = {
+  1: { base: 0.0011, jitter: 0.0016 },
+  2: { base: 0.0016, jitter: 0.0024 },
+  3: { base: 0.0024, jitter: 0.0038 },
+  4: { base: 0.0032, jitter: 0.0055 }
+};
+const RISK_SKEW = { 1: 1.6, 2: 2.4, 3: 3.4, 4: 4.8 };
+
+/* ═══════════════════════════════════════════
+   MOUNTAIN DEFINITIONS
+═══════════════════════════════════════════ */
+const MTN = [
+  {
+    id: 'k2', name: 'K2', elevation: '8,611 m', region: 'Karakoram · Pakistan',
+    risk: 'EXTREME', riskLevel: 4, color: '#dc2626',
+    skyTop: '#ffe3de', skyBot: '#f8fafc',
+    body: '0,200 70,200 100,188 122,170 140,148 154,122 164,95 171,68 176,44 179,24 181,10 183,24 186,48 190,75 197,108 210,138 228,164 255,184 295,197 400,200',
+    snow: '179,24 176,40 181,10 186,40 183,24',
+    startPhase: 'climbing', startMult: 4.21,
+    players: 847, avgPeak: 2.84,
+    history: [1.00, 48.4, 1.02, 112.5, 1.08, 8.72, 1.00, 32.1]
+  },
+  {
+    id: 'everest', name: 'Everest', elevation: '8,849 m', region: 'Himalayas · Nepal-Tibet',
+    risk: 'HIGH', riskLevel: 3, color: '#6366f1',
+    skyTop: '#e4e7fd', skyBot: '#f8fafc',
+    body: '0,200 58,200 88,188 112,170 130,148 143,124 152,100 158,76 163,54 166,34 168,18 170,8 172,20 175,40 178,60 174,72 170,58 176,44 183,28 190,44 195,60 200,44 204,30 208,44 212,62 220,82 234,110 254,140 278,168 312,188 360,198 400,200',
+    snow: '168,10 165,26 170,8 175,26 172,10',
+    startPhase: 'open', startCountdown: 8,
+    players: 1204, avgPeak: 3.12,
+    history: [2.34, 1.12, 8.92, 1.45, 5.67, 2.34, 1.03, 14.8]
+  },
+  {
+    id: 'aconcagua', name: 'Aconcagua', elevation: '6,961 m', region: 'Andes · Argentina',
+    risk: 'MEDIUM', riskLevel: 2, color: '#d97706',
+    skyTop: '#fdedd3', skyBot: '#f8fafc',
+    body: '0,200 48,200 80,192 112,178 140,160 160,138 176,114 188,90 196,68 201,50 204,36 206,26 208,36 210,50 212,38 214,28 216,40 218,52 221,62 226,76 234,92 246,114 262,140 285,165 318,185 360,198 400,200',
+    snow: '204,30 201,46 206,26 211,46 208,30',
+    startPhase: 'climbing', startMult: 2.18,
+    players: 632, avgPeak: 2.28,
+    history: [2.1, 3.4, 1.8, 4.2, 2.9, 1.6, 3.8, 2.5]
+  },
+  {
+    id: 'denali', name: 'Denali', elevation: '6,190 m', region: 'Alaska Range · USA',
+    risk: 'MEDIUM', riskLevel: 2, color: '#0284c7',
+    skyTop: '#dceffb', skyBot: '#f8fafc',
+    body: '0,200 65,200 95,188 120,172 142,150 158,126 170,100 178,74 184,50 188,30 190,16 192,6 194,18 198,38 202,56 206,70 208,78 210,64 214,50 219,35 224,22 228,14 232,26 238,44 244,64 254,88 268,116 286,146 312,172 345,190 386,200 400,200',
+    snow: '190,10 187,26 192,6 197,26 194,10',
+    startPhase: 'open', startCountdown: 5,
+    players: 489, avgPeak: 2.05,
+    history: [2.2, 1.8, 3.1, 2.4, 1.9, 2.8, 1.7, 3.4]
+  },
+  {
+    id: 'kilimanjaro', name: 'Kilimanjaro', elevation: '5,895 m', region: 'Eastern Africa · Tanzania',
+    risk: 'LOW', riskLevel: 1, color: '#059669',
+    skyTop: '#ddf3e7', skyBot: '#f8fafc',
+    body: '0,200 38,200 75,198 115,192 148,180 165,165 170,148 162,130 156,112 160,96 165,82 170,70 165,82 156,112 162,130 170,148 192,128 215,105 235,82 250,60 260,42 268,26 273,14 277,26 282,48 290,72 304,100 322,130 345,158 372,182 400,200',
+    snow: '271,14 267,30 273,14 279,30 275,14',
+    startPhase: 'climbing', startMult: 1.64,
+    players: 918, avgPeak: 1.82,
+    history: [1.8, 2.2, 1.5, 2.8, 1.9, 2.4, 1.7, 2.1]
+  },
+  {
+    id: 'montblanc', name: 'Mont Blanc', elevation: '4,808 m', region: 'Alps · France-Italy',
+    risk: 'LOW', riskLevel: 1, color: '#7c3aed',
+    skyTop: '#ece5fc', skyBot: '#f8fafc',
+    body: '0,200 48,200 82,192 115,180 142,165 162,147 178,126 188,104 195,82 200,62 203,46 205,34 207,46 210,62 212,48 214,38 216,50 218,62 220,50 222,40 225,54 228,65 232,52 236,65 242,80 252,64 256,80 264,96 276,118 292,144 315,168 344,188 378,200 400,200',
+    snow: '203,36 200,52 205,34 210,52 207,36',
+    startPhase: 'open', startCountdown: 10,
+    players: 356, avgPeak: 1.61,
+    history: [1.6, 1.9, 1.4, 2.2, 1.7, 1.5, 2.0, 1.8]
+  }
+];
+
+const USERS = [
+  'AlpineTrader','PeakSeeker','MtnForecast','SummitCall','RidgeRider',
+  'IceBreaker','NordicPro','GlacierBull','SnowCap','K2Bull',
+  'CrevassePro','FjordCapital','TundraFund','BasecampX','NordIce',
+  'VertexBull','ScarpaPro','SteepFund','IcefallCap','CouliorQ',
+  'SummitHunter','PowderDay','HighCamp9','ColdFront','AvalanchePro',
+  'RopeGunQ','BelayBull','SeracTrader','MoraineX','RouteFindr',
+  'HorizontePro','ColTrader','SerracQ','BivouacX','CorridorBull',
+  'DepthHoar','CruxFund','ZeroPoint','WhiteoutX','K6Capital',
+  'AltiTrader','NordFund','SteepQ','OxygenBull','CampIV',
+  'GlassierX','VersePoint','ThinAir','DeathZone','IceAx9'
+];
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+const fmtM    = n => n.toFixed(2) + '×';
+const fmtPool = n => n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : Math.round(n);
+const rnd     = n => Math.round(n * 100) / 100;
+const randEl  = arr => arr[Math.floor(Math.random() * arr.length)];
+const nowTs   = () => {
+  const d = new Date();
+  return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
+};
+const bkRangeLabel = b => b.max ? `${b.min.toFixed(1)}× – ${b.max.toFixed(1)}×` : `${b.min.toFixed(1)}× +`;
+
+function riskTip(risk) {
+  return {
+    'EXTREME': 'Extreme variance — peaks are wildly dispersed, so outer brackets carry real probability.',
+    'HIGH':    'High variance — wide peak distribution with a fat upper tail.',
+    'MEDIUM':  'Medium variance — balanced peak distribution.',
+    'LOW':     'Low variance — peaks cluster tightly, favourites win often.'
+  }[risk] || '';
+}
+
+function peakStyle(v) {
+  if (v < 1.5)  return 'background:rgba(220,38,38,0.08);border-color:rgba(220,38,38,0.25);color:#dc2626';
+  if (v < 3)    return 'background:rgba(217,119,6,0.08);border-color:rgba(217,119,6,0.25);color:#d97706';
+  if (v < 10)   return 'background:rgba(5,150,105,0.08);border-color:rgba(5,150,105,0.25);color:#059669';
+  return              'background:rgba(99,102,241,0.08);border-color:rgba(99,102,241,0.28);color:#6366f1';
+}
+
+// Deterministic soft clouds from mountain id
+function clouds(id) {
+  const seed = id.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
+  let s = '';
+  for (let i = 0; i < 7; i++) {
+    const x = ((seed * (i+7) * 31 + i*53) % 360) + 20;
+    const y = ((seed * (i+3) * 13 + i*29) % 60)  + 12;
+    const w = 26 + ((seed + i*11) % 34);
+    const o = (0.35 + (i % 4) * 0.12).toFixed(2);
+    s += `<ellipse cx="${x}" cy="${y}" rx="${w}" ry="${(w*0.28).toFixed(0)}" fill="white" opacity="${o}"/>`;
+    s += `<ellipse cx="${x+w*0.4}" cy="${y-4}" rx="${(w*0.55).toFixed(0)}" ry="${(w*0.2).toFixed(0)}" fill="white" opacity="${o}"/>`;
+  }
+  return s;
+}
+
+/* ═══════════════════════════════════════════
+   PARIMUTUEL MARKET CORE
+═══════════════════════════════════════════ */
+
+// True bracket probabilities under the peak distribution (exponential tail).
+// The crowd bets roughly in line with these, with noise — so implied odds hover
+// near fair value, exactly as a liquid prediction market should.
+function bracketProb(m, b) {
+  const s = RISK_SKEW[m.riskLevel] * 0.55;
+  const pa = Math.exp(-(b.min - 1) / s);
+  const pb = b.max ? Math.exp(-(b.max - 1) / s) : 0;
+  return Math.max(pa - pb, 0.005);
+}
+
+function rollPeak(m) {
+  const s = RISK_SKEW[m.riskLevel] * 0.55;
+  const r = Math.random();
+  const peak = 1 + (-Math.log(1 - r)) * s;
+  return Math.min(Math.max(peak, 1.02), 480);
+}
+
+function seedPools(m) {
+  const base = 12000 + Math.random() * 30000;
+  m.brackets.forEach(b => {
+    const p = bracketProb(m, b);
+    b.pool = Math.round(base * p * (0.8 + Math.random() * 0.4));
+  });
+}
+
+function totalPool(m) { return m.brackets.reduce((s,b) => s + b.pool, 0); }
+function impliedProb(m, i) { return m.brackets[i].pool / totalPool(m); }
+function payoutMult(m, i) {
+  const t = totalPool(m);
+  const bp = m.brackets[i].pool;
+  return Math.max(t * (1 - RAKE) / bp, 1.01);
+}
+function bracketIdxFor(m, peak) {
+  for (let i = 0; i < m.brackets.length; i++) {
+    const b = m.brackets[i];
+    if (peak >= b.min && (b.max === null || peak < b.max)) return i;
+  }
+  return m.brackets.length - 1;
+}
+function favouriteIdx(m) {
+  let best = 0;
+  m.brackets.forEach((b, i) => { if (b.pool > m.brackets[best].pool) best = i; });
+  return best;
+}
+
+/* ── Seed initial market state ── */
+MTN.forEach(m => {
+  m.brackets = BRACKET_SETS[m.riskLevel].map(b => ({ ...b, pool: 0 }));
+  seedPools(m);
+  m.pending = null;      // your bet in the current open window
+  m.pendingNext = null;  // your bet queued for the next window
+  m.position = null;     // your locked bet in a running round
+  m.trace = [];
+  m.lastPeak = null;
+  m.lastWinIdx = null;
+  if (m.startPhase === 'climbing') {
+    m.phase = 'climbing';
+    m.mult = m.startMult;
+    m.peakAt = Math.max(rollPeak(m), m.mult + 0.5 + Math.random() * 3);
+    m.lockedMults = m.brackets.map((_, i) => payoutMult(m, i));
+    const steps = 40;
+    for (let i = 0; i <= steps; i++) m.trace.push(1 + (m.mult - 1) * Math.pow(i / steps, 1.6));
+  } else {
+    m.phase = 'open';
+    m.opensEndsAt = Date.now() + (m.startCountdown || 8) * 1000;
+  }
+});
+
+/* ── Round lifecycle ── */
+function lockAndClimb(m) {
+  m.phase = 'climbing';
+  m.mult = 1.00;
+  m.trace = [1];
+  m.peakAt = rollPeak(m);
+  m.lockedMults = m.brackets.map((_, i) => payoutMult(m, i));
+  if (m.pending) {
+    m.position = {
+      amount: m.pending.amount,
+      bracket: m.pending.bracket,
+      lockedMult: m.lockedMults[m.pending.bracket]
+    };
+    m.pending = null;
+    toast(`Market locked on ${m.name} — your ${m.position.amount.toLocaleString()} TKN rides ${m.brackets[m.position.bracket].name} at ${fmtM(m.position.lockedMult)}`, 'info');
+  }
+  rerenderCard(m);
+  renderPortfolio();
+  if (activeModalId === m.id) renderModalContent(m);
+}
+
+function resolveMarket(m) {
+  m.phase = 'resolved';
+  m.resolvedUntil = Date.now() + RESOLVED_MS;
+  m.lastPeak = rnd(m.mult);
+  m.lastWinIdx = bracketIdxFor(m, m.lastPeak);
+  m.history.unshift(m.lastPeak);
+  if (m.history.length > 10) m.history.pop();
+  roundsToday++;
+
+  // Crowd hit-rate tracking: did the favourite bracket win?
+  crowdResults.push(m.lastWinIdx === favouriteIdx(m) ? 1 : 0);
+  if (crowdResults.length > 200) crowdResults.shift();
+  if (m.lastPeak > highestPeakToday.value) highestPeakToday = { value: m.lastPeak, mtn: m.name };
+
+  if (m.position) {
+    const b = m.brackets[m.position.bracket];
+    if (m.position.bracket === m.lastWinIdx) {
+      const payout = Math.round(m.position.amount * m.position.lockedMult);
+      wallet.balance += payout;
+      toast(`Resolved: ${m.name} peaked at ${fmtM(m.lastPeak)} — ${b.name} wins. You collect ${payout.toLocaleString()} TKN`, 'win');
+      recordBet(m, m.position.amount, b.name, m.lastPeak, payout);
+    } else {
+      toast(`Resolved: ${m.name} peaked at ${fmtM(m.lastPeak)} in ${m.brackets[m.lastWinIdx].name} — your ${b.name} forecast missed`, 'loss');
+      recordBet(m, m.position.amount, b.name, m.lastPeak, 0);
+    }
+    m.position = null;
+    updateWalletUI();
+  }
+  rerenderCard(m);
+  renderPortfolio();
+  if (activeModalId === m.id) renderModalContent(m);
+  updateGlobalBarExtras();
+}
+
+function reopenMarket(m) {
+  m.phase = 'open';
+  m.opensEndsAt = Date.now() + OPEN_MS;
+  seedPools(m);
+  if (m.pendingNext) {
+    m.pending = m.pendingNext;
+    m.pendingNext = null;
+    m.brackets[m.pending.bracket].pool += m.pending.amount;
+    toast(`Betting open on ${m.name} — your queued ${m.pending.amount.toLocaleString()} TKN is in on ${m.brackets[m.pending.bracket].name}`, 'info');
+  }
+  rerenderCard(m);
+  renderPortfolio();
+  if (activeModalId === m.id) renderModalContent(m);
+}
+
+/* ═══════════════════════════════════════════
+   ASCENT TRACE
+═══════════════════════════════════════════ */
+const TRACE_MAX = 140;
+const multY = v => 194 - Math.min(178, Math.log(v) * 62);
+function tracePoints(m) {
+  const n = m.trace.length;
+  if (n < 2) return '';
+  const step = 400 / (TRACE_MAX - 1);
+  let pts = '';
+  for (let i = 0; i < n; i++) pts += (i * step).toFixed(1) + ',' + multY(m.trace[i]).toFixed(1) + ' ';
+  return pts.trim();
+}
+function traceEnd(m) {
+  const n = m.trace.length;
+  const step = 400 / (TRACE_MAX - 1);
+  return { x: ((n - 1) * step).toFixed(1), y: multY(m.trace[n - 1] || 1).toFixed(1) };
+}
+// Dashed altitude lines at bracket boundaries so the trace reads against the market
+function bracketLines(m) {
+  let s = '';
+  for (let i = 1; i < m.brackets.length; i++) {
+    const v = m.brackets[i].min;
+    const y = multY(v).toFixed(1);
+    s += `<line x1="0" y1="${y}" x2="400" y2="${y}" stroke="rgba(23,37,60,0.22)" stroke-width="0.7" stroke-dasharray="3 4"/>`;
+    s += `<text x="395" y="${(y - 3)}" text-anchor="end" font-size="8" fill="rgba(23,37,60,0.45)" font-family="JetBrains Mono, monospace">${v.toFixed(1)}×</text>`;
+  }
+  return s;
+}
+
+/* ═══════════════════════════════════════════
+   CARD BUILDER
+═══════════════════════════════════════════ */
+function buildCard(m) {
+  const clr = m.color;
+  const isOpen = m.phase === 'open';
+  const isClimb = m.phase === 'climbing';
+  const isResolved = m.phase === 'resolved';
+
+  let badge;
+  if (isOpen) {
+    const remain = Math.max(0, Math.ceil((m.opensEndsAt - Date.now()) / 1000));
+    badge = `<div class="round-badge open" id="cd-${m.id}"><div class="badge-pip pulse"></div>BETS CLOSE ${remain}s</div>`;
+  } else if (isClimb) {
+    badge = `<div class="round-badge climbing"><div class="badge-pip pulse"></div>LOCKED · CLIMBING</div>`;
+  } else {
+    badge = `<div class="round-badge resolved">RESOLVED · ${m.brackets[m.lastWinIdx].name} WON</div>`;
+  }
+
+  let multEl = '';
+  if (isClimb) {
+    multEl = `<div class="live-mult" style="color:${clr}" id="mult-${m.id}">${fmtM(m.mult)}</div>
+              <div class="mult-sub">CURRENT ALTITUDE</div>`;
+  } else if (isResolved) {
+    multEl = `<div class="live-mult" style="color:${clr}" id="mult-${m.id}">${fmtM(m.lastPeak)}</div>
+              <div class="mult-sub">FINAL PEAK</div>`;
+  }
+
+  const end = traceEnd(m);
+  const traceEl = (isClimb || isResolved) && m.trace.length > 1 ? `
+    <polyline id="trace-${m.id}" points="${tracePoints(m)}" fill="none"
+      stroke="${clr}" stroke-width="2" stroke-opacity="0.8"
+      stroke-linejoin="round" stroke-linecap="round"/>
+    <circle id="dot-${m.id}" cx="${end.x}" cy="${end.y}" r="3.4"
+      fill="${clr}" stroke="white" stroke-width="1.4"/>` : '';
+
+  // Bracket board — implied prob + payout per bracket
+  const currentIdx = isClimb ? bracketIdxFor(m, m.mult) : null;
+  const bkRows = m.brackets.map((b, i) => {
+    const prob = impliedProb(m, i);
+    const mult = isOpen ? payoutMult(m, i) : (m.lockedMults ? m.lockedMults[i] : payoutMult(m, i));
+    const isYours = (m.pending && m.pending.bracket === i) || (m.position && m.position.bracket === i) || (m.pendingNext && m.pendingNext.bracket === i);
+    const zoneClass = isResolved && m.lastWinIdx === i ? ' won-zone' : (currentIdx === i ? ' current-zone' : '');
+    return `
+      <div class="bk-row${zoneClass}${isYours ? ' your-pick' : ''}" id="bkrow-${m.id}-${i}">
+        <div><div class="bk-name">${b.name}</div><span class="bk-range">${bkRangeLabel(b)}</span></div>
+        <div class="bk-barwrap"><div class="bk-bar" id="bkbar-${m.id}-${i}" style="width:${(prob*100).toFixed(1)}%;background:${clr}"></div></div>
+        <div class="bk-prob" id="bkprob-${m.id}-${i}">${Math.round(prob*100)}%</div>
+        <div class="bk-mult" id="bkmult-${m.id}-${i}" style="color:${clr}">${mult.toFixed(2)}×</div>
+      </div>`;
+  }).join('');
+
+  const lockState = isOpen
+    ? `<span class="bk-lockstate" style="color:var(--green)" id="lockstate-${m.id}">ODDS MOVING LIVE</span>`
+    : isClimb
+    ? `<span class="bk-lockstate" style="color:var(--indigo)">ODDS LOCKED</span>`
+    : `<span class="bk-lockstate" style="color:var(--amber)">SETTLED</span>`;
+
+  const peaks = m.history.slice(0, 8).map(v =>
+    `<span class="peak-chip" style="${peakStyle(v)}">${fmtM(v)}</span>`).join('');
+
+  // Your forecast banner
+  let banner = '';
+  const fmtBet = (bet, extra) => `${bet.amount.toLocaleString()} TKN on ${m.brackets[bet.bracket].name}${extra || ''}`;
+  if (m.position) {
+    const potential = Math.round(m.position.amount * m.position.lockedMult);
+    banner = `
+      <div class="stake-banner" style="border-color:${clr}45;background:${clr}0d">
+        <div class="sb-info">
+          <div class="sb-label">YOUR FORECAST · LOCKED @ ${fmtM(m.position.lockedMult)}</div>
+          <div class="sb-value" style="color:${clr}">${fmtBet(m.position)} → ${potential.toLocaleString()} TKN if it hits</div>
+        </div>
+      </div>`;
+  } else if (m.pending) {
+    banner = `
+      <div class="stake-banner" style="border-color:${clr}45;background:${clr}08">
+        <div class="sb-info">
+          <div class="sb-label">YOUR FORECAST · THIS ROUND</div>
+          <div class="sb-value" style="color:${clr}">${fmtBet(m.pending)} · locks at close</div>
+        </div>
+        <button class="sb-cancel" onclick="event.stopPropagation();cancelBet('${m.id}')">CANCEL</button>
+      </div>`;
+  } else if (m.pendingNext) {
+    banner = `
+      <div class="stake-banner" style="border-color:${clr}45;background:${clr}08">
+        <div class="sb-info">
+          <div class="sb-label">QUEUED · NEXT ROUND</div>
+          <div class="sb-value" style="color:var(--muted)">${fmtBet(m.pendingNext)}</div>
+        </div>
+        <button class="sb-cancel" onclick="event.stopPropagation();cancelBet('${m.id}')">CANCEL</button>
+      </div>`;
+  }
+
+  let btnLabel;
+  if (m.position) btnLabel = 'WATCHING · FORECAST LOCKED';
+  else if (m.pending || m.pendingNext) btnLabel = 'VIEW YOUR FORECAST';
+  else if (isOpen) btnLabel = 'PLACE FORECAST';
+  else btnLabel = 'MARKET LOCKED · QUEUE NEXT ROUND';
+
+  const btnStyle = (isOpen || m.position || m.pending)
+    ? `background:${clr}12;border:1px solid ${clr}40;color:${clr}`
+    : `background:var(--bg2);border:1px solid var(--border);color:var(--muted)`;
+
+  const hasBet = (m.position || m.pending || m.pendingNext) ? '1' : '0';
+
+  return `
+  <div class="mcard" id="card-${m.id}" data-risk="${m.riskLevel}" data-phase="${m.phase}"
+    data-mine="${hasBet}" onclick="openMarket('${m.id}')"
+    onmouseenter="this.style.borderColor='${clr}55'"
+    onmouseleave="this.style.borderColor='var(--border)'">
+
+    <div class="mcard-visual" style="background:linear-gradient(180deg, ${m.skyTop} 0%, ${m.skyBot} 100%)">
+      <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+        ${clouds(m.id)}
+        <polygon points="${m.body}" fill="#cdd9ea" transform="translate(-30,26) scale(1.05,0.85)" opacity="0.55"/>
+        <polygon points="${m.body}" fill="#b9c9de"/>
+        <polygon points="${m.body}" fill="${clr}" opacity="0.07"/>
+        <polyline points="${m.body.split(' ').slice(1, -2).join(' ')}" fill="none" stroke="${clr}" stroke-width="1" stroke-opacity="0.35"/>
+        <polygon points="${m.snow}" fill="#ffffff" stroke="rgba(23,37,60,0.12)" stroke-width="0.5"/>
+        ${bracketLines(m)}
+        ${traceEl}
+      </svg>
+      ${badge}
+      ${multEl}
+    </div>
+
+    <div class="mcard-body">
+      <div class="mcard-top">
+        <div>
+          <div class="mcard-name">${m.name}</div>
+          <div class="mcard-elev">${m.elevation} · ${m.region}</div>
+        </div>
+        <div class="risk-tag" title="${riskTip(m.risk)}" style="background:${clr}0f;border-color:${clr}35;color:${clr}">${m.risk}</div>
+      </div>
+
+      <div class="bk-label-row">
+        <div class="bk-title" title="Where will this round's peak land? Bar = share of the pool backing each bracket (the crowd's implied probability). Right column = payout multiple if that bracket wins.">PEAK BRACKET MARKET · IMPLIED ODDS</div>
+        ${lockState}
+      </div>
+      <div class="bk-board">${bkRows}</div>
+
+      ${banner}
+
+      <div class="mcard-stats">
+        <div class="mstat">
+          <div class="mstat-label" title="Forecasters in this round">PLAYERS</div>
+          <div class="mstat-value" id="pl-${m.id}">${m.players.toLocaleString()}</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-label" title="Combined value of all bracket pools this round">POOL</div>
+          <div class="mstat-value" id="po-${m.id}">${fmtPool(totalPool(m))}</div>
+        </div>
+        <div class="mstat">
+          <div class="mstat-label" title="Average final peak over recent rounds">AVG PEAK</div>
+          <div class="mstat-value">${fmtM(m.avgPeak)}</div>
+        </div>
+      </div>
+
+      <div class="bk-title" style="margin-bottom:7px">LAST ${Math.min(8, m.history.length)} PEAKS</div>
+      <div class="peak-row">${peaks}</div>
+
+      <button class="enter-btn" style="${btnStyle}">${btnLabel}</button>
+    </div>
+  </div>`;
+}
+
+function rerenderCard(m) {
+  const el = document.getElementById('card-' + m.id);
+  if (!el) return;
+  el.outerHTML = buildCard(m);
+  applyCurrentFilter();
+}
+
+// Cheap in-place refresh of odds numbers while a market is open (no full rerender)
+function refreshOdds(m) {
+  m.brackets.forEach((b, i) => {
+    const prob = impliedProb(m, i);
+    const bar = document.getElementById(`bkbar-${m.id}-${i}`);
+    const pr  = document.getElementById(`bkprob-${m.id}-${i}`);
+    const mu  = document.getElementById(`bkmult-${m.id}-${i}`);
+    if (bar) bar.style.width = (prob*100).toFixed(1) + '%';
+    if (pr)  pr.textContent = Math.round(prob*100) + '%';
+    if (mu)  mu.textContent = payoutMult(m, i).toFixed(2) + '×';
+  });
+  const po = document.getElementById('po-' + m.id);
+  if (po) po.textContent = fmtPool(totalPool(m));
+}
+
+/* ═══════════════════════════════════════════
+   WALLET + SESSION
+═══════════════════════════════════════════ */
+const wallet = { connected: false, address: null, balance: 5000 };
+const session = { staked: 0, wins: 0, losses: 0, pl: 0, bestPayout: 0 };
+let betHistory = [];
+
+function connectWallet() {
+  wallet.connected = true;
+  const hex = () => Math.random().toString(16).slice(2, 6).toUpperCase();
+  wallet.address = '0x' + hex() + '…' + hex();
+  updateWalletUI();
+  renderPortfolio();
+  toast('Wallet connected — demo balance 5,000 TKN loaded', 'info');
+}
+
+function updateWalletUI() {
+  const btn = document.getElementById('walletBtn');
+  if (wallet.connected) {
+    btn.textContent = wallet.address + ' · ' + wallet.balance.toLocaleString() + ' TKN';
+    btn.classList.add('connected');
+  } else {
+    btn.textContent = 'CONNECT WALLET';
+    btn.classList.remove('connected');
+  }
+}
+
+document.getElementById('walletBtn').addEventListener('click', () => {
+  if (wallet.connected) {
+    wallet.connected = false;
+    toast('Wallet disconnected', 'info');
+  } else {
+    connectWallet();
+  }
+  updateWalletUI();
+  renderPortfolio();
+});
+
+function recordBet(m, stake, bracketName, peak, payout) {
+  session.staked += stake;
+  session.pl += (payout - stake);
+  if (payout > 0) { session.wins++; if (payout > session.bestPayout) session.bestPayout = payout; }
+  else session.losses++;
+  betHistory.unshift({ ts: nowTs(), name: m.name, color: m.color, bracket: bracketName, stake, peak, payout, pl: payout - stake });
+  if (betHistory.length > 14) betHistory.pop();
+  renderPortfolio();
+}
+
+/* ═══════════════════════════════════════════
+   PORTFOLIO RENDER
+═══════════════════════════════════════════ */
+function renderPortfolio() {
+  const bal = document.getElementById('pf-balance');
+  const balSub = document.getElementById('pf-balance-sub');
+  bal.textContent = wallet.connected ? wallet.balance.toLocaleString() + ' TKN' : '— TKN';
+  balSub.textContent = wallet.connected ? wallet.address + ' · demo wallet' : 'Connect a wallet to start forecasting';
+
+  const plEl = document.getElementById('pf-pl');
+  plEl.textContent = (session.pl >= 0 ? '+' : '−') + Math.abs(session.pl).toLocaleString() + ' TKN';
+  plEl.style.color = session.pl > 0 ? 'var(--green)' : session.pl < 0 ? 'var(--red)' : 'var(--text)';
+
+  const total = session.wins + session.losses;
+  document.getElementById('pf-winrate').textContent = total ? Math.round(session.wins / total * 100) + '%' : '—';
+  document.getElementById('pf-staked').textContent = session.staked.toLocaleString() + ' TKN';
+  document.getElementById('pf-best').textContent = session.bestPayout ? session.bestPayout.toLocaleString() + ' TKN' : '—';
+
+  const open = [];
+  MTN.forEach(m => {
+    const bn = i => m.brackets[i].name;
+    if (m.position) open.push(`
+      <div class="pf-open-row">
+        <div class="pf-open-dot" style="background:${m.color}"></div>
+        <span class="pf-open-name">${m.name}</span>
+        <span class="pf-open-detail">${m.position.amount.toLocaleString()} TKN · ${bn(m.position.bracket)} · locked ${fmtM(m.position.lockedMult)}</span>
+      </div>`);
+    if (m.pending) open.push(`
+      <div class="pf-open-row">
+        <div class="pf-open-dot" style="background:${m.color};opacity:0.6"></div>
+        <span class="pf-open-name">${m.name}</span>
+        <span class="pf-open-detail">${m.pending.amount.toLocaleString()} TKN · ${bn(m.pending.bracket)} · locks at close</span>
+      </div>`);
+    if (m.pendingNext) open.push(`
+      <div class="pf-open-row">
+        <div class="pf-open-dot" style="background:${m.color};opacity:0.35"></div>
+        <span class="pf-open-name">${m.name}</span>
+        <span class="pf-open-detail">${m.pendingNext.amount.toLocaleString()} TKN · ${bn(m.pendingNext.bracket)} · next round</span>
+      </div>`);
+  });
+  document.getElementById('pf-open').innerHTML = open.length ? open.join('')
+    : '<div class="pf-empty">No open forecasts. Pick a mountain above and back a bracket.</div>';
+
+  const hist = document.getElementById('pf-history');
+  if (!betHistory.length) {
+    hist.innerHTML = '<div class="pf-empty">Your resolved forecasts will appear here — bracket backed, where the peak landed, and running profit and loss.</div>';
+  } else {
+    hist.innerHTML = `
+      <table class="pf-table">
+        <thead><tr>
+          <th>TIME</th><th>MARKET</th><th>BRACKET</th><th class="num">STAKE</th><th class="num">PEAK</th><th class="num">RETURN</th><th class="num">P/L</th>
+        </tr></thead>
+        <tbody>
+        ${betHistory.map(b => `
+          <tr>
+            <td>${b.ts}</td>
+            <td class="pf-mtn" style="color:${b.color}">${b.name}</td>
+            <td>${b.bracket}</td>
+            <td class="num">${b.stake.toLocaleString()}</td>
+            <td class="num">${fmtM(b.peak)}</td>
+            <td class="num">${b.payout.toLocaleString()}</td>
+            <td class="num ${b.pl >= 0 ? 'pf-pl-pos' : 'pf-pl-neg'}">${b.pl >= 0 ? '+' : '−'}${Math.abs(b.pl).toLocaleString()}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   TOASTS
+═══════════════════════════════════════════ */
+function toast(msg, type) {
+  const stack = document.getElementById('toastStack');
+  const el = document.createElement('div');
+  el.className = 'toast toast-' + (type || 'info');
+  el.textContent = msg;
+  stack.prepend(el);
+  setTimeout(() => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(8px)';
+    setTimeout(() => el.remove(), 300);
+  }, 4600);
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+let activeModalId = null;
+
+function openMarket(id) {
+  activeModalId = id;
+  const m = MTN.find(x => x.id === id);
+  if (m.uiBracket === undefined) m.uiBracket = null;
+  renderModalContent(m);
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  activeModalId = null;
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function selectBracket(id, i) {
+  const m = MTN.find(x => x.id === id);
+  const amtInput = document.getElementById('stakeAmount');
+  m.uiStakeKeep = amtInput ? amtInput.value : m.uiStakeKeep;
+  m.uiBracket = i;
+  renderModalContent(m);
+}
+
+function renderModalContent(m) {
+  const clr = m.color;
+  const modal = document.getElementById('stakeModal');
+  const isOpen = m.phase === 'open';
+
+  const phaseNote = isOpen
+    ? `Betting is <b style="color:var(--green)">open</b> — closes in <b id="modal-countdown">${Math.max(0, Math.ceil((m.opensEndsAt - Date.now()) / 1000))}s</b>. Odds move as the crowd stakes; your payout locks at the final odds when betting closes.`
+    : m.phase === 'climbing'
+    ? `Market <b style="color:var(--indigo)">locked</b> — the ascent is live at <b style="color:${clr}" id="modal-mult">${fmtM(m.mult)}</b>. New forecasts join the next round.`
+    : `Round <b style="color:var(--amber)">resolved</b> — peaked at <b style="color:${clr}">${fmtM(m.lastPeak)}</b>, ${m.brackets[m.lastWinIdx].name} paid out. Next round opens shortly.`;
+
+  const yourBet = m.position || m.pending || m.pendingNext;
+
+  let betBlock;
+  if (yourBet) {
+    const b = m.brackets[yourBet.bracket];
+    const status = m.position
+      ? `Locked @ ${fmtM(m.position.lockedMult)} — pays ${Math.round(m.position.amount * m.position.lockedMult).toLocaleString()} TKN if the peak lands in ${b.name}`
+      : m.pending
+      ? `In this round's pool — payout locks when betting closes (currently ~${fmtM(payoutMult(m, yourBet.bracket))})`
+      : `Queued for the next round's pool`;
+    betBlock = `
+      <div class="modal-position" style="border-color:${clr}45;background:${clr}0a">
+        <div class="mp-row"><span>Your forecast</span><span>${b.name} · ${bkRangeLabel(b)}</span></div>
+        <div class="mp-row"><span>Stake</span><span>${yourBet.amount.toLocaleString()} TKN</span></div>
+        <div class="mp-note">${status}</div>
+        ${m.position ? '' : `<button class="modal-cancel" onclick="cancelBet('${m.id}')">CANCEL FORECAST</button>`}
+        ${m.position ? `<div class="mp-warn">Forecasts can't be withdrawn after the market locks — the round must resolve.</div>` : ''}
+      </div>`;
+  } else {
+    const options = m.brackets.map((b, i) => {
+      const prob = impliedProb(m, i);
+      const mult = payoutMult(m, i);
+      return `
+        <button type="button" class="bk-option${m.uiBracket === i ? ' selected' : ''}" onclick="selectBracket('${m.id}', ${i})">
+          <div><div class="bko-name">${b.name}</div><span class="bko-range">peak lands ${bkRangeLabel(b)}</span></div>
+          <div class="bko-prob">${Math.round(prob*100)}%<small>IMPLIED</small></div>
+          <div class="bko-mult" style="color:${clr}">${mult.toFixed(2)}×<small>PAYS</small></div>
+        </button>`;
+    }).join('');
+
+    const stakeVal = m.uiStakeKeep || '100';
+    betBlock = `
+      <div class="modal-form">
+        <label class="mf-label">1 · PICK YOUR BRACKET</label>
+        <div class="bk-select">${options}</div>
+        <label class="mf-label" for="stakeAmount">2 · STAKE AMOUNT (TKN)</label>
+        <input type="number" id="stakeAmount" class="mf-input" min="1" step="1" placeholder="e.g. 250" value="${stakeVal}">
+        <div class="chip-row">
+          ${[25, 100, 250, 1000].map(v => `<button type="button" class="chip-btn" onclick="document.getElementById('stakeAmount').value=${v};updatePreview('${m.id}')">${v}</button>`).join('')}
+          <button type="button" class="chip-btn" onclick="document.getElementById('stakeAmount').value=${wallet.balance};updatePreview('${m.id}')">MAX</button>
+        </div>
+        <div class="mf-preview" id="stakePreview">—</div>
+        <button class="modal-stake-btn" id="placeBtn" style="background:${clr}12;border-color:${clr}45;color:${clr}" onclick="placeForecast('${m.id}')">
+          ${wallet.connected ? (isOpen ? 'PLACE FORECAST' : 'QUEUE FOR NEXT ROUND') : 'CONNECT WALLET TO FORECAST'}
+        </button>
+        <div class="rake-note">PARIMUTUEL POOL · WINNERS SPLIT THE POT · 5% RAKE</div>
+      </div>`;
+  }
+
+  const peaks = m.history.slice(0, 8).map(v =>
+    `<span class="peak-chip" style="${peakStyle(v)}">${fmtM(v)}</span>`).join('');
+
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div>
+        <div class="modal-name" style="color:${clr}">${m.name}</div>
+        <div class="modal-sub">${m.elevation} · ${m.region} · <span title="${riskTip(m.risk)}">${m.risk} VARIANCE</span> · POOL ${fmtPool(totalPool(m))} TKN</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-phase-note">${phaseNote}</div>
+    ${betBlock}
+    <div class="bk-title" style="margin:16px 0 7px">LAST ${Math.min(8, m.history.length)} PEAKS</div>
+    <div class="peak-row">${peaks}</div>
+    <div class="modal-wallet">Wallet balance: <b>${wallet.connected ? wallet.balance.toLocaleString() + ' TKN' : 'not connected'}</b></div>
+  `;
+
+  if (!yourBet) {
+    const amt = document.getElementById('stakeAmount');
+    if (amt) amt.addEventListener('input', () => updatePreview(m.id));
+    updatePreview(m.id);
+  }
+}
+
+function updatePreview(id) {
+  const m = MTN.find(x => x.id === id);
+  const amtInput = document.getElementById('stakeAmount');
+  const preview = document.getElementById('stakePreview');
+  if (!amtInput || !preview) return;
+  m.uiStakeKeep = amtInput.value;
+  const amt = parseFloat(amtInput.value) || 0;
+  if (m.uiBracket === null || m.uiBracket === undefined) {
+    preview.textContent = 'Select a bracket to see your potential payout.';
+    return;
+  }
+  const b = m.brackets[m.uiBracket];
+  const mult = payoutMult(m, m.uiBracket);
+  preview.innerHTML = amt > 0
+    ? `If the peak lands in <b style="color:var(--text)">${b.name}</b> (${bkRangeLabel(b)}): ~<b style="color:${m.color}">${Math.round(amt * mult).toLocaleString()} TKN</b> at current odds. Final payout locks at close.`
+    : 'Enter a stake to see your potential payout.';
+}
+
+/* ═══════════════════════════════════════════
+   FORECAST ACTIONS
+═══════════════════════════════════════════ */
+function placeForecast(id) {
+  const m = MTN.find(x => x.id === id);
+  const amtInput = document.getElementById('stakeAmount');
+  const amtVal = amtInput ? amtInput.value : '100';
+
+  if (!wallet.connected) {
+    connectWallet();
+    renderModalContent(m);
+    return;
+  }
+  if (m.uiBracket === null || m.uiBracket === undefined) {
+    toast('Pick a bracket first — which zone does the peak land in?', 'info');
+    return;
+  }
+  const amt = Math.floor(parseFloat(amtVal));
+  if (!amt || amt <= 0) { toast('Enter a stake amount first', 'info'); return; }
+  if (amt > wallet.balance) { toast('Not enough balance for that stake', 'info'); return; }
+
+  wallet.balance -= amt;
+  const bet = { amount: amt, bracket: m.uiBracket };
+  const bName = m.brackets[m.uiBracket].name;
+
+  if (m.phase === 'open') {
+    m.pending = bet;
+    m.brackets[m.uiBracket].pool += amt;   // your stake moves the odds — parimutuel
+    toast(`Forecast placed — ${amt.toLocaleString()} TKN on ${bName} (${m.name}). Odds lock at close.`, 'info');
+  } else {
+    m.pendingNext = bet;
+    toast(`Queued — ${amt.toLocaleString()} TKN on ${bName} joins ${m.name}'s next round`, 'info');
+  }
+  m.uiBracket = null;
+  m.uiStakeKeep = null;
+  updateWalletUI();
+  rerenderCard(m);
+  renderPortfolio();
+  renderModalContent(m);
+}
+
+function cancelBet(id) {
+  const m = MTN.find(x => x.id === id);
+  const bet = m.pending || m.pendingNext;
+  if (!bet) return;
+  if (m.pending) {
+    m.brackets[m.pending.bracket].pool = Math.max(m.brackets[m.pending.bracket].pool - m.pending.amount, 100);
+    m.pending = null;
+  } else {
+    m.pendingNext = null;
+  }
+  wallet.balance += bet.amount;
+  toast(`Forecast cancelled — ${bet.amount.toLocaleString()} TKN refunded`, 'info');
+  updateWalletUI();
+  rerenderCard(m);
+  renderPortfolio();
+  if (activeModalId === id) renderModalContent(m);
+}
+
+/* ═══════════════════════════════════════════
+   LEADERBOARD
+═══════════════════════════════════════════ */
+const LBTYPES = [
+  { id: 'gains',    title: 'TOP GAINS TODAY',        key: 'gain', fmt: v => '+'+fmtPool(v)+' TKN', color: '#059669' },
+  { id: 'accuracy', title: 'BEST FORECAST HIT RATE', key: 'pct',  fmt: v => v+'% of markets',      color: '#6366f1' },
+  { id: 'volume',   title: 'HIGHEST VOLUME',         key: 'vol',  fmt: v => fmtPool(v)+' TKN',     color: '#d97706' },
+];
+
+function buildLeaderboard() {
+  return LBTYPES.map(lb => {
+    const leaders = Array.from({length:5}, () => {
+      const u = randEl(USERS);
+      const val = lb.key === 'gain' ? Math.floor(500 + Math.random()*50000)
+                : lb.key === 'pct'  ? Math.floor(48 + Math.random()*34)
+                : Math.floor(2000 + Math.random()*200000);
+      return { user: u, val, init: u.slice(0,2).toUpperCase() };
+    }).sort((a,b) => b.val - a.val);
+
+    const rows = leaders.map((l, i) => `
+      <div class="lb-row">
+        <span class="lb-rank">${i+1}</span>
+        <div class="lb-av" style="background:${lb.color}14;color:${lb.color}">${l.init}</div>
+        <span class="lb-name">${l.user}</span>
+        <span class="lb-val" style="color:${lb.color}">${lb.fmt(l.val)}</span>
+      </div>`).join('');
+
+    return `<div class="lb-card"><div class="lb-card-title">${lb.title}</div>${rows}</div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════════
+   GLOBAL FEED
+═══════════════════════════════════════════ */
+function bracketOf(m) { return randEl(m.brackets); }
+
+const ACTIONS = [
+  (u,m,a) => { const b = bracketOf(m); return { text: `<b>${u}</b> backed ${b.name} (${bkRangeLabel(b)}) on`, result: a+' TKN', rcolor: 'var(--indigo)' }; },
+  (u,m,a) => {
+    const b = bracketOf(m);
+    const mult = rnd(1.3 + Math.random()*6);
+    const payout = Math.floor(a*mult);
+    return { text: `<b>${u}</b> hit ${b.name} at ${fmtM(mult)} pool odds on`, result: `+${payout} TKN`, rcolor: 'var(--green)' };
+  },
+  (u,m,a) => { const b = bracketOf(m); return { text: `<b>${u}</b> missed — peak skipped ${b.name} on`, result: '−'+a+' TKN', rcolor: 'var(--red)' }; },
+  (u,m,a) => ({ text: `<b>${u}</b> joined the pool on`, result: a+' TKN', rcolor: 'var(--dim)' }),
+  (u,m,a) => { const b = bracketOf(m); return { text: `<b>${u}</b> moved the line on ${b.name} —`, result: a+' TKN', rcolor: 'var(--dim)' }; },
+];
+
+const AMOUNTS = [50,100,150,200,250,300,400,500,600,750,1000,1200,1500,2000,2500];
+
+let feedLog = [];
+let feedTotal = 0;
+
+function genFeedEvent() {
+  const m = randEl(MTN);
+  const u = randEl(USERS);
+  const a = randEl(AMOUNTS);
+  const act = ACTIONS[Math.floor(Math.random() * ACTIONS.length)](u, m, a);
+  return { m, u, a, act, init: u.slice(0,2).toUpperCase(), ts: nowTs() };
+}
+
+function renderFeed() {
+  document.getElementById('gfeed').innerHTML = feedLog.slice(0,10).map(ev => `
+    <div class="gfeed-row">
+      <div class="gfeed-av" style="background:${ev.m.color}14;color:${ev.m.color}">${ev.init}</div>
+      <div class="gfeed-body">${ev.act.text} <span class="gfeed-mtn" style="color:${ev.m.color}">${ev.m.name}</span></div>
+      <div class="gfeed-result" style="color:${ev.act.rcolor}">${ev.act.result}</div>
+      <div class="gfeed-time">${ev.ts}</div>
+    </div>`).join('');
+  document.getElementById('feed-count').textContent = feedTotal.toLocaleString() + ' EVENTS TODAY';
+}
+
+/* ═══════════════════════════════════════════
+   GLOBAL BAR
+═══════════════════════════════════════════ */
+let roundsToday = 2114;
+let highestPeakToday = { value: 284.5, mtn: 'K2' };
+let crowdResults = Array.from({ length: 80 }, () => Math.random() < 0.61 ? 1 : 0);
+let vol24h = 14200000;
+
+function updateGlobalBarExtras() {
+  document.getElementById('gb-rounds').textContent = roundsToday.toLocaleString();
+  document.getElementById('gb-highest').textContent = fmtM(highestPeakToday.value);
+  document.getElementById('gb-highest-sub').textContent = `on ${highestPeakToday.mtn}`;
+  const hit = crowdResults.reduce((s,v) => s+v, 0) / crowdResults.length;
+  document.getElementById('gb-crowd').textContent = Math.round(hit * 100) + '%';
+  const openN = MTN.filter(m => m.phase === 'open').length;
+  document.getElementById('hdr-live-count').textContent = openN + (openN === 1 ? ' market open' : ' markets open');
+}
+
+/* ═══════════════════════════════════════════
+   INITIAL RENDER
+═══════════════════════════════════════════ */
+document.getElementById('grid').innerHTML = MTN.map(buildCard).join('');
+document.getElementById('lb-grid').innerHTML = buildLeaderboard();
+
+for (let i = 0; i < 10; i++) feedLog.push(genFeedEvent());
+feedTotal = 4218;
+renderFeed();
+updateGlobalBarExtras();
+renderPortfolio();
+
+function updateTotals() {
+  const totalP = MTN.reduce((s,m) => s+m.players, 0);
+  const pooled = MTN.reduce((s,m) => s+totalPool(m), 0);
+  document.getElementById('gb-players').textContent = totalP.toLocaleString();
+  document.getElementById('hdr-pool').textContent   = fmtPool(pooled)+' TKN';
+  document.getElementById('gb-pool').textContent    = fmtPool(pooled)+' TKN';
+  document.getElementById('hdr-vol').textContent    = fmtPool(vol24h);
+}
+updateTotals();
+
+/* ═══════════════════════════════════════════
+   MAIN TICK — open → climbing → resolved → open
+═══════════════════════════════════════════ */
+function tick() {
+  const now = Date.now();
+  MTN.forEach(m => {
+    if (m.phase === 'open') {
+      const remain = Math.max(0, Math.ceil((m.opensEndsAt - now) / 1000));
+      const el = document.getElementById('cd-' + m.id);
+      if (el) el.innerHTML = `<div class="badge-pip pulse"></div>BETS CLOSE ${remain}s`;
+      if (activeModalId === m.id) {
+        const mc = document.getElementById('modal-countdown');
+        if (mc) mc.textContent = remain + 's';
+      }
+      if (now >= m.opensEndsAt) lockAndClimb(m);
+    } else if (m.phase === 'climbing') {
+      const sp = RISK_SPEED[m.riskLevel] || RISK_SPEED[2];
+      m.mult = m.mult * (1 + sp.base + Math.random() * sp.jitter);
+      m.trace.push(m.mult);
+      if (m.trace.length > TRACE_MAX) m.trace.shift();
+
+      if (m.mult >= m.peakAt) { resolveMarket(m); return; }
+
+      const el = document.getElementById('mult-' + m.id);
+      if (el) el.textContent = fmtM(m.mult);
+      const tr = document.getElementById('trace-' + m.id);
+      if (tr) {
+        tr.setAttribute('points', tracePoints(m));
+        const end = traceEnd(m);
+        const dot = document.getElementById('dot-' + m.id);
+        if (dot) { dot.setAttribute('cx', end.x); dot.setAttribute('cy', end.y); }
+      }
+      // Highlight which bracket the ascent is currently inside
+      const cur = bracketIdxFor(m, m.mult);
+      if (m._lastZone !== cur) {
+        m.brackets.forEach((_, i) => {
+          const row = document.getElementById(`bkrow-${m.id}-${i}`);
+          if (row) row.classList.toggle('current-zone', i === cur);
+        });
+        m._lastZone = cur;
+      }
+      if (activeModalId === m.id) {
+        const mm = document.getElementById('modal-mult');
+        if (mm) mm.textContent = fmtM(m.mult);
+      }
+    } else if (m.phase === 'resolved') {
+      if (now >= m.resolvedUntil) reopenMarket(m);
+    }
+  });
+}
+setInterval(tick, 200);
+
+// Crowd money flowing into open markets — this is what moves the odds
+setInterval(() => {
+  MTN.forEach(m => {
+    if (m.phase !== 'open') return;
+    // Crowd stakes roughly track true probability, with noise
+    const probs = m.brackets.map(b => bracketProb(m, b));
+    const total = probs.reduce((s,p) => s+p, 0);
+    for (let k = 0; k < 2; k++) {
+      let r = Math.random() * total, idx = 0;
+      for (let i = 0; i < probs.length; i++) { r -= probs[i]; if (r <= 0) { idx = i; break; } }
+      m.brackets[idx].pool += randEl(AMOUNTS) * (0.5 + Math.random());
+    }
+    m.players += Math.floor(Math.random() * 5) - 1;
+    if (m.players < 80) m.players = 80;
+    refreshOdds(m);
+    const pEl = document.getElementById('pl-' + m.id);
+    if (pEl) pEl.textContent = m.players.toLocaleString();
+    // Live odds refresh in the modal too
+    if (activeModalId === m.id && !(m.pending || m.position || m.pendingNext)) {
+      const kept = document.getElementById('stakeAmount');
+      if (kept) m.uiStakeKeep = kept.value;
+      renderModalContent(m);
+    }
+  });
+  vol24h += Math.floor(Math.random() * 15000);
+  updateTotals();
+}, 1400);
+
+// Feed events
+setInterval(() => {
+  feedLog.unshift(genFeedEvent());
+  feedTotal += Math.floor(Math.random()*3)+1;
+  if (feedLog.length > 30) feedLog.pop();
+  renderFeed();
+  updateGlobalBarExtras();
+}, 1600);
+
+/* ═══════════════════════════════════════════
+   FILTERS
+═══════════════════════════════════════════ */
+function applyCurrentFilter() {
+  const activeBtn = document.querySelector('.filter-btn.active');
+  const f = activeBtn ? activeBtn.dataset.filter : 'all';
+  document.querySelectorAll('.mcard').forEach(card => {
+    const risk  = parseInt(card.dataset.risk);
+    const phase = card.dataset.phase;
+    const mine  = card.dataset.mine === '1';
+    const show  = f === 'all' ? true
+                : f === 'open' ? phase === 'open'
+                : f === 'climbing' ? (phase === 'climbing' || phase === 'resolved')
+                : f === 'low'  ? risk <= 1
+                : f === 'high' ? risk >= 3
+                : f === 'mine' ? mine
+                : true;
+    card.style.display = show ? '' : 'none';
+  });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    applyCurrentFilter();
+    if (this.dataset.filter === 'mine' && !MTN.some(m => m.position || m.pending || m.pendingNext)) {
+      toast('No forecasts yet — open any market and back a bracket', 'info');
+    }
+  });
+});
+</script>
+</body>
+</html>

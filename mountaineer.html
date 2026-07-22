@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mountaineer — Predictive Markets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #070c18;
+  --surface: #0c1221;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.04);
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --dim: #334155;
+  --green: #10b981;
+  --blue: #3b82f6;
+  --red: #ef4444;
+  --amber: #f59e0b;
+}
+
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  font-family: 'JetBrains Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  user-select: none;
+}
+
+/* ── HEADER ── */
+#header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0,0,0,0.35);
+  flex-shrink: 0;
+}
+
+#logo { display: flex; align-items: center; gap: 10px; }
+#logo-mark { color: var(--green); font-size: 19px; line-height: 1; }
+#logo-name {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 19px;
+  letter-spacing: 0.1em; color: #f8fafc;
+}
+#logo-tag { font-size: 9px; color: var(--dim); letter-spacing: 0.18em; margin-left: 2px; }
+
+#balance-box {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  padding: 6px 14px; border-radius: 8px;
+}
+#balance-label { font-size: 10px; color: var(--muted); }
+#balance-amount { font-size: 16px; font-weight: 700; color: #f8fafc; }
+#balance-unit { font-size: 10px; color: var(--muted); }
+
+/* ── HISTORY ── */
+#history-bar {
+  display: flex; gap: 5px;
+  padding: 7px 24px;
+  background: rgba(0,0,0,0.22);
+  border-bottom: 1px solid var(--border2);
+  overflow-x: auto; flex-shrink: 0;
+}
+#history-bar::-webkit-scrollbar { height: 0; }
+.hist-chip {
+  flex-shrink: 0; padding: 2px 9px;
+  border-radius: 4px; font-size: 10px;
+  font-weight: 700; letter-spacing: 0.04em;
+}
+
+/* ── MAIN ── */
+#main { flex: 1; display: flex; min-height: 0; }
+
+/* ── CANVAS AREA ── */
+#canvas-section {
+  flex: 1; position: relative;
+  overflow: hidden; background: #060a15;
+  border-right: 1px solid var(--border);
+}
+#mountain-bg {
+  position: absolute; bottom: 0; left: 0;
+  width: 100%; height: 58%;
+  opacity: 0.038; pointer-events: none;
+}
+#game-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+#status-dot-wrap {
+  position: absolute; top: 14px; left: 16px;
+  display: flex; align-items: center; gap: 7px; z-index: 2;
+}
+#status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%; transition: background 0.3s, box-shadow 0.3s;
+}
+#status-text { font-size: 9px; color: var(--muted); letter-spacing: 0.14em; }
+
+/* ── OVERLAYS ── */
+#countdown-overlay, #mult-overlay {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center; pointer-events: none; z-index: 2;
+}
+.ov-label { font-size: 10px; color: var(--dim); letter-spacing: 0.2em; margin-bottom: 10px; min-height: 16px; }
+.ov-num {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 78px; line-height: 1;
+  transition: color 0.4s;
+}
+.ov-sub { font-size: 10px; color: var(--muted); margin-top: 10px; letter-spacing: 0.12em; min-height: 16px; }
+#cd-num { color: #f8fafc; opacity: 0.7; }
+#cd-label { color: var(--dim); }
+#cd-sub { color: var(--dim); }
+
+/* ── RIGHT PANEL ── */
+#right-panel {
+  width: 278px; background: #080d1b;
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+
+#forecast-desk {
+  padding: 15px 16px;
+  border-bottom: 1px solid var(--border2);
+}
+.panel-heading {
+  font-size: 9px; color: var(--dim);
+  letter-spacing: 0.16em; margin-bottom: 14px;
+}
+.field-label {
+  font-size: 9px; color: var(--muted);
+  letter-spacing: 0.08em; margin-bottom: 5px;
+}
+.field-row { display: flex; gap: 6px; align-items: stretch; margin-bottom: 10px; }
+.chip-col { display: flex; flex-direction: column; gap: 3px; }
+
+.chip-btn {
+  padding: 3px 8px; font-size: 9px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 4px; color: var(--muted);
+  cursor: pointer; font-family: inherit;
+  transition: background 0.15s;
+}
+.chip-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.chip-btn:disabled { opacity: 0.3; cursor: default; }
+
+input[type="number"] {
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 6px; padding: 8px 10px;
+  color: #f8fafc; font-size: 14px;
+  font-family: inherit; outline: none;
+  transition: border-color 0.2s;
+  -moz-appearance: textfield;
+  width: 100%;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+input[type="number"]:focus { border-color: rgba(255,255,255,0.22); }
+input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
+#stake-input { flex: 1; width: auto; }
+#auto-wrap { margin-bottom: 14px; }
+
+#action-btn {
+  width: 100%; padding: 13px 0;
+  border: none; border-radius: 8px;
+  font-family: inherit; font-size: 12px;
+  font-weight: 700; letter-spacing: 0.06em;
+  cursor: pointer; transition: all 0.18s;
+}
+#action-btn.place {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #fff; box-shadow: 0 4px 18px rgba(59,130,246,0.28);
+}
+#action-btn.place:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59,130,246,0.38); }
+#action-btn.placed {
+  background: rgba(59,130,246,0.1);
+  border: 1px solid rgba(59,130,246,0.25);
+  color: #60a5fa; cursor: default;
+}
+#action-btn.cashout {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff; box-shadow: 0 4px 22px rgba(16,185,129,0.32);
+  animation: pulse-green 1.3s ease-in-out infinite;
+}
+#action-btn.locked {
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.22);
+  color: var(--green); cursor: default;
+}
+#action-btn.inactive {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--dim); cursor: default;
+}
+@keyframes pulse-green {
+  0%, 100% { box-shadow: 0 4px 22px rgba(16,185,129,0.32); }
+  50% { box-shadow: 0 4px 34px rgba(16,185,129,0.52); }
+}
+
+#bet-info {
+  min-height: 18px; margin-top: 8px;
+  font-size: 10px; text-align: center;
+  letter-spacing: 0.05em; color: var(--green);
+}
+
+/* ── LIVE FEED ── */
+#live-feed { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+#feed-heading {
+  padding: 10px 16px 8px;
+  font-size: 9px; color: var(--dim);
+  letter-spacing: 0.16em;
+  border-bottom: 1px solid var(--border2);
+  flex-shrink: 0;
+}
+#feed-list { flex: 1; overflow-y: auto; }
+#feed-list::-webkit-scrollbar { width: 3px; }
+#feed-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+
+.feed-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.025);
+  animation: slide-in 0.28s ease;
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.feed-name { font-size: 11px; color: #94a3b8; font-weight: 500; }
+.feed-action { font-size: 9px; color: var(--dim); margin-top: 1px; }
+.feed-value { font-size: 12px; font-weight: 700; }
+#feed-empty { padding: 28px 16px; text-align: center; font-size: 10px; color: #1a2535; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 22px; left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  padding: 11px 22px; border-radius: 10px;
+  font-size: 13px; font-weight: 700;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em; z-index: 999;
+  opacity: 0; transition: opacity 0.28s, transform 0.28s;
+  pointer-events: none; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.win { background: rgba(16,185,129,0.96); color: #fff; }
+#toast.loss { background: rgba(239,68,68,0.96); color: #fff; }
+
+/* Scrollbar global */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.09); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div id="header">
+  <div id="logo">
+    <span id="logo-mark">▲</span>
+    <span id="logo-name">MOUNTAINEER</span>
+    <span id="logo-tag">PREDICTIVE MARKETS</span>
+  </div>
+  <div id="balance-box">
+    <span id="balance-label">BALANCE</span>
+    <span id="balance-amount">1000.00</span>
+    <span id="balance-unit">TKN</span>
+  </div>
+</div>
+
+<!-- ── HISTORY ── -->
+<div id="history-bar"></div>
+
+<!-- ── MAIN ── -->
+<div id="main">
+
+  <!-- Canvas section -->
+  <div id="canvas-section">
+    <svg id="mountain-bg" viewBox="0 0 900 300" preserveAspectRatio="none">
+      <polygon points="0,300 110,52 255,138 395,10 535,118 675,40 900,108 900,300" fill="#10b981"/>
+      <polygon points="0,300 75,162 188,218 315,88 452,172 602,28 755,132 900,68 900,300" fill="#60a5fa" opacity="0.35"/>
+    </svg>
+
+    <canvas id="game-canvas"></canvas>
+
+    <div id="status-dot-wrap">
+      <div id="status-dot"></div>
+      <span id="status-text">ACCEPTING FORECASTS</span>
+    </div>
+
+    <!-- Waiting overlay -->
+    <div id="countdown-overlay">
+      <div class="ov-label" id="cd-label">NEXT ROUND IN</div>
+      <div class="ov-num" id="cd-num">7</div>
+      <div class="ov-sub" id="cd-sub">PLACE YOUR FORECAST NOW</div>
+    </div>
+
+    <!-- Climbing/crashed overlay -->
+    <div id="mult-overlay" style="display:none">
+      <div class="ov-label" id="mult-label"></div>
+      <div class="ov-num" id="mult-num">1.00×</div>
+      <div class="ov-sub" id="mult-sub"></div>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div id="right-panel">
+    <div id="forecast-desk">
+      <div class="panel-heading">FORECAST DESK</div>
+
+      <div class="field-label">STAKE (TKN)</div>
+      <div class="field-row">
+        <input type="number" id="stake-input" value="10" min="1" step="1">
+        <div class="chip-col">
+          <button class="chip-btn" id="chip-25" onclick="setStake(25)">25</button>
+          <button class="chip-btn" id="chip-100" onclick="setStake(100)">100</button>
+          <button class="chip-btn" id="chip-max" onclick="setStakeMax()">MAX</button>
+        </div>
+      </div>
+
+      <div class="field-label">AUTO EXIT AT (×)</div>
+      <div id="auto-wrap">
+        <input type="number" id="auto-input" placeholder="e.g. 2.00" min="1.01" step="0.01">
+      </div>
+
+      <button id="action-btn" class="inactive" onclick="handleAction()">PLACE FORECAST</button>
+      <div id="bet-info"></div>
+    </div>
+
+    <div id="live-feed">
+      <div id="feed-heading">LIVE MARKET ACTIVITY</div>
+      <div id="feed-list">
+        <div id="feed-empty">Waiting for market activity...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+/* ──────────────────────────────────────────────
+   MOUNTAINEER · Core Game Engine
+────────────────────────────────────────────── */
+const PLAYERS = [
+  'AlpineTrader','PeakSeeker','MtnForecast','SummitCall',
+  'RidgeRider','IceBreaker','NordicPro','GlacierBull',
+  'SnowCap','K2Bull','CrevassePro','FjordCapital',
+  'TundraFund','BasecampX','NordIce','VertexBull',
+  'ScarpaPro','SteepFund','IcefallCap','CouliorQ'
+];
+
+// ── State ──
+let balance = 1000;
+let stake = 10;
+let autoCO = null;
+let phase = 'waiting';
+let multiplier = 1.0;
+let countdown = 7;
+let hasBet = false;
+let hasCashedOut = false;
+let cashMult = null;
+let history = [3.21, 1.12, 8.92, 1.45, 5.67, 2.34, 1.03, 14.8, 1.77, 4.22];
+
+// ── Anim ──
+let rafId = null;
+let intervalId = null;
+let timeoutId = null;
+let startTime = 0;
+let crashPoint = 1;
+let points = [];
+let simPlayers = [];
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+
+// ── Resize ──
+function resize() {
+  const s = document.getElementById('canvas-section');
+  canvas.width = s.clientWidth;
+  canvas.height = s.clientHeight;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ── Utilities ──
+function genCrash() {
+  const r = Math.random();
+  if (r < 0.04) return 1.00;
+  return Math.max(1.01, Math.round(0.99 / (1 - Math.random() * 0.96) * 100) / 100);
+}
+const fmtM = n => n.toFixed(2) + '×';
+const fmtT = n => n.toFixed(2);
+const rnd = (n, d=2) => Math.round(n * 10**d) / 10**d;
+
+function histStyle(v) {
+  if (v < 1.5) return { bg:'rgba(239,68,68,0.12)', bd:'rgba(239,68,68,0.22)', c:'#ef4444' };
+  if (v < 3)   return { bg:'rgba(245,158,11,0.12)', bd:'rgba(245,158,11,0.22)', c:'#f59e0b' };
+  return              { bg:'rgba(16,185,129,0.12)', bd:'rgba(16,185,129,0.22)', c:'#10b981' };
+}
+
+// ── History ──
+function renderHistory() {
+  document.getElementById('history-bar').innerHTML = history
+    .map(v => { const s = histStyle(v);
+      return `<div class="hist-chip" style="background:${s.bg};border:1px solid ${s.bd};color:${s.c}">${fmtM(v)}</div>`;
+    }).join('');
+}
+
+// ── Balance ──
+function updateBalance() {
+  document.getElementById('balance-amount').textContent = fmtT(balance);
+}
+
+// ── Canvas draw ──
+function drawFrame(pts, m, crashed, waiting) {
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  // Grid
+  ctx.lineWidth = 1;
+  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  for (let i = 1; i < 8; i++) {
+    ctx.beginPath(); ctx.moveTo(0, H*i/8); ctx.lineTo(W, H*i/8); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W*i/8, 0); ctx.lineTo(W*i/8, H); ctx.stroke();
+  }
+
+  if (waiting) {
+    ctx.beginPath();
+    ctx.arc(40, H - 28, 5, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(16,185,129,0.4)';
+    ctx.fill();
+    return;
+  }
+
+  if (pts.length < 2) return;
+
+  const col = crashed ? '#ef4444' : '#10b981';
+  const ca  = crashed ? 'rgba(239,68,68,' : 'rgba(16,185,129,';
+
+  // Area fill
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0,    ca + '0.17)');
+  g.addColorStop(0.75, ca + '0.04)');
+  g.addColorStop(1,    ca + '0)');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, H - 10);
+  for (const p of pts) ctx.lineTo(p.x, p.y);
+  ctx.lineTo(pts[pts.length-1].x, H - 10);
+  ctx.closePath();
+  ctx.fillStyle = g;
+  ctx.fill();
+
+  // Glow
+  ctx.beginPath();
+  for (let i = 0; i < pts.length; i++) i===0 ? ctx.moveTo(pts[i].x,pts[i].y) : ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.strokeStyle = ca + '0.17)';
+  ctx.lineWidth = 13;
+  ctx.lineJoin = ctx.lineCap = 'round';
+  ctx.stroke();
+
+  // Line
+  ctx.beginPath();
+  for (let i = 0; i < pts.length; i++) i===0 ? ctx.moveTo(pts[i].x,pts[i].y) : ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.strokeStyle = col;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Tip
+  const L = pts[pts.length-1];
+  if (!crashed) {
+    ctx.beginPath(); ctx.arc(L.x,L.y,18,0,Math.PI*2); ctx.fillStyle=ca+'0.07)'; ctx.fill();
+    ctx.beginPath(); ctx.arc(L.x,L.y,8,0,Math.PI*2);  ctx.fillStyle=ca+'0.18)'; ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(L.x,L.y,5,0,Math.PI*2); ctx.fillStyle=col; ctx.fill();
+  ctx.beginPath(); ctx.arc(L.x,L.y,2.5,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+}
+
+// ── Feed ──
+function addFeed(name, type, mult, profit) {
+  const list = document.getElementById('feed-list');
+  const empty = document.getElementById('feed-empty');
+  if (empty) empty.remove();
+  const isCO = type === 'cashout';
+  const div = document.createElement('div');
+  div.className = 'feed-item';
+  div.innerHTML = `
+    <div>
+      <div class="feed-name">${name}</div>
+      <div class="feed-action">${isCO ? 'exited at '+fmtM(mult) : 'busted · '+fmtM(mult)}</div>
+    </div>
+    <div class="feed-value" style="color:${isCO?'#10b981':'#ef4444'}">${isCO?'+'+profit.toFixed(0):'−'}</div>
+  `;
+  list.insertBefore(div, list.firstChild);
+  while (list.children.length > 12) list.removeChild(list.lastChild);
+}
+
+// ── Toast ──
+function showToast(msg, type) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type + ' show';
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => { t.className = ''; }, 3600);
+}
+
+// ── Status dot ──
+function updateStatus() {
+  const dot = document.getElementById('status-dot');
+  const txt = document.getElementById('status-text');
+  const MAP = {
+    waiting:  { c:'#f59e0b', s:'0 0 7px #f59e0b', t:'ACCEPTING FORECASTS' },
+    climbing: { c:'#10b981', s:'0 0 7px #10b981', t:'MARKET LIVE — ROUND ACTIVE' },
+    crashed:  { c:'#ef4444', s:'0 0 7px #ef4444', t:'ROUND SETTLED' },
+  };
+  const m = MAP[phase];
+  dot.style.background = m.c;
+  dot.style.boxShadow  = m.s;
+  txt.textContent = m.t;
+}
+
+// ── Overlay ──
+function showMultOverlay(m, state) {
+  const num = document.getElementById('mult-num');
+  const lbl = document.getElementById('mult-label');
+  const sub = document.getElementById('mult-sub');
+  num.textContent = fmtM(m);
+  if (state === 'crashed') {
+    num.style.color = '#ef4444';
+    lbl.textContent = 'PEAK REACHED';
+    sub.textContent = '';
+  } else {
+    num.style.color = '#10b981';
+    lbl.textContent = hasCashedOut ? ('✓ LOCKED AT ' + fmtM(cashMult)) : '';
+    sub.textContent = hasBet && !hasCashedOut ? '↑ CLIMBING — EXIT TO LOCK GAINS' :
+                      hasBet && hasCashedOut  ? '' : 'ROUND IN PROGRESS';
+  }
+}
+
+// ── Action button ──
+function updateBtn() {
+  const btn  = document.getElementById('action-btn');
+  const info = document.getElementById('bet-info');
+  const si   = document.getElementById('stake-input');
+  const ai   = document.getElementById('auto-input');
+  const chips = document.querySelectorAll('.chip-btn');
+
+  const disable = (yes) => {
+    si.disabled = yes; ai.disabled = yes;
+    chips.forEach(c => c.disabled = yes);
+  };
+
+  if (phase === 'climbing' && hasBet && !hasCashedOut) {
+    btn.className = 'cashout';
+    btn.textContent = 'LOCK IN · ' + fmtM(multiplier);
+    info.textContent = 'Potential: ' + fmtT(stake * multiplier) + ' TKN';
+    info.style.color = '#10b981';
+    disable(true);
+  } else if (phase === 'climbing' && hasBet && hasCashedOut) {
+    btn.className = 'locked';
+    btn.textContent = '✓ LOCKED AT ' + fmtM(cashMult);
+    info.textContent = '+' + fmtT(stake * cashMult) + ' TKN secured';
+    info.style.color = '#10b981';
+    disable(true);
+  } else if (phase === 'waiting' && hasBet) {
+    btn.className = 'placed';
+    btn.textContent = '✓ FORECAST PLACED';
+    info.textContent = '✓ ' + fmtT(stake) + ' TKN committed';
+    info.style.color = '#60a5fa';
+    disable(true);
+  } else if (phase === 'waiting' && !hasBet) {
+    const s = parseFloat(si.value) || 0;
+    const ok = s > 0 && s <= balance;
+    btn.className = ok ? 'place' : 'inactive';
+    btn.textContent = 'PLACE FORECAST';
+    info.textContent = '';
+    disable(false);
+  } else {
+    btn.className = 'inactive';
+    btn.textContent = 'ROUND IN PROGRESS';
+    info.textContent = '';
+    disable(true);
+  }
+}
+
+// ── Cashout ──
+function doCashout(atM) {
+  if (hasCashedOut || !hasBet) return;
+  hasCashedOut = true;
+  cashMult = atM;
+  const win = rnd(stake * atM);
+  balance = rnd(balance + win);
+  updateBalance();
+  showToast('+' + fmtT(win) + ' TKN at ' + fmtM(atM), 'win');
+}
+
+// ── Climbing round ──
+function startClimb(cp) {
+  points = [];
+  crashPoint = cp;
+  const K = 0.000065;
+
+  // Sim players
+  simPlayers = [];
+  const n = 3 + Math.floor(Math.random() * 7);
+  for (let i = 0; i < n; i++) {
+    const co = 1.07 + Math.random() * Math.min(cp - 1.07, 14);
+    if (co < cp) simPlayers.push({
+      name: PLAYERS[Math.floor(Math.random() * PLAYERS.length)],
+      co: rnd(co), done: false,
+      s: (2 + Math.floor(Math.random() * 22)) * 10
+    });
+  }
+
+  startTime = performance.now();
+
+  function loop(now) {
+    const el = now - startTime;
+    multiplier = Math.pow(Math.E, K * el);
+
+    // Map to canvas coords
+    const W = canvas.width, H = canvas.height;
+    const x = 40 + Math.min(el / 38000, 1) * (W - 80);
+    const logM   = Math.log(multiplier);
+    const maxLog = Math.log(Math.max(cp * 1.9, 2.8));
+    const y = Math.max(14, H - 28 - (logM / maxLog) * (H - 65));
+    points.push({ x, y });
+    drawFrame(points, multiplier, false, false);
+
+    // Update overlay & button every frame
+    showMultOverlay(multiplier, 'climbing');
+    if (hasBet && !hasCashedOut) {
+      const btn = document.getElementById('action-btn');
+      if (btn.className === 'cashout') {
+        btn.textContent = 'LOCK IN · ' + fmtM(multiplier);
+        document.getElementById('bet-info').textContent = 'Potential: ' + fmtT(stake * multiplier) + ' TKN';
+      }
+    }
+
+    // Auto cashout
+    if (autoCO && multiplier >= autoCO && !hasCashedOut && hasBet) {
+      doCashout(multiplier);
+      updateBtn();
+    }
+
+    // Sim cashouts
+    for (const p of simPlayers) {
+      if (!p.done && multiplier >= p.co) {
+        p.done = true;
+        addFeed(p.name, 'cashout', p.co, rnd(p.s * (p.co - 1)));
+      }
+    }
+
+    if (multiplier >= cp) {
+      // CRASH
+      multiplier = cp;
+      drawFrame(points, cp, true, false);
+      showMultOverlay(cp, 'crashed');
+      phase = 'crashed';
+      updateStatus();
+      updateBtn();
+
+      history.unshift(rnd(cp));
+      if (history.length > 20) history.pop();
+      renderHistory();
+
+      for (const p of simPlayers) {
+        if (!p.done) addFeed(p.name, 'bust', cp, 0);
+      }
+
+      if (hasBet && !hasCashedOut) {
+        showToast('Bust — market peaked at ' + fmtM(cp), 'loss');
+      }
+
+      timeoutId = setTimeout(startWaiting, 4500);
+      return;
+    }
+
+    rafId = requestAnimationFrame(loop);
+  }
+
+  rafId = requestAnimationFrame(loop);
+}
+
+// ── Waiting ──
+function startWaiting() {
+  if (rafId)      { cancelAnimationFrame(rafId); rafId = null; }
+  if (intervalId) { clearInterval(intervalId); intervalId = null; }
+  if (timeoutId)  { clearTimeout(timeoutId); timeoutId = null; }
+
+  points = []; hasBet = false; hasCashedOut = false;
+  cashMult = null; multiplier = 1.0; countdown = 7;
+  phase = 'waiting';
+
+  document.getElementById('feed-list').innerHTML = '<div id="feed-empty">Waiting for market activity...</div>';
+  document.getElementById('countdown-overlay').style.display = 'block';
+  document.getElementById('mult-overlay').style.display = 'none';
+  document.getElementById('cd-num').textContent = countdown;
+  document.getElementById('stake-input').value = stake;
+
+  drawFrame([], 1, false, true);
+  updateStatus();
+  updateBtn();
+
+  const cp = genCrash();
+
+  intervalId = setInterval(() => {
+    countdown--;
+    document.getElementById('cd-num').textContent = countdown;
+    if (countdown <= 0) {
+      clearInterval(intervalId); intervalId = null;
+      phase = 'climbing';
+      document.getElementById('countdown-overlay').style.display = 'none';
+      document.getElementById('mult-overlay').style.display = 'block';
+      showMultOverlay(1.0, 'climbing');
+      updateStatus(); updateBtn();
+      startClimb(cp);
+    }
+  }, 1000);
+}
+
+// ── Action handler ──
+function handleAction() {
+  if (phase === 'climbing' && hasBet && !hasCashedOut) {
+    doCashout(multiplier);
+    updateBtn();
+    showMultOverlay(multiplier, 'climbing');
+    return;
+  }
+  if (phase === 'waiting' && !hasBet) {
+    const s = parseFloat(document.getElementById('stake-input').value) || 0;
+    const a = parseFloat(document.getElementById('auto-input').value) || null;
+    if (s <= 0 || s > balance) return;
+    stake = s;
+    autoCO = (a && a > 1.01) ? a : null;
+    balance = rnd(balance - s);
+    hasBet = true;
+    updateBalance();
+    updateBtn();
+  }
+}
+
+function setStake(v) {
+  if (hasBet || phase !== 'waiting') return;
+  document.getElementById('stake-input').value = Math.min(v, Math.floor(balance));
+  updateBtn();
+}
+function setStakeMax() {
+  if (hasBet || phase !== 'waiting') return;
+  document.getElementById('stake-input').value = Math.floor(balance);
+  updateBtn();
+}
+
+document.getElementById('stake-input').addEventListener('input', updateBtn);
+
+// ── Boot ──
+renderHistory();
+updateBalance();
+startWaiting();
+</script>
+</body>
+</html>
