@@ -445,6 +445,27 @@ header {
 }
 .ascent-link:hover { color: var(--text); border-color: var(--hover-border); transform: translateY(-1px); }
 
+/* ── LIVE WEATHER (biases the climb below) ── */
+.weather-strip {
+  display: flex; flex-direction: column; gap: 6px;
+  padding: 7px 10px; margin-bottom: 11px;
+  background: var(--bg2); border: 1px solid var(--border2); border-radius: 8px;
+  font-size: 9.5px; color: var(--muted);
+}
+.weather-strip.pending { flex-direction: row; align-items: center; color: var(--dim); font-style: italic; }
+.weather-strip-top { display: flex; align-items: center; gap: 8px; }
+.weather-strip .live-dot { flex-shrink: 0; }
+.weather-reading { font-weight: 700; color: var(--text); white-space: nowrap; }
+.weather-verdict {
+  margin-left: auto; font-weight: 700; letter-spacing: 0.04em; white-space: nowrap; cursor: help;
+}
+.weather-gradient {
+  display: flex; justify-content: space-between; gap: 4px;
+  padding-left: 2px; border-top: 1px solid var(--border2); padding-top: 6px;
+  font-size: 8.5px; color: var(--dim); cursor: help;
+}
+.weather-gradient b { color: var(--muted); font-weight: 700; }
+
 /* ── PORTFOLIO ── */
 .portfolio-section { padding: 0 32px 46px; }
 .portfolio-grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; }
@@ -890,6 +911,10 @@ const RAKE = 0.05;
 const OPEN_MS = 12000;      // betting window
 const RESOLVED_MS = 3000;   // resolution display
 const BASE_CAMP_FRACTION = 0.15; // every ascent starts this far up the mountain, not at the summit
+const BREAKTHROUGH_CHANCE = 0.08; // flat chance any round draws the mountain's full baseline scale
+                                   // regardless of live weather — a team pushing through anyway. See
+                                   // weatherThrottle()/bracketProb()/rollPeak() further down for how
+                                   // this mixes with the live-weather throttle on the climb.
 
 /* Bracket ladders per variance tier. Named as climbing zones. */
 const BRACKET_SETS = {
@@ -918,6 +943,8 @@ const RISK_SPEED = {
   4: { base: 0.0032, jitter: 0.0055 }
 };
 const RISK_SKEW = { 1: 1.6, 2: 2.4, 3: 3.4, 4: 4.8 };
+// Fixed regardless of the mountain's own accent color, so risk reads consistently card to card.
+const RISK_COLOR = { LOW: '#059669', MEDIUM: '#6366f1', HIGH: '#d97706', EXTREME: '#dc2626' };
 
 /* ═══════════════════════════════════════════
    MOUNTAIN DEFINITIONS
@@ -925,6 +952,7 @@ const RISK_SKEW = { 1: 1.6, 2: 2.4, 3: 3.4, 4: 4.8 };
 const MTN = [
   {
     id: 'everest', name: 'Everest', elevationM: 8849, region: 'Himalayas · Nepal-Tibet',
+    lat: 27.9881, lon: 86.9250,
     risk: 'HIGH', riskLevel: 3, color: '#6366f1',
     skyTop: '#e4e7fd', skyBot: '#f8fafc',
     body: '0,200 58,200 88,188 112,170 130,148 143,124 152,100 158,76 163,54 166,34 168,18 170,8 172,20 175,40 178,60 174,72 170,58 176,44 183,28 190,44 195,60 200,44 204,30 208,44 212,62 220,82 234,110 254,140 278,168 312,188 360,198 400,200',
@@ -935,6 +963,7 @@ const MTN = [
   },
   {
     id: 'k2', name: 'K2', elevationM: 8611, region: 'Karakoram · Pakistan',
+    lat: 35.8825, lon: 76.5133,
     risk: 'EXTREME', riskLevel: 4, color: '#dc2626',
     skyTop: '#ffe3de', skyBot: '#f8fafc',
     body: '0,200 70,200 100,188 122,170 140,148 154,122 164,95 171,68 176,44 179,24 181,10 183,24 186,48 190,75 197,108 210,138 228,164 255,184 295,197 400,200',
@@ -945,6 +974,7 @@ const MTN = [
   },
   {
     id: 'aconcagua', name: 'Aconcagua', elevationM: 6961, region: 'Andes · Argentina',
+    lat: -32.6532, lon: -70.0109,
     risk: 'MEDIUM', riskLevel: 2, color: '#d97706',
     skyTop: '#fdedd3', skyBot: '#f8fafc',
     body: '0,200 48,200 80,192 112,178 140,160 160,138 176,114 188,90 196,68 201,50 204,36 206,26 208,36 210,50 212,38 214,28 216,40 218,52 221,62 226,76 234,92 246,114 262,140 285,165 318,185 360,198 400,200',
@@ -955,6 +985,7 @@ const MTN = [
   },
   {
     id: 'denali', name: 'Denali', elevationM: 6190, region: 'Alaska Range · USA',
+    lat: 63.0692, lon: -151.0070,
     risk: 'MEDIUM', riskLevel: 2, color: '#0284c7',
     skyTop: '#dceffb', skyBot: '#f8fafc',
     body: '0,200 65,200 95,188 120,172 142,150 158,126 170,100 178,74 184,50 188,30 190,16 192,6 194,18 198,38 202,56 206,70 208,78 210,64 214,50 219,35 224,22 228,14 232,26 238,44 244,64 254,88 268,116 286,146 312,172 345,190 386,200 400,200',
@@ -965,6 +996,7 @@ const MTN = [
   },
   {
     id: 'kilimanjaro', name: 'Kilimanjaro', elevationM: 5895, region: 'Eastern Africa · Tanzania',
+    lat: -3.0674, lon: 37.3556,
     risk: 'LOW', riskLevel: 1, color: '#059669',
     skyTop: '#ddf3e7', skyBot: '#f8fafc',
     body: '0,200 38,200 75,198 115,192 148,180 165,165 170,148 162,130 156,112 160,96 165,82 170,70 165,82 156,112 162,130 170,148 192,128 215,105 235,82 250,60 260,42 268,26 273,14 277,26 282,48 290,72 304,100 322,130 345,158 372,182 400,200',
@@ -975,6 +1007,7 @@ const MTN = [
   },
   {
     id: 'montblanc', name: 'Mont Blanc', elevationM: 4808, region: 'Alps · France-Italy',
+    lat: 45.8326, lon: 6.8652,
     risk: 'LOW', riskLevel: 1, color: '#7c3aed',
     skyTop: '#ece5fc', skyBot: '#f8fafc',
     body: '0,200 48,200 82,192 115,180 142,165 162,147 178,126 188,104 195,82 200,62 203,46 205,34 207,46 210,62 212,48 214,38 216,50 218,62 220,50 222,40 225,54 228,65 232,52 236,65 242,80 252,64 256,80 264,96 276,118 292,144 315,168 344,188 378,200 400,200',
@@ -1062,15 +1095,23 @@ function clouds(id) {
 // True bracket probabilities under the peak distribution (exponential tail).
 // The crowd bets roughly in line with these, with noise — so implied odds hover
 // near fair value, exactly as a liquid prediction market should.
+// Peak is a mixture: BREAKTHROUGH_CHANCE of the time it draws from the mountain's full baseline
+// scale regardless of weather (a team pushing through anyway), otherwise from that scale throttled
+// by live conditions. bracketProb() below computes this mixture's exact CDF so the displayed odds
+// match what rollPeak() actually samples from — bad weather never rules out a lucky high peak, it
+// just makes the low brackets dominate the probability mass instead.
 function bracketProb(m, b) {
-  const s = RISK_SKEW[m.riskLevel] * 0.55;
-  const pa = Math.exp(-(b.min - 1) / s);
-  const pb = b.max ? Math.exp(-(b.max - 1) / s) : 0;
-  return Math.max(pa - pb, 0.005);
+  const base = RISK_SKEW[m.riskLevel] * 0.55;
+  const throttled = base * weatherThrottle(m);
+  const pThrottled = expCdf(b.max, throttled) - expCdf(b.min, throttled);
+  const pBase = expCdf(b.max, base) - expCdf(b.min, base);
+  const prob = (1 - BREAKTHROUGH_CHANCE) * pThrottled + BREAKTHROUGH_CHANCE * pBase;
+  return Math.max(prob, 0.005);
 }
 
 function rollPeak(m) {
-  const s = RISK_SKEW[m.riskLevel] * 0.55;
+  const base = RISK_SKEW[m.riskLevel] * 0.55;
+  const s = Math.random() < BREAKTHROUGH_CHANCE ? base : base * weatherThrottle(m);
   const r = Math.random();
   const peak = 1 + (-Math.log(1 - r)) * s;
   return Math.min(Math.max(peak, 1.02), 480);
@@ -1371,11 +1412,13 @@ function buildCard(m) {
           <div class="mcard-name">${m.name}</div>
           <div class="mcard-elev">${m.elevation} · ${m.region}</div>
         </div>
-        <div class="risk-tag" title="${riskTip(m.risk)}" style="background:${clr}0f;border-color:${clr}35;color:${clr}">${m.risk}</div>
+        <div class="risk-tag" title="${riskTip(m.risk)}" style="background:${RISK_COLOR[m.risk]}0f;border-color:${RISK_COLOR[m.risk]}35;color:${RISK_COLOR[m.risk]}">${m.risk}</div>
       </div>
 
+      ${weatherStripHTML(m)}
+
       <div class="bk-label-row">
-        <div class="bk-title" title="Where will this round's peak land? Bar = share of the pool backing each bracket (the crowd's implied probability). Right column = payout multiple if that bracket wins.">PEAK BRACKET MARKET · IMPLIED ODDS</div>
+        <div class="bk-title" title="Where will this round's peak land? Bar = share of the pool backing each bracket (the crowd's implied probability). Right column = payout multiple if that bracket wins. Live wind + temperature at this summit scale the odds — see the conditions strip above.">PEAK BRACKET MARKET · IMPLIED ODDS</div>
         ${lockState}
       </div>
       <div class="bk-board">${bkRows}</div>
@@ -1996,6 +2039,101 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
     }
   });
 });
+
+/* ═══════════════════════════════════════════
+   LIVE WEATHER — biases the climb itself
+   Each mountain's live wind speed + temperature (from Open-Meteo, at its real
+   summit coordinates) scales that mountain's peak-generating distribution —
+   see weatherScale(), used by bracketProb() and rollPeak() above. Favourable
+   conditions shift the average climb higher; poor conditions shift it lower.
+   This is one market, not two: the round itself, its odds, and its outcome
+   are all the same mechanism, just grounded in a real, live, checkable input
+   instead of being pure RNG. The round's exact outcome is still a random
+   draw, though — weather nudges the distribution, it doesn't dictate a
+   single "correct" answer the way a raw fetched fact would.
+═══════════════════════════════════════════ */
+const OPEN_METEO_URL   = 'https://api.open-meteo.com/v1/forecast';
+const WIND_CALM_KMH    = 20;   // at/below this, wind isn't a limiting factor
+const WIND_STOP_KMH    = 60;   // at/above this, wind alone is treated as summit-stopping
+const TEMP_MILD_C      = -25;  // at/above this, cold isn't a limiting factor
+const TEMP_STOP_C      = -45;  // at/below this, cold alone is treated as summit-stopping
+const WEATHER_THROTTLE_MIN = 0.35; // worst-conditions climb scale, as a fraction of the mountain's base variance
+const WEATHER_THROTTLE_MAX = 1.0;  // best-conditions climb scale — no throttle at all
+// BREAKTHROUGH_CHANCE lives up in MARKET CONSTANTS — bracketProb()/rollPeak() need it during page-init,
+// before this module has run.
+const WEATHER_REFRESH_MS = 5 * 60 * 1000; // real minutes between live re-fetches
+const LAPSE_RATE_C_PER_1000M = 6.5; // international standard atmosphere lapse rate — colder higher up
+const WAYPOINT_ABBR = { 'BASE CAMP': 'BASE', 'CAMP II': 'C.II', 'HIGH CAMP': 'HIGH', 'SUMMIT': 'TOP' };
+
+const windFactor = kmh => Math.min(1, Math.max(0, 1 - (kmh - WIND_CALM_KMH) / (WIND_STOP_KMH - WIND_CALM_KMH)));
+const tempFactor  = c   => Math.min(1, Math.max(0, 1 - (TEMP_MILD_C - c) / (TEMP_MILD_C - TEMP_STOP_C)));
+const fmtDeg  = v => Math.round(v) + '°';
+const fmtWind = v => Math.round(v) + ' km/h';
+// Estimate temperature at any altitude on the mountain from the one live summit reading,
+// via the standard lapse rate — not a second live measurement, just disclosed physics. Capped,
+// since a linear lapse rate stops being a meaningful model many kilometres below the summit
+// (real base-camp conditions are shaped far more by local terrain and season than by altitude alone).
+const tempAtElevation = (m, targetM) => Math.min(m.weather.temp + LAPSE_RATE_C_PER_1000M * (m.elevationM - targetM) / 1000, 15);
+
+// How much this mountain's climb distribution is throttled by its live conditions right now.
+// No reading yet (still loading, or fetch failed) → no throttle, so the game works immediately.
+function weatherThrottle(m) {
+  if (!m.weather || !m.weather.loaded) return 1;
+  const factor = windFactor(m.weather.wind) * tempFactor(m.weather.temp);
+  return WEATHER_THROTTLE_MIN + (WEATHER_THROTTLE_MAX - WEATHER_THROTTLE_MIN) * factor;
+}
+// CDF of a peak = 1 + Exponential(scale). Used to turn the weather/breakthrough mixture into
+// closed-form bracket probabilities, so the displayed odds match what rollPeak() actually draws from.
+// (A plain function declaration, not a const — bracketProb() calls this from the page-init sequence,
+// before this line has textually run, and only a hoisted declaration survives that.)
+function expCdf(x, scale) { return x === null ? 1 : 1 - Math.exp(-(x - 1) / scale); }
+function weatherVerdict(m) {
+  if (!m.weather || !m.weather.loaded) return { label: 'PENDING', color: 'var(--dim)' };
+  const factor = windFactor(m.weather.wind) * tempFactor(m.weather.temp);
+  if (factor >= 0.75) return { label: 'FAVOURABLE', color: 'var(--green)' };
+  if (factor >= 0.35) return { label: 'MARGINAL',   color: 'var(--amber)' };
+  return { label: 'DANGEROUS', color: 'var(--red)' };
+}
+
+function weatherStripHTML(m) {
+  if (!m.weather || !m.weather.loaded) {
+    return `<div class="weather-strip pending" id="wx-${m.id}"><span class="live-dot"></span>Fetching live conditions…</div>`;
+  }
+  const v = weatherVerdict(m);
+  const gradient = m.brackets.map(b => {
+    const waypointM = altitudeFor(m, b.min);
+    return `<span><b>${WAYPOINT_ABBR[b.name] || b.name}</b> ${fmtDeg(tempAtElevation(m, waypointM))}</span>`;
+  }).join('');
+  return `<div class="weather-strip" id="wx-${m.id}">
+    <div class="weather-strip-top">
+      <span class="live-dot"></span>
+      <span class="weather-reading">AT SUMMIT: ${fmtDeg(m.weather.temp)}C · ${fmtWind(m.weather.wind)} wind</span>
+      <span class="weather-verdict" style="color:${v.color}" title="Live conditions at the summit scale this mountain's climb odds — favourable weather raises the average peak, poor weather lowers it.">${v.label}</span>
+    </div>
+    <div class="weather-gradient" title="Estimated from the one live summit reading using the standard ~6.5°C/1000m atmospheric lapse rate, capped at 15°C since that model stops being meaningful many km below the summit — not separately measured at each camp. Wind is shown at the summit only, usually the binding constraint for reaching the top.">${gradient}</div>
+  </div>`;
+}
+function refreshWeatherStrip(m) {
+  const el = document.getElementById('wx-' + m.id);
+  if (el) el.outerHTML = weatherStripHTML(m);
+}
+
+async function fetchWeather(m) {
+  try {
+    const url = `${OPEN_METEO_URL}?latitude=${m.lat}&longitude=${m.lon}&elevation=${m.elevationM}&current=temperature_2m,wind_speed_10m&timezone=UTC`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    m.weather = { temp: data.current.temperature_2m, wind: data.current.wind_speed_10m, loaded: true };
+  } catch (e) {
+    // Leave any previous reading in place; if there's never been one, the game just runs at neutral scale.
+    if (!m.weather) m.weather = { loaded: false };
+  }
+  refreshWeatherStrip(m);
+}
+
+setInterval(() => { MTN.forEach(m => fetchWeather(m)); }, WEATHER_REFRESH_MS);
+MTN.forEach(m => fetchWeather(m));
 </script>
 </body>
 </html>
