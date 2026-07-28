@@ -133,6 +133,13 @@ body {
   color: var(--muted); transition: all 0.2s;
 }
 #theme-toggle:hover { color: var(--text); transform: translateY(-1px); }
+#avatar-badge {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; font-size: 15px; text-decoration: none; transition: all 0.2s;
+}
+#avatar-badge:hover { border-color: var(--input-border-focus); transform: translateY(-1px); }
 
 #balance-box {
   display: flex; align-items: center; gap: 8px;
@@ -386,6 +393,7 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
     </div>
   </div>
   <div id="header-right">
+    <a id="avatar-badge" href="loadout.html" title="Expedition loadout">🧗</a>
     <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">☀</button>
     <div id="balance-box">
       <span id="balance-label">BALANCE</span>
@@ -468,6 +476,7 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
 <!-- Toast -->
 <div id="toast"></div>
 
+<script src="account.js"></script>
 <script>
 /* ──────────────────────────────────────────────
    MOUNTAINEER · Core Game Engine
@@ -481,7 +490,7 @@ const PLAYERS = [
 ];
 
 // ── State ──
-let balance = 1000;
+// Balance now lives on Account (account.js) and is shared with index.html + loadout.html.
 let stake = 10;
 let autoCO = null;
 let phase = 'waiting';
@@ -516,8 +525,9 @@ resize();
 // ── Utilities ──
 function genCrash() {
   const r = Math.random();
-  if (r < 0.04) return 1.00;
-  return Math.max(1.01, Math.round(0.99 / (1 - Math.random() * 0.96) * 100) / 100);
+  if (r < 0.04) return 1.00; // instant bust — unaffected by loadout, always a real chance
+  const raw = Math.max(1.01, 0.99 / (1 - Math.random() * 0.96));
+  return Math.round(raw * Account.skewMultiplier() * 100) / 100; // active climber + ice axe bonus
 }
 // Peaks available from the index.html markets grid — linked via ?mountain=<id>
 const MOUNTAINS = {
@@ -561,7 +571,8 @@ function renderHistory() {
 
 // ── Balance ──
 function updateBalance() {
-  document.getElementById('balance-amount').textContent = fmtT(balance);
+  document.getElementById('balance-amount').textContent = fmtT(Account.data.balance);
+  Account.save();
 }
 
 // ── Canvas draw ──
@@ -733,7 +744,7 @@ function updateBtn() {
     disable(true);
   } else if (phase === 'waiting' && !hasBet) {
     const s = parseFloat(si.value) || 0;
-    const ok = s > 0 && s <= balance;
+    const ok = s > 0 && s <= Account.data.balance;
     btn.className = ok ? 'place' : 'inactive';
     btn.textContent = 'PLACE FORECAST';
     info.textContent = '';
@@ -752,7 +763,8 @@ function doCashout(atM) {
   hasCashedOut = true;
   cashMult = atM;
   const win = rnd(stake * atM);
-  balance = rnd(balance + win);
+  Account.data.balance = rnd(Account.data.balance + win);
+  Account.recordBet(stake, win);
   updateBalance();
   showToast('+' + fmtT(win) + ' TKN at ' + fmtM(atM), 'win');
 }
@@ -846,6 +858,7 @@ function startClimb(cp) {
 
       if (hasBet && !hasCashedOut) {
         showToast('Bust — market peaked at ' + fmtM(cp), 'loss');
+        Account.recordBet(stake, 0);
       }
 
       timeoutId = setTimeout(startWaiting, 4500);
@@ -906,10 +919,10 @@ function handleAction() {
   if (phase === 'waiting' && !hasBet) {
     const s = parseFloat(document.getElementById('stake-input').value) || 0;
     const a = parseFloat(document.getElementById('auto-input').value) || null;
-    if (s <= 0 || s > balance) return;
+    if (s <= 0 || s > Account.data.balance) return;
     stake = s;
     autoCO = (a && a > 1.01) ? a : null;
-    balance = rnd(balance - s);
+    Account.data.balance = rnd(Account.data.balance - s);
     hasBet = true;
     updateBalance();
     updateBtn();
@@ -918,12 +931,12 @@ function handleAction() {
 
 function setStake(v) {
   if (hasBet || phase !== 'waiting') return;
-  document.getElementById('stake-input').value = Math.min(v, Math.floor(balance));
+  document.getElementById('stake-input').value = Math.min(v, Math.floor(Account.data.balance));
   updateBtn();
 }
 function setStakeMax() {
   if (hasBet || phase !== 'waiting') return;
-  document.getElementById('stake-input').value = Math.floor(balance);
+  document.getElementById('stake-input').value = Math.floor(Account.data.balance);
   updateBtn();
 }
 
@@ -952,6 +965,7 @@ applyTheme(localStorage.getItem('mountaineer-theme') ||
 document.title = 'Mountaineer — ' + MOUNTAIN_NAME + ' · Predictive Markets';
 document.getElementById('peak-name').textContent = MOUNTAIN_NAME.toUpperCase();
 document.getElementById('peak-elev').textContent = 'SUMMIT · ' + ELEVATION_M.toLocaleString() + ' M';
+document.getElementById('avatar-badge').textContent = Account.avatar().icon;
 renderHistory();
 updateBalance();
 startWaiting();
