@@ -12,6 +12,7 @@
 :root {
   --bg: #eef3f9;
   --bg2: #f6f9fd;
+  --bg-grad-top: #e8eff8;
   --surface: #ffffff;
   --surface2: #fbfdff;
   --border: rgba(18,38,68,0.10);
@@ -25,21 +26,53 @@
   --indigo: #6366f1;
   --shadow: 0 1px 2px rgba(23,37,60,0.05), 0 6px 20px rgba(23,37,60,0.06);
   --shadow-lg: 0 4px 8px rgba(23,37,60,0.06), 0 16px 44px rgba(23,37,60,0.12);
+  --dot: rgba(23,37,60,0.035);
+  --scrollbar-thumb: rgba(23,37,60,0.18);
+  --glass: rgba(255,255,255,0.85);
+  --glass-soft: rgba(255,255,255,0.6);
+  --tint: rgba(18,38,68,0.07);
+  --hover-border: rgba(18,38,68,0.25);
+}
+
+:root[data-theme="dark"] {
+  --bg: #0b1220;
+  --bg2: #101a2e;
+  --bg-grad-top: #0e1729;
+  --surface: #131d33;
+  --surface2: #17223b;
+  --border: rgba(255,255,255,0.09);
+  --border2: rgba(255,255,255,0.055);
+  --text: #e7ecf5;
+  --muted: #8b98b3;
+  --dim: #4c5876;
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #f87171;
+  --indigo: #818cf8;
+  --shadow: 0 1px 2px rgba(0,0,0,0.25), 0 6px 20px rgba(0,0,0,0.35);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.3), 0 16px 44px rgba(0,0,0,0.5);
+  --dot: rgba(255,255,255,0.045);
+  --scrollbar-thumb: rgba(255,255,255,0.14);
+  --glass: rgba(11,18,32,0.72);
+  --glass-soft: rgba(11,18,32,0.5);
+  --tint: rgba(255,255,255,0.08);
+  --hover-border: rgba(255,255,255,0.25);
 }
 
 html { scroll-behavior: smooth; }
 body {
   font-family: 'JetBrains Mono', monospace;
-  background: linear-gradient(180deg, #e8eff8 0%, var(--bg) 30%, var(--bg) 100%);
+  background: linear-gradient(180deg, var(--bg-grad-top) 0%, var(--bg) 30%, var(--bg) 100%);
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background 0.25s, color 0.25s;
 }
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: radial-gradient(rgba(23,37,60,0.035) 1px, transparent 1px);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1px);
   background-size: 30px 30px;
   pointer-events: none;
   z-index: 0;
@@ -48,7 +81,7 @@ body::before {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(23,37,60,0.18); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
@@ -58,8 +91,8 @@ body::before {
 header {
   position: sticky; top: 0; z-index: 200;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 32px; height: 58px;
-  background: rgba(255,255,255,0.85);
+  padding: 8px 32px; min-height: 58px;
+  background: var(--glass);
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(16px);
   flex-wrap: wrap;
@@ -79,7 +112,7 @@ header {
   color: var(--muted); padding: 6px 12px; border-radius: 6px;
   transition: all 0.15s;
 }
-.main-nav a:hover { color: var(--text); background: rgba(23,37,60,0.05); }
+.main-nav a:hover { color: var(--text); background: var(--tint); }
 
 .header-nav { display: flex; align-items: center; gap: 16px; }
 .nav-stat { display: flex; align-items: center; gap: 6px; font-size: 11px; }
@@ -108,9 +141,24 @@ header {
   box-shadow: var(--shadow);
 }
 
+.theme-toggle {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; font-size: 14px;
+  color: var(--muted); transition: all 0.2s;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--hover-border); transform: translateY(-1px); }
+
 @media (max-width: 1080px) { .main-nav { display: none; } }
 @media (max-width: 860px) { .hide-sm { display: none !important; } }
 @media (max-width: 620px) { .hide-xs { display: none !important; } }
+@media (max-width: 480px) {
+  header { gap: 6px; }
+  .header-nav { gap: 8px; }
+  .theme-toggle { width: 26px; height: 26px; font-size: 12px; }
+  .wallet-btn { padding: 7px 11px; font-size: 9.5px; }
+}
 
 /* ── HERO ── */
 .hero-wrap {
@@ -168,7 +216,7 @@ header {
   display: flex; gap: 0; flex-wrap: wrap;
   border-top: 1px solid var(--border2);
   border-bottom: 1px solid var(--border2);
-  background: rgba(255,255,255,0.6);
+  background: var(--glass-soft);
 }
 .gbar-stat {
   flex: 1 1 20%; padding: 16px 24px;
@@ -209,8 +257,8 @@ header {
   border-radius: 7px; color: var(--muted); cursor: pointer; transition: all 0.15s;
   letter-spacing: 0.06em;
 }
-.filter-btn:hover { color: var(--text); border-color: rgba(18,38,68,0.22); }
-.filter-btn.active { background: var(--text); border-color: var(--text); color: #fff; }
+.filter-btn:hover { color: var(--text); border-color: var(--hover-border); }
+.filter-btn.active { background: var(--text); border-color: var(--text); color: var(--bg); }
 
 /* ── MOUNTAIN GRID ── */
 .mountain-grid {
@@ -255,16 +303,46 @@ header {
 .badge-pip { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 .badge-pip.pulse { animation: blink 1.4s ease-in-out infinite; }
 
+.live-mult-wrap {
+  position: absolute; top: 10px; left: 12px; z-index: 5;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+}
 .live-mult {
-  position: absolute; top: 10px; left: 12px;
   font-family: 'Syne', sans-serif; font-weight: 800;
-  font-size: 26px; line-height: 1; z-index: 5;
+  font-size: 25px; line-height: 1;
   letter-spacing: -0.02em;
   text-shadow: 0 1px 0 rgba(255,255,255,0.8), 0 2px 10px rgba(255,255,255,0.6);
+  transition: text-shadow 0.4s;
+  font-variant-numeric: tabular-nums;
+}
+.live-mult.zone-1 { text-shadow: 0 0 10px currentColor, 0 1px 0 rgba(255,255,255,0.85); }
+.live-mult.zone-2 { text-shadow: 0 0 16px currentColor, 0 1px 0 rgba(255,255,255,0.85); }
+.live-mult.zone-3 {
+  text-shadow: 0 0 22px currentColor, 0 1px 0 rgba(255,255,255,0.85);
+  animation: hotGlow 0.9s ease-in-out infinite;
+}
+@keyframes hotGlow {
+  0%,100% { filter: brightness(1); }
+  50%     { filter: brightness(1.28); }
+}
+.live-mult.milestone { animation: milestoneFlash 0.55s ease; }
+@keyframes milestoneFlash {
+  0%   { transform: scale(1.35); filter: brightness(1.6); }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); filter: brightness(1); }
 }
 .mult-sub {
-  position: absolute; top: 38px; left: 13px; z-index: 5;
   font-size: 8px; letter-spacing: 0.1em; color: var(--muted);
+}
+.mult-badge {
+  font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  font-size: 11px; letter-spacing: 0.02em;
+  padding: 2px 9px; border-radius: 20px; border: 1px solid;
+  animation: badgePulse 1.5s ease-in-out infinite;
+}
+@keyframes badgePulse {
+  0%,100% { transform: scale(1); }
+  50%     { transform: scale(1.07); }
 }
 
 /* Card body */
@@ -305,7 +383,7 @@ header {
 .bk-row.your-pick { box-shadow: inset 2.5px 0 0 var(--text); }
 .bk-name { font-weight: 700; color: var(--text); font-size: 9px; letter-spacing: 0.03em; }
 .bk-range { font-size: 8px; color: var(--dim); display: block; }
-.bk-barwrap { height: 5px; border-radius: 3px; background: rgba(18,38,68,0.07); overflow: hidden; }
+.bk-barwrap { height: 5px; border-radius: 3px; background: var(--tint); overflow: hidden; }
 .bk-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
 .bk-prob { text-align: right; font-weight: 700; color: var(--muted); font-size: 9.5px; }
 .bk-mult { text-align: right; font-weight: 700; font-size: 9.5px; }
@@ -342,7 +420,7 @@ header {
 .sb-cancel {
   font-family: inherit; font-size: 9px; font-weight: 700; letter-spacing: 0.06em;
   padding: 8px 11px; border-radius: 7px; border: none; cursor: pointer; flex-shrink: 0;
-  background: rgba(23,37,60,0.07); color: var(--muted); transition: filter 0.15s;
+  background: var(--tint); color: var(--muted); transition: filter 0.15s;
 }
 .sb-cancel:hover { filter: brightness(0.94); }
 
@@ -356,6 +434,16 @@ header {
 }
 .enter-btn:hover { filter: brightness(1.04); transform: translateY(-1px); }
 .enter-btn:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px; }
+
+.ascent-link {
+  display: block; width: 100%; box-sizing: border-box;
+  margin-top: 8px; padding: 9px 0; text-align: center;
+  font-family: inherit; font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em;
+  border-radius: 9px; border: 1px solid var(--border);
+  color: var(--muted); text-decoration: none; cursor: pointer;
+  transition: all 0.18s;
+}
+.ascent-link:hover { color: var(--text); border-color: var(--hover-border); transform: translateY(-1px); }
 
 /* ── PORTFOLIO ── */
 .portfolio-section { padding: 0 32px 46px; }
@@ -506,7 +594,7 @@ footer {
   transition: border-color 0.15s, background 0.15s;
   width: 100%;
 }
-.bk-option:hover { border-color: rgba(18,38,68,0.28); }
+.bk-option:hover { border-color: var(--hover-border); }
 .bk-option.selected { border-color: var(--text); background: var(--bg2); box-shadow: inset 3px 0 0 var(--text); }
 .bko-name { font-weight: 700; color: var(--text); font-size: 10.5px; }
 .bko-range { font-size: 8.5px; color: var(--dim); display: block; margin-top: 2px; }
@@ -526,7 +614,7 @@ footer {
   background: transparent; color: var(--muted); font-family: inherit; font-size: 10.5px; font-weight: 700;
   letter-spacing: 0.06em; cursor: pointer; margin-top: 4px;
 }
-.modal-cancel:hover { color: var(--text); border-color: rgba(18,38,68,0.25); }
+.modal-cancel:hover { color: var(--text); border-color: var(--hover-border); }
 
 .modal-form { display: flex; flex-direction: column; gap: 6px; }
 .mf-label { font-size: 9px; color: var(--dim); letter-spacing: 0.1em; margin-top: 8px; }
@@ -541,7 +629,7 @@ footer {
   font-family: inherit; font-size: 10px; padding: 6px 12px; border-radius: 7px;
   background: var(--surface); border: 1px solid var(--border); color: var(--muted); cursor: pointer;
 }
-.chip-btn:hover { border-color: rgba(18,38,68,0.25); color: var(--text); }
+.chip-btn:hover { border-color: var(--hover-border); color: var(--text); }
 .mf-preview { font-size: 10.5px; color: var(--muted); margin: 6px 0 4px; line-height: 1.6; }
 .modal-stake-btn {
   width: 100%; margin-top: 10px; padding: 13px 0; border-radius: 9px;
@@ -602,6 +690,7 @@ footer {
       <span class="nav-value" style="color:var(--green)" id="hdr-vol">14.2M</span>
     </div>
     <div class="nav-divider"></div>
+    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
     <button class="wallet-btn" id="walletBtn">CONNECT WALLET</button>
   </div>
 </header>
@@ -779,11 +868,28 @@ footer {
 
 <script>
 /* ═══════════════════════════════════════════
+   THEME
+═══════════════════════════════════════════ */
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('themeToggle');
+  if (btn) btn.textContent = theme === 'dark' ? '☀' : '◐';
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('mountaineer-theme', next);
+  applyTheme(next);
+}
+applyTheme(localStorage.getItem('mountaineer-theme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+/* ═══════════════════════════════════════════
    MARKET CONSTANTS
 ═══════════════════════════════════════════ */
 const RAKE = 0.05;
 const OPEN_MS = 12000;      // betting window
 const RESOLVED_MS = 3000;   // resolution display
+const BASE_CAMP_FRACTION = 0.15; // every ascent starts this far up the mountain, not at the summit
 
 /* Bracket ladders per variance tier. Named as climbing zones. */
 const BRACKET_SETS = {
@@ -818,17 +924,7 @@ const RISK_SKEW = { 1: 1.6, 2: 2.4, 3: 3.4, 4: 4.8 };
 ═══════════════════════════════════════════ */
 const MTN = [
   {
-    id: 'k2', name: 'K2', elevation: '8,611 m', region: 'Karakoram · Pakistan',
-    risk: 'EXTREME', riskLevel: 4, color: '#dc2626',
-    skyTop: '#ffe3de', skyBot: '#f8fafc',
-    body: '0,200 70,200 100,188 122,170 140,148 154,122 164,95 171,68 176,44 179,24 181,10 183,24 186,48 190,75 197,108 210,138 228,164 255,184 295,197 400,200',
-    snow: '179,24 176,40 181,10 186,40 183,24',
-    startPhase: 'climbing', startMult: 4.21,
-    players: 847, avgPeak: 2.84,
-    history: [1.00, 48.4, 1.02, 112.5, 1.08, 8.72, 1.00, 32.1]
-  },
-  {
-    id: 'everest', name: 'Everest', elevation: '8,849 m', region: 'Himalayas · Nepal-Tibet',
+    id: 'everest', name: 'Everest', elevationM: 8849, region: 'Himalayas · Nepal-Tibet',
     risk: 'HIGH', riskLevel: 3, color: '#6366f1',
     skyTop: '#e4e7fd', skyBot: '#f8fafc',
     body: '0,200 58,200 88,188 112,170 130,148 143,124 152,100 158,76 163,54 166,34 168,18 170,8 172,20 175,40 178,60 174,72 170,58 176,44 183,28 190,44 195,60 200,44 204,30 208,44 212,62 220,82 234,110 254,140 278,168 312,188 360,198 400,200',
@@ -838,7 +934,17 @@ const MTN = [
     history: [2.34, 1.12, 8.92, 1.45, 5.67, 2.34, 1.03, 14.8]
   },
   {
-    id: 'aconcagua', name: 'Aconcagua', elevation: '6,961 m', region: 'Andes · Argentina',
+    id: 'k2', name: 'K2', elevationM: 8611, region: 'Karakoram · Pakistan',
+    risk: 'EXTREME', riskLevel: 4, color: '#dc2626',
+    skyTop: '#ffe3de', skyBot: '#f8fafc',
+    body: '0,200 70,200 100,188 122,170 140,148 154,122 164,95 171,68 176,44 179,24 181,10 183,24 186,48 190,75 197,108 210,138 228,164 255,184 295,197 400,200',
+    snow: '179,24 176,40 181,10 186,40 183,24',
+    startPhase: 'climbing', startMult: 4.21,
+    players: 847, avgPeak: 2.84,
+    history: [1.00, 48.4, 1.02, 112.5, 1.08, 8.72, 1.00, 32.1]
+  },
+  {
+    id: 'aconcagua', name: 'Aconcagua', elevationM: 6961, region: 'Andes · Argentina',
     risk: 'MEDIUM', riskLevel: 2, color: '#d97706',
     skyTop: '#fdedd3', skyBot: '#f8fafc',
     body: '0,200 48,200 80,192 112,178 140,160 160,138 176,114 188,90 196,68 201,50 204,36 206,26 208,36 210,50 212,38 214,28 216,40 218,52 221,62 226,76 234,92 246,114 262,140 285,165 318,185 360,198 400,200',
@@ -848,7 +954,7 @@ const MTN = [
     history: [2.1, 3.4, 1.8, 4.2, 2.9, 1.6, 3.8, 2.5]
   },
   {
-    id: 'denali', name: 'Denali', elevation: '6,190 m', region: 'Alaska Range · USA',
+    id: 'denali', name: 'Denali', elevationM: 6190, region: 'Alaska Range · USA',
     risk: 'MEDIUM', riskLevel: 2, color: '#0284c7',
     skyTop: '#dceffb', skyBot: '#f8fafc',
     body: '0,200 65,200 95,188 120,172 142,150 158,126 170,100 178,74 184,50 188,30 190,16 192,6 194,18 198,38 202,56 206,70 208,78 210,64 214,50 219,35 224,22 228,14 232,26 238,44 244,64 254,88 268,116 286,146 312,172 345,190 386,200 400,200',
@@ -858,7 +964,7 @@ const MTN = [
     history: [2.2, 1.8, 3.1, 2.4, 1.9, 2.8, 1.7, 3.4]
   },
   {
-    id: 'kilimanjaro', name: 'Kilimanjaro', elevation: '5,895 m', region: 'Eastern Africa · Tanzania',
+    id: 'kilimanjaro', name: 'Kilimanjaro', elevationM: 5895, region: 'Eastern Africa · Tanzania',
     risk: 'LOW', riskLevel: 1, color: '#059669',
     skyTop: '#ddf3e7', skyBot: '#f8fafc',
     body: '0,200 38,200 75,198 115,192 148,180 165,165 170,148 162,130 156,112 160,96 165,82 170,70 165,82 156,112 162,130 170,148 192,128 215,105 235,82 250,60 260,42 268,26 273,14 277,26 282,48 290,72 304,100 322,130 345,158 372,182 400,200',
@@ -868,7 +974,7 @@ const MTN = [
     history: [1.8, 2.2, 1.5, 2.8, 1.9, 2.4, 1.7, 2.1]
   },
   {
-    id: 'montblanc', name: 'Mont Blanc', elevation: '4,808 m', region: 'Alps · France-Italy',
+    id: 'montblanc', name: 'Mont Blanc', elevationM: 4808, region: 'Alps · France-Italy',
     risk: 'LOW', riskLevel: 1, color: '#7c3aed',
     skyTop: '#ece5fc', skyBot: '#f8fafc',
     body: '0,200 48,200 82,192 115,180 142,165 162,147 178,126 188,104 195,82 200,62 203,46 205,34 207,46 210,62 212,48 214,38 216,50 218,62 220,50 222,40 225,54 228,65 232,52 236,65 242,80 252,64 256,80 264,96 276,118 292,144 315,168 344,188 378,200 400,200',
@@ -896,6 +1002,14 @@ const USERS = [
    HELPERS
 ═══════════════════════════════════════════ */
 const fmtM    = n => n.toFixed(2) + '×';
+// Altitude climbs from base camp toward the summit as the multiplier climbs toward the
+// SUMMIT bracket's threshold — and is hard-capped there, since you can't climb past the top.
+function altitudeFor(m, mult) {
+  const top = m.brackets[m.brackets.length - 1].min;
+  const frac = Math.min(1, Math.max(0, (mult - 1) / (top - 1)));
+  return Math.round(m.baseCampM + (m.elevationM - m.baseCampM) * frac);
+}
+const fmtAlt  = (m, mult) => altitudeFor(m, mult).toLocaleString() + ' m';
 const fmtPool = n => n >= 1e6 ? (n/1e6).toFixed(2)+'M' : n >= 1e3 ? (n/1e3).toFixed(1)+'K' : Math.round(n);
 const rnd     = n => Math.round(n * 100) / 100;
 const randEl  = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -904,6 +1018,11 @@ const nowTs   = () => {
   return `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}:${d.getSeconds().toString().padStart(2,'0')}`;
 };
 const bkRangeLabel = b => b.max ? `${b.min.toFixed(1)}× – ${b.max.toFixed(1)}×` : `${b.min.toFixed(1)}× +`;
+// Same bracket, expressed as the altitude window it corresponds to — easier to read at a glance than the raw multiplier.
+const bkAltRange = (m, b) => {
+  const lo = altitudeFor(m, b.min).toLocaleString();
+  return b.max ? `${lo}–${altitudeFor(m, b.max).toLocaleString()}m` : `${lo}m`;
+};
 
 function riskTip(risk) {
   return {
@@ -987,6 +1106,8 @@ function favouriteIdx(m) {
 
 /* ── Seed initial market state ── */
 MTN.forEach(m => {
+  m.elevation = m.elevationM.toLocaleString() + ' m';
+  m.baseCampM = Math.round(m.elevationM * BASE_CAMP_FRACTION);
   m.brackets = BRACKET_SETS[m.riskLevel].map(b => ({ ...b, pool: 0 }));
   seedPools(m);
   m.pending = null;      // your bet in the current open window
@@ -1127,13 +1248,24 @@ function buildCard(m) {
     badge = `<div class="round-badge resolved">RESOLVED · ${m.brackets[m.lastWinIdx].name} WON</div>`;
   }
 
+  // How deep into the bracket ladder the ascent currently sits — drives the heat-glow intensity
+  const currentIdx = isClimb ? bracketIdxFor(m, m.mult) : (isResolved ? m.lastWinIdx : null);
+  const zoneClassFor = idx => idx === null ? '' : ` zone-${Math.min(3, idx)}`;
+
+  const summitIdx = m.brackets.length - 1;
   let multEl = '';
   if (isClimb) {
-    multEl = `<div class="live-mult" style="color:${clr}" id="mult-${m.id}">${fmtM(m.mult)}</div>
-              <div class="mult-sub">CURRENT ALTITUDE</div>`;
+    multEl = `<div class="live-mult-wrap">
+      <div class="live-mult${zoneClassFor(currentIdx)}" style="color:${clr}" id="alt-${m.id}">${fmtAlt(m, m.mult)}</div>
+      <div class="mult-sub" id="sub-${m.id}">${currentIdx === summitIdx ? 'SUMMIT REACHED' : 'CURRENT ALTITUDE'}</div>
+      <div class="mult-badge" style="background:${clr}18;border-color:${clr}55;color:${clr}" id="mult-${m.id}">${fmtM(m.mult)}</div>
+    </div>`;
   } else if (isResolved) {
-    multEl = `<div class="live-mult" style="color:${clr}" id="mult-${m.id}">${fmtM(m.lastPeak)}</div>
-              <div class="mult-sub">FINAL PEAK</div>`;
+    multEl = `<div class="live-mult-wrap">
+      <div class="live-mult${zoneClassFor(currentIdx)}" style="color:${clr}" id="alt-${m.id}">${fmtAlt(m, m.lastPeak)}</div>
+      <div class="mult-sub">${m.lastWinIdx === summitIdx ? 'SUMMIT REACHED · FINAL ALTITUDE' : 'FINAL PEAK ALTITUDE'}</div>
+      <div class="mult-badge" style="background:${clr}18;border-color:${clr}55;color:${clr}" id="mult-${m.id}">${fmtM(m.lastPeak)}</div>
+    </div>`;
   }
 
   const end = traceEnd(m);
@@ -1145,7 +1277,6 @@ function buildCard(m) {
       fill="${clr}" stroke="white" stroke-width="1.4"/>` : '';
 
   // Bracket board — implied prob + payout per bracket
-  const currentIdx = isClimb ? bracketIdxFor(m, m.mult) : null;
   const bkRows = m.brackets.map((b, i) => {
     const prob = impliedProb(m, i);
     const mult = isOpen ? payoutMult(m, i) : (m.lockedMults ? m.lockedMults[i] : payoutMult(m, i));
@@ -1153,7 +1284,7 @@ function buildCard(m) {
     const zoneClass = isResolved && m.lastWinIdx === i ? ' won-zone' : (currentIdx === i ? ' current-zone' : '');
     return `
       <div class="bk-row${zoneClass}${isYours ? ' your-pick' : ''}" id="bkrow-${m.id}-${i}">
-        <div><div class="bk-name">${b.name}</div><span class="bk-range">${bkRangeLabel(b)}</span></div>
+        <div><div class="bk-name">${b.name}</div><span class="bk-range" title="${bkRangeLabel(b)} payout range">${bkAltRange(m, b)}</span></div>
         <div class="bk-barwrap"><div class="bk-bar" id="bkbar-${m.id}-${i}" style="width:${(prob*100).toFixed(1)}%;background:${clr}"></div></div>
         <div class="bk-prob" id="bkprob-${m.id}-${i}">${Math.round(prob*100)}%</div>
         <div class="bk-mult" id="bkmult-${m.id}-${i}" style="color:${clr}">${mult.toFixed(2)}×</div>
@@ -1167,7 +1298,7 @@ function buildCard(m) {
     : `<span class="bk-lockstate" style="color:var(--amber)">SETTLED</span>`;
 
   const peaks = m.history.slice(0, 8).map(v =>
-    `<span class="peak-chip" style="${peakStyle(v)}">${fmtM(v)}</span>`).join('');
+    `<span class="peak-chip" style="${peakStyle(v)}" title="${fmtM(v)} payout multiple">${fmtAlt(m, v)}</span>`).join('');
 
   // Your forecast banner
   let banner = '';
@@ -1270,6 +1401,7 @@ function buildCard(m) {
       <div class="peak-row">${peaks}</div>
 
       <button class="enter-btn" style="${btnStyle}">${btnLabel}</button>
+      <a class="ascent-link" href="mountaineer.html?mountain=${m.id}" onclick="event.stopPropagation()">▲ PLAY LIVE ASCENT</a>
     </div>
   </div>`;
 }
@@ -1464,8 +1596,8 @@ function renderModalContent(m) {
   const phaseNote = isOpen
     ? `Betting is <b style="color:var(--green)">open</b> — closes in <b id="modal-countdown">${Math.max(0, Math.ceil((m.opensEndsAt - Date.now()) / 1000))}s</b>. Odds move as the crowd stakes; your payout locks at the final odds when betting closes.`
     : m.phase === 'climbing'
-    ? `Market <b style="color:var(--indigo)">locked</b> — the ascent is live at <b style="color:${clr}" id="modal-mult">${fmtM(m.mult)}</b>. New forecasts join the next round.`
-    : `Round <b style="color:var(--amber)">resolved</b> — peaked at <b style="color:${clr}">${fmtM(m.lastPeak)}</b>, ${m.brackets[m.lastWinIdx].name} paid out. Next round opens shortly.`;
+    ? `Market <b style="color:var(--indigo)">locked</b> — the ascent is live at <b style="color:${clr}" id="modal-alt">${fmtAlt(m, m.mult)}</b> (<b style="color:${clr}" id="modal-mult">${fmtM(m.mult)}</b>). New forecasts join the next round.`
+    : `Round <b style="color:var(--amber)">resolved</b> — peaked at <b style="color:${clr}">${fmtAlt(m, m.lastPeak)}</b> (${fmtM(m.lastPeak)}), ${m.brackets[m.lastWinIdx].name} paid out. Next round opens shortly.`;
 
   const yourBet = m.position || m.pending || m.pendingNext;
 
@@ -1479,7 +1611,7 @@ function renderModalContent(m) {
       : `Queued for the next round's pool`;
     betBlock = `
       <div class="modal-position" style="border-color:${clr}45;background:${clr}0a">
-        <div class="mp-row"><span>Your forecast</span><span>${b.name} · ${bkRangeLabel(b)}</span></div>
+        <div class="mp-row"><span>Your forecast</span><span title="${bkRangeLabel(b)} payout range">${b.name} · ${bkAltRange(m, b)}</span></div>
         <div class="mp-row"><span>Stake</span><span>${yourBet.amount.toLocaleString()} TKN</span></div>
         <div class="mp-note">${status}</div>
         ${m.position ? '' : `<button class="modal-cancel" onclick="cancelBet('${m.id}')">CANCEL FORECAST</button>`}
@@ -1491,7 +1623,7 @@ function renderModalContent(m) {
       const mult = payoutMult(m, i);
       return `
         <button type="button" class="bk-option${m.uiBracket === i ? ' selected' : ''}" onclick="selectBracket('${m.id}', ${i})">
-          <div><div class="bko-name">${b.name}</div><span class="bko-range">peak lands ${bkRangeLabel(b)}</span></div>
+          <div><div class="bko-name">${b.name}</div><span class="bko-range" title="${bkRangeLabel(b)} payout range">peak lands ${bkAltRange(m, b)}</span></div>
           <div class="bko-prob">${Math.round(prob*100)}%<small>IMPLIED</small></div>
           <div class="bko-mult" style="color:${clr}">${mult.toFixed(2)}×<small>PAYS</small></div>
         </button>`;
@@ -1517,7 +1649,7 @@ function renderModalContent(m) {
   }
 
   const peaks = m.history.slice(0, 8).map(v =>
-    `<span class="peak-chip" style="${peakStyle(v)}">${fmtM(v)}</span>`).join('');
+    `<span class="peak-chip" style="${peakStyle(v)}" title="${fmtM(v)} payout multiple">${fmtAlt(m, v)}</span>`).join('');
 
   modal.innerHTML = `
     <div class="modal-head">
@@ -1555,7 +1687,7 @@ function updatePreview(id) {
   const b = m.brackets[m.uiBracket];
   const mult = payoutMult(m, m.uiBracket);
   preview.innerHTML = amt > 0
-    ? `If the peak lands in <b style="color:var(--text)">${b.name}</b> (${bkRangeLabel(b)}): ~<b style="color:${m.color}">${Math.round(amt * mult).toLocaleString()} TKN</b> at current odds. Final payout locks at close.`
+    ? `If the peak lands in <b style="color:var(--text)">${b.name}</b> (${bkAltRange(m, b)}): ~<b style="color:${m.color}">${Math.round(amt * mult).toLocaleString()} TKN</b> at current odds. Final payout locks at close.`
     : 'Enter a stake to see your potential payout.';
 }
 
@@ -1655,7 +1787,7 @@ function buildLeaderboard() {
 function bracketOf(m) { return randEl(m.brackets); }
 
 const ACTIONS = [
-  (u,m,a) => { const b = bracketOf(m); return { text: `<b>${u}</b> backed ${b.name} (${bkRangeLabel(b)}) on`, result: a+' TKN', rcolor: 'var(--indigo)' }; },
+  (u,m,a) => { const b = bracketOf(m); return { text: `<b>${u}</b> backed ${b.name} (${bkAltRange(m, b)}) on`, result: a+' TKN', rcolor: 'var(--indigo)' }; },
   (u,m,a) => {
     const b = bracketOf(m);
     const mult = rnd(1.3 + Math.random()*6);
@@ -1754,8 +1886,10 @@ function tick() {
 
       if (m.mult >= m.peakAt) { resolveMarket(m); return; }
 
-      const el = document.getElementById('mult-' + m.id);
-      if (el) el.textContent = fmtM(m.mult);
+      const altEl = document.getElementById('alt-' + m.id);
+      if (altEl) altEl.textContent = fmtAlt(m, m.mult);
+      const badgeEl = document.getElementById('mult-' + m.id);
+      if (badgeEl) badgeEl.textContent = fmtM(m.mult);
       const tr = document.getElementById('trace-' + m.id);
       if (tr) {
         tr.setAttribute('points', tracePoints(m));
@@ -1770,11 +1904,22 @@ function tick() {
           const row = document.getElementById(`bkrow-${m.id}-${i}`);
           if (row) row.classList.toggle('current-zone', i === cur);
         });
+        if (m._lastZone !== undefined && altEl) {
+          altEl.classList.remove('zone-0', 'zone-1', 'zone-2', 'zone-3');
+          altEl.classList.add('zone-' + Math.min(3, cur));
+          altEl.classList.remove('milestone');
+          void altEl.offsetWidth; // restart the flash animation
+          altEl.classList.add('milestone');
+          const subEl = document.getElementById('sub-' + m.id);
+          if (subEl) subEl.textContent = cur === m.brackets.length - 1 ? 'SUMMIT REACHED' : 'CURRENT ALTITUDE';
+        }
         m._lastZone = cur;
       }
       if (activeModalId === m.id) {
         const mm = document.getElementById('modal-mult');
         if (mm) mm.textContent = fmtM(m.mult);
+        const ma = document.getElementById('modal-alt');
+        if (ma) ma.textContent = fmtAlt(m, m.mult);
       }
     } else if (m.phase === 'resolved') {
       if (now >= m.resolvedUntil) reopenMarket(m);
