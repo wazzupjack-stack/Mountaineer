@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mountaineer — Predictive Markets</title>
+<title>Mountaineer — Everest · Predictive Markets</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -21,6 +21,56 @@
   --blue: #3b82f6;
   --red: #ef4444;
   --amber: #f59e0b;
+  --text-strong: #f8fafc;
+  --surface2: rgba(255,255,255,0.04);
+  --surface3: rgba(255,255,255,0.05);
+  --surface3-hover: rgba(255,255,255,0.1);
+  --input-bg: rgba(255,255,255,0.045);
+  --input-border: rgba(255,255,255,0.09);
+  --input-border-focus: rgba(255,255,255,0.22);
+  --inactive-border: rgba(255,255,255,0.06);
+  --canvas-bg: #060a15;
+  --right-panel-bg: #080d1b;
+  --header-bg: rgba(0,0,0,0.35);
+  --hist-bg: rgba(0,0,0,0.22);
+  --scrollbar-thumb: rgba(255,255,255,0.09);
+  --feed-border: rgba(255,255,255,0.025);
+  --feed-name: #94a3b8;
+  --feed-empty: #1a2535;
+  --grid-line: rgba(255,255,255,0.02);
+  --mountain-bg-opacity: 0.038;
+}
+
+:root[data-theme="light"] {
+  --bg: #eef3f9;
+  --surface: #ffffff;
+  --border: rgba(18,38,68,0.12);
+  --border2: rgba(18,38,68,0.07);
+  --text: #17253c;
+  --muted: #5b6b84;
+  --dim: #93a3ba;
+  --green: #059669;
+  --blue: #3b82f6;
+  --red: #dc2626;
+  --amber: #d97706;
+  --text-strong: #0b1220;
+  --surface2: rgba(18,38,68,0.05);
+  --surface3: rgba(18,38,68,0.055);
+  --surface3-hover: rgba(18,38,68,0.1);
+  --input-bg: rgba(18,38,68,0.04);
+  --input-border: rgba(18,38,68,0.14);
+  --input-border-focus: rgba(18,38,68,0.35);
+  --inactive-border: rgba(18,38,68,0.08);
+  --canvas-bg: #f4f7fb;
+  --right-panel-bg: #f7f9fc;
+  --header-bg: rgba(255,255,255,0.75);
+  --hist-bg: rgba(18,38,68,0.04);
+  --scrollbar-thumb: rgba(18,38,68,0.18);
+  --feed-border: rgba(18,38,68,0.05);
+  --feed-name: #3d4b63;
+  --feed-empty: #c7d0dd;
+  --grid-line: rgba(18,38,68,0.05);
+  --mountain-bg-opacity: 0.07;
 }
 
 html, body { height: 100%; overflow: hidden; }
@@ -33,6 +83,7 @@ body {
   flex-direction: column;
   height: 100vh;
   user-select: none;
+  transition: background 0.25s, color 0.25s;
 }
 
 /* ── HEADER ── */
@@ -42,7 +93,7 @@ body {
   justify-content: space-between;
   padding: 11px 24px;
   border-bottom: 1px solid var(--border);
-  background: rgba(0,0,0,0.35);
+  background: var(--header-bg);
   flex-shrink: 0;
 }
 
@@ -51,25 +102,53 @@ body {
 #logo-name {
   font-family: 'Syne', sans-serif;
   font-weight: 800; font-size: 19px;
-  letter-spacing: 0.1em; color: #f8fafc;
+  letter-spacing: 0.1em; color: var(--text-strong);
 }
 #logo-tag { font-size: 9px; color: var(--dim); letter-spacing: 0.18em; margin-left: 2px; }
+#back-link {
+  font-size: 9px; color: var(--muted); letter-spacing: 0.1em;
+  text-decoration: none; margin-left: 6px; padding: 4px 9px;
+  border: 1px solid var(--border); border-radius: 6px; transition: all 0.15s;
+}
+#back-link:hover { color: var(--text); border-color: var(--input-border-focus); }
+
+#peak-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface2); border: 1px solid var(--border);
+  padding: 6px 16px; border-radius: 8px;
+}
+#peak-icon { color: var(--green); font-size: 22px; line-height: 1; }
+#peak-name {
+  font-family: 'Syne', sans-serif; font-weight: 800;
+  font-size: 17px; letter-spacing: 0.08em; color: var(--text-strong); line-height: 1.2;
+}
+#peak-elev { font-size: 10.5px; font-weight: 700; color: var(--green); letter-spacing: 0.08em; margin-top: 2px; }
+
+#header-right { display: flex; align-items: center; gap: 10px; }
+#theme-toggle {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; cursor: pointer; font-size: 14px;
+  color: var(--muted); transition: all 0.2s;
+}
+#theme-toggle:hover { color: var(--text); transform: translateY(-1px); }
 
 #balance-box {
   display: flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.04);
+  background: var(--surface2);
   border: 1px solid var(--border);
   padding: 6px 14px; border-radius: 8px;
 }
 #balance-label { font-size: 10px; color: var(--muted); }
-#balance-amount { font-size: 16px; font-weight: 700; color: #f8fafc; }
+#balance-amount { font-size: 16px; font-weight: 700; color: var(--text-strong); }
 #balance-unit { font-size: 10px; color: var(--muted); }
 
 /* ── HISTORY ── */
 #history-bar {
   display: flex; gap: 5px;
   padding: 7px 24px;
-  background: rgba(0,0,0,0.22);
+  background: var(--hist-bg);
   border-bottom: 1px solid var(--border2);
   overflow-x: auto; flex-shrink: 0;
 }
@@ -86,13 +165,14 @@ body {
 /* ── CANVAS AREA ── */
 #canvas-section {
   flex: 1; position: relative;
-  overflow: hidden; background: #060a15;
+  overflow: hidden; background: var(--canvas-bg);
   border-right: 1px solid var(--border);
+  transition: background 0.25s;
 }
 #mountain-bg {
   position: absolute; bottom: 0; left: 0;
   width: 100%; height: 58%;
-  opacity: 0.038; pointer-events: none;
+  opacity: var(--mountain-bg-opacity); pointer-events: none;
 }
 #game-canvas {
   position: absolute; inset: 0;
@@ -121,14 +201,37 @@ body {
   transition: color 0.4s;
 }
 .ov-sub { font-size: 10px; color: var(--muted); margin-top: 10px; letter-spacing: 0.12em; min-height: 16px; }
-#cd-num { color: #f8fafc; opacity: 0.7; }
+#cd-num { color: var(--text-strong); opacity: 0.7; }
 #cd-label { color: var(--dim); }
 #cd-sub { color: var(--dim); }
 
+#alt-tag { font-size: 9px; color: var(--dim); letter-spacing: 0.16em; margin-top: 6px; }
+.ov-num.zone-1 { text-shadow: 0 0 14px currentColor; }
+.ov-num.zone-2 { text-shadow: 0 0 22px currentColor; }
+.ov-num.zone-3 { text-shadow: 0 0 32px currentColor; animation: hotGlow 0.9s ease-in-out infinite; }
+@keyframes hotGlow { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.3); } }
+.ov-num.milestone { animation: milestoneFlash 0.55s ease; }
+@keyframes milestoneFlash {
+  0%   { transform: scale(1.3); filter: brightness(1.6); }
+  60%  { transform: scale(0.97); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+#mult-badge {
+  display: inline-block; margin-top: 10px;
+  padding: 4px 13px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.35);
+  background: rgba(16,185,129,0.12); color: #10b981;
+  font-weight: 700; font-size: 13px; letter-spacing: 0.03em;
+  font-family: 'JetBrains Mono', monospace;
+  animation: badgePulse 1.5s ease-in-out infinite;
+  transition: color 0.3s, background 0.3s, border-color 0.3s;
+}
+@keyframes badgePulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
 /* ── RIGHT PANEL ── */
 #right-panel {
-  width: 278px; background: #080d1b;
+  width: 278px; background: var(--right-panel-bg);
   display: flex; flex-direction: column; flex-shrink: 0;
+  transition: background 0.25s;
 }
 
 #forecast-desk {
@@ -148,20 +251,20 @@ body {
 
 .chip-btn {
   padding: 3px 8px; font-size: 9px;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--surface3);
+  border: 1px solid var(--input-border);
   border-radius: 4px; color: var(--muted);
   cursor: pointer; font-family: inherit;
   transition: background 0.15s;
 }
-.chip-btn:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+.chip-btn:hover { background: var(--surface3-hover); color: var(--text); }
 .chip-btn:disabled { opacity: 0.3; cursor: default; }
 
 input[type="number"] {
-  background: rgba(255,255,255,0.045);
-  border: 1px solid rgba(255,255,255,0.09);
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
   border-radius: 6px; padding: 8px 10px;
-  color: #f8fafc; font-size: 14px;
+  color: var(--text-strong); font-size: 14px;
   font-family: inherit; outline: none;
   transition: border-color 0.2s;
   -moz-appearance: textfield;
@@ -169,7 +272,7 @@ input[type="number"] {
 }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
-input[type="number"]:focus { border-color: rgba(255,255,255,0.22); }
+input[type="number"]:focus { border-color: var(--input-border-focus); }
 input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
 #stake-input { flex: 1; width: auto; }
 #auto-wrap { margin-bottom: 14px; }
@@ -202,8 +305,8 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
   color: var(--green); cursor: default;
 }
 #action-btn.inactive {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--surface2);
+  border: 1px solid var(--inactive-border);
   color: var(--dim); cursor: default;
 }
 @keyframes pulse-green {
@@ -228,21 +331,21 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
 }
 #feed-list { flex: 1; overflow-y: auto; }
 #feed-list::-webkit-scrollbar { width: 3px; }
-#feed-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+#feed-list::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
 
 .feed-item {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 16px; border-bottom: 1px solid rgba(255,255,255,0.025);
+  padding: 8px 16px; border-bottom: 1px solid var(--feed-border);
   animation: slide-in 0.28s ease;
 }
 @keyframes slide-in {
   from { opacity: 0; transform: translateY(-5px); }
   to { opacity: 1; transform: translateY(0); }
 }
-.feed-name { font-size: 11px; color: #94a3b8; font-weight: 500; }
+.feed-name { font-size: 11px; color: var(--feed-name); font-weight: 500; }
 .feed-action { font-size: 9px; color: var(--dim); margin-top: 1px; }
 .feed-value { font-size: 12px; font-weight: 700; }
-#feed-empty { padding: 28px 16px; text-align: center; font-size: 10px; color: #1a2535; }
+#feed-empty { padding: 28px 16px; text-align: center; font-size: 10px; color: var(--feed-empty); }
 
 /* ── TOAST ── */
 #toast {
@@ -262,7 +365,7 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
 /* Scrollbar global */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.09); border-radius: 2px; }
+::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 2px; }
 </style>
 </head>
 <body>
@@ -273,11 +376,22 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
     <span id="logo-mark">▲</span>
     <span id="logo-name">MOUNTAINEER</span>
     <span id="logo-tag">PREDICTIVE MARKETS</span>
+    <a id="back-link" href="index.html">← ALL MARKETS</a>
   </div>
-  <div id="balance-box">
-    <span id="balance-label">BALANCE</span>
-    <span id="balance-amount">1000.00</span>
-    <span id="balance-unit">TKN</span>
+  <div id="peak-box">
+    <span id="peak-icon">▲</span>
+    <div>
+      <div id="peak-name">EVEREST</div>
+      <div id="peak-elev">SUMMIT · 8,849 M</div>
+    </div>
+  </div>
+  <div id="header-right">
+    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">☀</button>
+    <div id="balance-box">
+      <span id="balance-label">BALANCE</span>
+      <span id="balance-amount">1000.00</span>
+      <span id="balance-unit">TKN</span>
+    </div>
   </div>
 </div>
 
@@ -311,7 +425,9 @@ input[type="number"]:disabled { opacity: 0.35; cursor: not-allowed; }
     <!-- Climbing/crashed overlay -->
     <div id="mult-overlay" style="display:none">
       <div class="ov-label" id="mult-label"></div>
-      <div class="ov-num" id="mult-num">1.00×</div>
+      <div class="ov-num" id="mult-num">1,327 m</div>
+      <div id="alt-tag">CURRENT ALTITUDE</div>
+      <div id="mult-badge">1.00×</div>
       <div class="ov-sub" id="mult-sub"></div>
     </div>
   </div>
@@ -403,9 +519,31 @@ function genCrash() {
   if (r < 0.04) return 1.00;
   return Math.max(1.01, Math.round(0.99 / (1 - Math.random() * 0.96) * 100) / 100);
 }
+// Peaks available from the index.html markets grid — linked via ?mountain=<id>
+const MOUNTAINS = {
+  k2:          { name: 'K2',          elevationM: 8611 },
+  everest:     { name: 'Everest',     elevationM: 8849 },
+  aconcagua:   { name: 'Aconcagua',   elevationM: 6961 },
+  denali:      { name: 'Denali',      elevationM: 6190 },
+  kilimanjaro: { name: 'Kilimanjaro', elevationM: 5895 },
+  montblanc:   { name: 'Mont Blanc',  elevationM: 4808 }
+};
+const selectedPeak = MOUNTAINS[new URLSearchParams(location.search).get('mountain')] || MOUNTAINS.everest;
+const MOUNTAIN_NAME = selectedPeak.name;
+const ELEVATION_M = selectedPeak.elevationM;
+const BASE_CAMP_FRACTION = 0.15; // the ascent starts this far up the mountain, not at the summit
+const BASE_CAMP_M = Math.round(ELEVATION_M * BASE_CAMP_FRACTION);
+const SUMMIT_MULT = 10; // multiplier at which the summit is reached — altitude is capped here
 const fmtM = n => n.toFixed(2) + '×';
+// Altitude climbs from base camp toward the summit as the multiplier climbs toward SUMMIT_MULT,
+// then holds at the summit — you can't climb past the top of the mountain.
+function fmtAlt(n) {
+  const frac = Math.min(1, Math.max(0, (n - 1) / (SUMMIT_MULT - 1)));
+  return Math.round(BASE_CAMP_M + (ELEVATION_M - BASE_CAMP_M) * frac).toLocaleString() + ' m';
+}
 const fmtT = n => n.toFixed(2);
 const rnd = (n, d=2) => Math.round(n * 10**d) / 10**d;
+const zoneFor = n => n >= SUMMIT_MULT ? 3 : n >= 3 ? 2 : n >= 1.5 ? 1 : 0;
 
 function histStyle(v) {
   if (v < 1.5) return { bg:'rgba(239,68,68,0.12)', bd:'rgba(239,68,68,0.22)', c:'#ef4444' };
@@ -417,7 +555,7 @@ function histStyle(v) {
 function renderHistory() {
   document.getElementById('history-bar').innerHTML = history
     .map(v => { const s = histStyle(v);
-      return `<div class="hist-chip" style="background:${s.bg};border:1px solid ${s.bd};color:${s.c}">${fmtM(v)}</div>`;
+      return `<div class="hist-chip" style="background:${s.bg};border:1px solid ${s.bd};color:${s.c}" title="${fmtM(v)} payout multiple">${fmtAlt(v)}</div>`;
     }).join('');
 }
 
@@ -433,7 +571,7 @@ function drawFrame(pts, m, crashed, waiting) {
 
   // Grid
   ctx.lineWidth = 1;
-  ctx.strokeStyle = 'rgba(255,255,255,0.02)';
+  ctx.strokeStyle = gridLineColor;
   for (let i = 1; i < 8; i++) {
     ctx.beginPath(); ctx.moveTo(0, H*i/8); ctx.lineTo(W, H*i/8); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(W*i/8, 0); ctx.lineTo(W*i/8, H); ctx.stroke();
@@ -538,16 +676,27 @@ function showMultOverlay(m, state) {
   const num = document.getElementById('mult-num');
   const lbl = document.getElementById('mult-label');
   const sub = document.getElementById('mult-sub');
-  num.textContent = fmtM(m);
+  const tag = document.getElementById('alt-tag');
+  const badge = document.getElementById('mult-badge');
+  num.textContent = fmtAlt(m);
+  badge.textContent = fmtM(m);
   if (state === 'crashed') {
     num.style.color = '#ef4444';
     lbl.textContent = 'PEAK REACHED';
+    tag.textContent = m >= SUMMIT_MULT ? 'SUMMIT REACHED · FINAL ALTITUDE' : 'FINAL PEAK ALTITUDE';
     sub.textContent = '';
+    badge.style.color = '#ef4444';
+    badge.style.borderColor = 'rgba(239,68,68,0.35)';
+    badge.style.background = 'rgba(239,68,68,0.12)';
   } else {
     num.style.color = '#10b981';
+    tag.textContent = m >= SUMMIT_MULT ? 'SUMMIT REACHED' : 'CURRENT ALTITUDE';
     lbl.textContent = hasCashedOut ? ('✓ LOCKED AT ' + fmtM(cashMult)) : '';
     sub.textContent = hasBet && !hasCashedOut ? '↑ CLIMBING — EXIT TO LOCK GAINS' :
                       hasBet && hasCashedOut  ? '' : 'ROUND IN PROGRESS';
+    badge.style.color = '#10b981';
+    badge.style.borderColor = 'rgba(16,185,129,0.35)';
+    badge.style.background = 'rgba(16,185,129,0.12)';
   }
 }
 
@@ -628,9 +777,22 @@ function startClimb(cp) {
 
   startTime = performance.now();
 
+  const numEl = document.getElementById('mult-num');
+  numEl.classList.remove('zone-1', 'zone-2', 'zone-3', 'milestone');
+  let lastZone = 0;
+
   function loop(now) {
     const el = now - startTime;
     multiplier = Math.pow(Math.E, K * el);
+
+    const zone = zoneFor(multiplier);
+    if (zone !== lastZone) {
+      numEl.classList.remove('zone-1', 'zone-2', 'zone-3', 'milestone');
+      if (zone > 0) numEl.classList.add('zone-' + zone);
+      void numEl.offsetWidth; // restart the flash animation
+      numEl.classList.add('milestone');
+      lastZone = zone;
+    }
 
     // Map to canvas coords
     const W = canvas.width, H = canvas.height;
@@ -767,7 +929,29 @@ function setStakeMax() {
 
 document.getElementById('stake-input').addEventListener('input', updateBtn);
 
+// ── Theme ──
+let gridLineColor = 'rgba(255,255,255,0.02)';
+function readGridLineColor() {
+  gridLineColor = getComputedStyle(document.documentElement).getPropertyValue('--grid-line').trim() || gridLineColor;
+}
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  const btn = document.getElementById('theme-toggle');
+  if (btn) btn.textContent = theme === 'light' ? '☾' : '☀';
+  readGridLineColor();
+}
+function toggleTheme() {
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  localStorage.setItem('mountaineer-theme', next);
+  applyTheme(next);
+}
+applyTheme(localStorage.getItem('mountaineer-theme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
 // ── Boot ──
+document.title = 'Mountaineer — ' + MOUNTAIN_NAME + ' · Predictive Markets';
+document.getElementById('peak-name').textContent = MOUNTAIN_NAME.toUpperCase();
+document.getElementById('peak-elev').textContent = 'SUMMIT · ' + ELEVATION_M.toLocaleString() + ' M';
 renderHistory();
 updateBalance();
 startWaiting();
