@@ -150,6 +150,14 @@ header {
 }
 .theme-toggle:hover { color: var(--text); border-color: var(--hover-border); transform: translateY(-1px); }
 
+.avatar-badge {
+  width: 30px; height: 30px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  font-size: 15px; text-decoration: none; transition: all 0.2s;
+}
+.avatar-badge:hover { border-color: var(--hover-border); transform: translateY(-1px); }
+
 @media (max-width: 1080px) { .main-nav { display: none; } }
 @media (max-width: 860px) { .hide-sm { display: none !important; } }
 @media (max-width: 620px) { .hide-xs { display: none !important; } }
@@ -522,6 +530,8 @@ header {
   font-size: 11px;
 }
 .lb-row:last-child { border-bottom: none; }
+.lb-row-you { background: var(--tint); margin: 0 -8px; padding: 7px 8px; border-radius: 6px; }
+.lb-row-you .lb-name { color: var(--text); font-weight: 700; }
 .lb-rank { font-size: 9px; color: var(--dim); width: 16px; flex-shrink: 0; }
 .lb-av {
   width: 24px; height: 24px; border-radius: 50%;
@@ -694,6 +704,7 @@ footer {
     <a href="#portfolio">PORTFOLIO</a>
     <a href="#leaderboard">LEADERBOARD</a>
     <a href="#feed">ACTIVITY</a>
+    <a href="loadout.html">LOADOUT</a>
   </nav>
   <div class="header-nav">
     <div class="live-indicator hide-sm">
@@ -711,6 +722,7 @@ footer {
       <span class="nav-value" style="color:var(--green)" id="hdr-vol">14.2M</span>
     </div>
     <div class="nav-divider"></div>
+    <a class="avatar-badge" id="avatarBadge" href="loadout.html" title="Expedition loadout">🧗</a>
     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark mode">◐</button>
     <button class="wallet-btn" id="walletBtn">CONNECT WALLET</button>
   </div>
@@ -794,7 +806,7 @@ footer {
 <div class="section-head" id="portfolio">
   <div class="section-title-row">
     <div class="section-title">Your Portfolio</div>
-    <div class="section-count">THIS SESSION</div>
+    <div class="section-count">LIFETIME · SAVED TO THIS BROWSER</div>
   </div>
 </div>
 <div class="portfolio-section">
@@ -805,7 +817,7 @@ footer {
       <div class="pf-balance-sub" id="pf-balance-sub">Connect a wallet to start forecasting</div>
       <div class="pf-tiles">
         <div class="pf-tile">
-          <div class="pf-tile-label">SESSION P/L</div>
+          <div class="pf-tile-label">LIFETIME P/L</div>
           <div class="pf-tile-value" id="pf-pl">0 TKN</div>
         </div>
         <div class="pf-tile">
@@ -825,7 +837,7 @@ footer {
       <div class="pf-open-list" id="pf-open"></div>
     </div>
     <div class="pf-card">
-      <div class="pf-card-title">FORECAST HISTORY · THIS SESSION</div>
+      <div class="pf-card-title">FORECAST HISTORY · LAST 20</div>
       <div id="pf-history"></div>
     </div>
   </div>
@@ -870,6 +882,7 @@ footer {
       <a href="#portfolio">Portfolio</a>
       <a href="#leaderboard">Leaderboard</a>
       <a href="#feed">Activity feed</a>
+      <a href="loadout.html">Expedition loadout</a>
     </div>
   </div>
   <div>
@@ -887,6 +900,7 @@ footer {
   <div class="stake-modal" id="stakeModal"></div>
 </div>
 
+<script src="account.js"></script>
 <script>
 /* ═══════════════════════════════════════════
    THEME
@@ -911,10 +925,10 @@ const RAKE = 0.05;
 const OPEN_MS = 12000;      // betting window
 const RESOLVED_MS = 3000;   // resolution display
 const BASE_CAMP_FRACTION = 0.15; // every ascent starts this far up the mountain, not at the summit
-const BREAKTHROUGH_CHANCE = 0.08; // flat chance any round draws the mountain's full baseline scale
-                                   // regardless of live weather — a team pushing through anyway. See
-                                   // weatherThrottle()/bracketProb()/rollPeak() further down for how
-                                   // this mixes with the live-weather throttle on the climb.
+// Breakthrough chance (the flat chance any round draws the full baseline scale regardless of live
+// weather) and the climb-scale multiplier both now come from Account.breakthroughChance() /
+// Account.skewMultiplier() — your hired climber and equipped gear from loadout.html. See
+// weatherThrottle()/bracketProb()/rollPeak() further down for how they mix with live weather.
 
 /* Bracket ladders per variance tier. Named as climbing zones. */
 const BRACKET_SETS = {
@@ -1095,23 +1109,24 @@ function clouds(id) {
 // True bracket probabilities under the peak distribution (exponential tail).
 // The crowd bets roughly in line with these, with noise — so implied odds hover
 // near fair value, exactly as a liquid prediction market should.
-// Peak is a mixture: BREAKTHROUGH_CHANCE of the time it draws from the mountain's full baseline
-// scale regardless of weather (a team pushing through anyway), otherwise from that scale throttled
-// by live conditions. bracketProb() below computes this mixture's exact CDF so the displayed odds
+// Peak is a mixture: Account.breakthroughChance() of the time it draws from the mountain's full
+// baseline scale regardless of weather (a team pushing through anyway), otherwise from that scale
+// throttled by live conditions. bracketProb() below computes this mixture's exact CDF so the odds
 // match what rollPeak() actually samples from — bad weather never rules out a lucky high peak, it
 // just makes the low brackets dominate the probability mass instead.
 function bracketProb(m, b) {
-  const base = RISK_SKEW[m.riskLevel] * 0.55;
+  const base = RISK_SKEW[m.riskLevel] * 0.55 * Account.skewMultiplier();
   const throttled = base * weatherThrottle(m);
   const pThrottled = expCdf(b.max, throttled) - expCdf(b.min, throttled);
   const pBase = expCdf(b.max, base) - expCdf(b.min, base);
-  const prob = (1 - BREAKTHROUGH_CHANCE) * pThrottled + BREAKTHROUGH_CHANCE * pBase;
+  const breakthrough = Account.breakthroughChance();
+  const prob = (1 - breakthrough) * pThrottled + breakthrough * pBase;
   return Math.max(prob, 0.005);
 }
 
 function rollPeak(m) {
-  const base = RISK_SKEW[m.riskLevel] * 0.55;
-  const s = Math.random() < BREAKTHROUGH_CHANCE ? base : base * weatherThrottle(m);
+  const base = RISK_SKEW[m.riskLevel] * 0.55 * Account.skewMultiplier();
+  const s = Math.random() < Account.breakthroughChance() ? base : base * weatherThrottle(m);
   const r = Math.random();
   const peak = 1 + (-Math.log(1 - r)) * s;
   return Math.min(Math.max(peak, 1.02), 480);
@@ -1209,7 +1224,8 @@ function resolveMarket(m) {
     const b = m.brackets[m.position.bracket];
     if (m.position.bracket === m.lastWinIdx) {
       const payout = Math.round(m.position.amount * m.position.lockedMult);
-      wallet.balance += payout;
+      Account.data.balance += payout;
+      Account.save();
       toast(`Resolved: ${m.name} peaked at ${fmtM(m.lastPeak)} — ${b.name} wins. You collect ${payout.toLocaleString()} TKN`, 'win');
       recordBet(m, m.position.amount, b.name, m.lastPeak, payout);
     } else {
@@ -1474,9 +1490,9 @@ function refreshOdds(m) {
 /* ═══════════════════════════════════════════
    WALLET + SESSION
 ═══════════════════════════════════════════ */
-const wallet = { connected: false, address: null, balance: 5000 };
-const session = { staked: 0, wins: 0, losses: 0, pl: 0, bestPayout: 0 };
-let betHistory = [];
+// Balance, lifetime stats, and history now live on Account (account.js) and persist across visits.
+// Connection state stays session-only, same as reconnecting a real wallet each time you show up.
+const wallet = { connected: false, address: null };
 
 function connectWallet() {
   wallet.connected = true;
@@ -1484,13 +1500,13 @@ function connectWallet() {
   wallet.address = '0x' + hex() + '…' + hex();
   updateWalletUI();
   renderPortfolio();
-  toast('Wallet connected — demo balance 5,000 TKN loaded', 'info');
+  toast(`Wallet connected — ${Account.data.balance.toLocaleString()} TKN loaded`, 'info');
 }
 
 function updateWalletUI() {
   const btn = document.getElementById('walletBtn');
   if (wallet.connected) {
-    btn.textContent = wallet.address + ' · ' + wallet.balance.toLocaleString() + ' TKN';
+    btn.textContent = wallet.address + ' · ' + Account.data.balance.toLocaleString() + ' TKN';
     btn.classList.add('connected');
   } else {
     btn.textContent = 'CONNECT WALLET';
@@ -1510,12 +1526,8 @@ document.getElementById('walletBtn').addEventListener('click', () => {
 });
 
 function recordBet(m, stake, bracketName, peak, payout) {
-  session.staked += stake;
-  session.pl += (payout - stake);
-  if (payout > 0) { session.wins++; if (payout > session.bestPayout) session.bestPayout = payout; }
-  else session.losses++;
-  betHistory.unshift({ ts: nowTs(), name: m.name, color: m.color, bracket: bracketName, stake, peak, payout, pl: payout - stake });
-  if (betHistory.length > 14) betHistory.pop();
+  Account.recordBet(stake, payout);
+  Account.pushHistory({ ts: nowTs(), name: m.name, color: m.color, bracket: bracketName, stake, peak, payout, pl: payout - stake });
   renderPortfolio();
 }
 
@@ -1525,17 +1537,18 @@ function recordBet(m, stake, bracketName, peak, payout) {
 function renderPortfolio() {
   const bal = document.getElementById('pf-balance');
   const balSub = document.getElementById('pf-balance-sub');
-  bal.textContent = wallet.connected ? wallet.balance.toLocaleString() + ' TKN' : '— TKN';
+  bal.textContent = wallet.connected ? Account.data.balance.toLocaleString() + ' TKN' : '— TKN';
   balSub.textContent = wallet.connected ? wallet.address + ' · demo wallet' : 'Connect a wallet to start forecasting';
 
+  const stats = Account.data.stats;
   const plEl = document.getElementById('pf-pl');
-  plEl.textContent = (session.pl >= 0 ? '+' : '−') + Math.abs(session.pl).toLocaleString() + ' TKN';
-  plEl.style.color = session.pl > 0 ? 'var(--green)' : session.pl < 0 ? 'var(--red)' : 'var(--text)';
+  plEl.textContent = (stats.pl >= 0 ? '+' : '−') + Math.abs(stats.pl).toLocaleString() + ' TKN';
+  plEl.style.color = stats.pl > 0 ? 'var(--green)' : stats.pl < 0 ? 'var(--red)' : 'var(--text)';
 
-  const total = session.wins + session.losses;
-  document.getElementById('pf-winrate').textContent = total ? Math.round(session.wins / total * 100) + '%' : '—';
-  document.getElementById('pf-staked').textContent = session.staked.toLocaleString() + ' TKN';
-  document.getElementById('pf-best').textContent = session.bestPayout ? session.bestPayout.toLocaleString() + ' TKN' : '—';
+  const total = stats.wins + stats.losses;
+  document.getElementById('pf-winrate').textContent = total ? Math.round(stats.wins / total * 100) + '%' : '—';
+  document.getElementById('pf-staked').textContent = stats.staked.toLocaleString() + ' TKN';
+  document.getElementById('pf-best').textContent = stats.bestPayout ? stats.bestPayout.toLocaleString() + ' TKN' : '—';
 
   const open = [];
   MTN.forEach(m => {
@@ -1563,7 +1576,7 @@ function renderPortfolio() {
     : '<div class="pf-empty">No open forecasts. Pick a mountain above and back a bracket.</div>';
 
   const hist = document.getElementById('pf-history');
-  if (!betHistory.length) {
+  if (!Account.data.history.length) {
     hist.innerHTML = '<div class="pf-empty">Your resolved forecasts will appear here — bracket backed, where the peak landed, and running profit and loss.</div>';
   } else {
     hist.innerHTML = `
@@ -1572,7 +1585,7 @@ function renderPortfolio() {
           <th>TIME</th><th>MARKET</th><th>BRACKET</th><th class="num">STAKE</th><th class="num">PEAK</th><th class="num">RETURN</th><th class="num">P/L</th>
         </tr></thead>
         <tbody>
-        ${betHistory.map(b => `
+        ${Account.data.history.map(b => `
           <tr>
             <td>${b.ts}</td>
             <td class="pf-mtn" style="color:${b.color}">${b.name}</td>
@@ -1681,7 +1694,7 @@ function renderModalContent(m) {
         <input type="number" id="stakeAmount" class="mf-input" min="1" step="1" placeholder="e.g. 250" value="${stakeVal}">
         <div class="chip-row">
           ${[25, 100, 250, 1000].map(v => `<button type="button" class="chip-btn" onclick="document.getElementById('stakeAmount').value=${v};updatePreview('${m.id}')">${v}</button>`).join('')}
-          <button type="button" class="chip-btn" onclick="document.getElementById('stakeAmount').value=${wallet.balance};updatePreview('${m.id}')">MAX</button>
+          <button type="button" class="chip-btn" onclick="document.getElementById('stakeAmount').value=${Account.data.balance};updatePreview('${m.id}')">MAX</button>
         </div>
         <div class="mf-preview" id="stakePreview">—</div>
         <button class="modal-stake-btn" id="placeBtn" style="background:${clr}12;border-color:${clr}45;color:${clr}" onclick="placeForecast('${m.id}')">
@@ -1706,7 +1719,7 @@ function renderModalContent(m) {
     ${betBlock}
     <div class="bk-title" style="margin:16px 0 7px">LAST ${Math.min(8, m.history.length)} PEAKS</div>
     <div class="peak-row">${peaks}</div>
-    <div class="modal-wallet">Wallet balance: <b>${wallet.connected ? wallet.balance.toLocaleString() + ' TKN' : 'not connected'}</b></div>
+    <div class="modal-wallet">Wallet balance: <b>${wallet.connected ? Account.data.balance.toLocaleString() + ' TKN' : 'not connected'}</b></div>
   `;
 
   if (!yourBet) {
@@ -1753,9 +1766,10 @@ function placeForecast(id) {
   }
   const amt = Math.floor(parseFloat(amtVal));
   if (!amt || amt <= 0) { toast('Enter a stake amount first', 'info'); return; }
-  if (amt > wallet.balance) { toast('Not enough balance for that stake', 'info'); return; }
+  if (amt > Account.data.balance) { toast('Not enough balance for that stake', 'info'); return; }
 
-  wallet.balance -= amt;
+  Account.data.balance -= amt;
+  Account.save();
   const bet = { amount: amt, bracket: m.uiBracket };
   const bName = m.brackets[m.uiBracket].name;
 
@@ -1785,7 +1799,8 @@ function cancelBet(id) {
   } else {
     m.pendingNext = null;
   }
-  wallet.balance += bet.amount;
+  Account.data.balance += bet.amount;
+  Account.save();
   toast(`Forecast cancelled — ${bet.amount.toLocaleString()} TKN refunded`, 'info');
   updateWalletUI();
   rerenderCard(m);
@@ -1803,6 +1818,8 @@ const LBTYPES = [
 ];
 
 function buildLeaderboard() {
+  const stats = Account.data.stats;
+  const total = stats.wins + stats.losses;
   return LBTYPES.map(lb => {
     const leaders = Array.from({length:5}, () => {
       const u = randEl(USERS);
@@ -1810,10 +1827,16 @@ function buildLeaderboard() {
                 : lb.key === 'pct'  ? Math.floor(48 + Math.random()*34)
                 : Math.floor(2000 + Math.random()*200000);
       return { user: u, val, init: u.slice(0,2).toUpperCase() };
-    }).sort((a,b) => b.val - a.val);
+    });
+
+    const youVal = lb.key === 'gain' ? Math.max(stats.pl, 0)
+                  : lb.key === 'pct'  ? (total ? Math.round(stats.wins / total * 100) : 0)
+                  : stats.staked;
+    leaders.push({ user: 'YOU', val: youVal, init: Account.avatar().icon, isYou: true });
+    leaders.sort((a,b) => b.val - a.val);
 
     const rows = leaders.map((l, i) => `
-      <div class="lb-row">
+      <div class="lb-row${l.isYou ? ' lb-row-you' : ''}">
         <span class="lb-rank">${i+1}</span>
         <div class="lb-av" style="background:${lb.color}14;color:${lb.color}">${l.init}</div>
         <span class="lb-name">${l.user}</span>
@@ -1889,6 +1912,7 @@ function updateGlobalBarExtras() {
 ═══════════════════════════════════════════ */
 document.getElementById('grid').innerHTML = MTN.map(buildCard).join('');
 document.getElementById('lb-grid').innerHTML = buildLeaderboard();
+document.getElementById('avatarBadge').textContent = Account.avatar().icon;
 
 for (let i = 0; i < 10; i++) feedLog.push(genFeedEvent());
 feedTotal = 4218;
@@ -2059,14 +2083,19 @@ const TEMP_MILD_C      = -25;  // at/above this, cold isn't a limiting factor
 const TEMP_STOP_C      = -45;  // at/below this, cold alone is treated as summit-stopping
 const WEATHER_THROTTLE_MIN = 0.35; // worst-conditions climb scale, as a fraction of the mountain's base variance
 const WEATHER_THROTTLE_MAX = 1.0;  // best-conditions climb scale — no throttle at all
-// BREAKTHROUGH_CHANCE lives up in MARKET CONSTANTS — bracketProb()/rollPeak() need it during page-init,
-// before this module has run.
 const WEATHER_REFRESH_MS = 5 * 60 * 1000; // real minutes between live re-fetches
 const LAPSE_RATE_C_PER_1000M = 6.5; // international standard atmosphere lapse rate — colder higher up
 const WAYPOINT_ABBR = { 'BASE CAMP': 'BASE', 'CAMP II': 'C.II', 'HIGH CAMP': 'HIGH', 'SUMMIT': 'TOP' };
 
-const windFactor = kmh => Math.min(1, Math.max(0, 1 - (kmh - WIND_CALM_KMH) / (WIND_STOP_KMH - WIND_CALM_KMH)));
-const tempFactor  = c   => Math.min(1, Math.max(0, 1 - (TEMP_MILD_C - c) / (TEMP_MILD_C - TEMP_STOP_C)));
+// Equipped gear (oxygen tank, boots, down suit — see loadout.html) widens these cutoffs directly.
+const windFactor = kmh => {
+  const stop = WIND_STOP_KMH + Account.windStopBonus();
+  return Math.min(1, Math.max(0, 1 - (kmh - WIND_CALM_KMH) / (stop - WIND_CALM_KMH)));
+};
+const tempFactor = c => {
+  const stop = TEMP_STOP_C - Account.tempStopBonus();
+  return Math.min(1, Math.max(0, 1 - (TEMP_MILD_C - c) / (TEMP_MILD_C - stop)));
+};
 const fmtDeg  = v => Math.round(v) + '°';
 const fmtWind = v => Math.round(v) + ' km/h';
 // Estimate temperature at any altitude on the mountain from the one live summit reading,
