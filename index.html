@@ -240,6 +240,7 @@ const MTN=[
  zones:[[5000,'ARCTIC ZONE','#93c5fd'],[5700,'SUMMIT GLACIERS','#e0f2fe']],
  weather:{snow:.25,wind:.12,gust:.15,dark:.30,dust:0,flake:1.5},
  rock:'#191611',snowC:'#e8f4f8',skyLo:'#122033',skyHi:'#04070f',
+ profile:[[0,.95],[.31,.88],[.6,.72],[.85,.55],[.93,.42],[1,.5]],
  hist:[2.31,1.84,3.02,1.41,2.68,4.15,1.97,2.44]
 },
 {
@@ -253,6 +254,7 @@ const MTN=[
  zones:[[6000,'HIGH CAMP','#fcd34d'],[6700,'SUMMIT RIDGE','#fef3c7']],
  weather:{snow:.3,wind:.55,gust:.7,dark:.34,dust:.45,flake:1.2},
  rock:'#1b1408',snowC:'#f5f0e0',skyLo:'#1a1408',skyHi:'#05060d',
+ profile:[[0,.9],[.34,.8],[.6,.62],[.82,.4],[1,.28]],
  hist:[1.62,2.90,1.18,5.41,2.07,1.75,3.36,1.44]
 },
 {
@@ -266,6 +268,7 @@ const MTN=[
  zones:[[4300,'GRAND COULOIR','#c4b5fd'],[4650,'SUMMIT DOME','#ede9fe']],
  weather:{snow:.5,wind:.35,gust:.55,dark:.42,dust:.1,flake:1.9},
  rock:'#13111e',snowC:'#eef0fb',skyLo:'#161428',skyHi:'#05050e',
+ profile:[[0,.85],[.3,.68],[.5,.38],[.65,.55],[.84,.62],[1,.7]],
  hist:[1.24,3.85,1.06,2.18,1.51,6.72,1.33,2.05]
 },
 {
@@ -279,6 +282,7 @@ const MTN=[
  zones:[[5200,'HEADWALL','#7dd3fc'],[5900,'SUMMIT RIDGE','#e0f2fe']],
  weather:{snow:.62,wind:.6,gust:.75,dark:.46,dust:0,flake:1.1,aurora:true},
  rock:'#0c151f',snowC:'#e6f4fd',skyLo:'#0c1a2a',skyHi:'#03060e',
+ profile:[[0,.9],[.48,.42],[.62,.75],[.85,.45],[1,.3]],
  hist:[1.09,2.44,1.71,1.02,4.88,1.30,2.13,1.56]
 },
 {
@@ -292,6 +296,7 @@ const MTN=[
  zones:[[7000,'LHOTSE FACE','#a5b4fc'],[8000,'DEATH ZONE','#ef4444'],[8700,'HILLARY STEP','#e0e7ff']],
  weather:{snow:.7,wind:.85,gust:.8,dark:.55,dust:.05,flake:1.0},
  rock:'#0e0f1e',snowC:'#e9ecfb',skyLo:'#101128',skyHi:'#02030b',
+ profile:[[0,.85],[.25,.4],[.45,.6],[.65,.48],[.85,.55],[.94,.18],[1,.35]],
  hist:[1.03,7.20,1.41,1.00,2.86,14.55,1.12,1.88]
 },
 {
@@ -305,6 +310,7 @@ const MTN=[
  zones:[[6800,'BLACK PYRAMID','#fca5a5'],[8000,'DEATH ZONE','#ef4444'],[8200,'THE BOTTLENECK','#dc2626']],
  weather:{snow:.95,wind:1.0,gust:1.0,dark:.66,dust:0,flake:.9},
  rock:'#150b0d',snowC:'#f3e8e8',skyLo:'#180a0c',skyHi:'#030207',
+ profile:[[0,.6],[.3,.5],[.48,.3],[.65,.42],[.82,.32],[.88,.12],[1,.22]],
  hist:[1.00,1.04,28.40,1.00,1.16,1.02,62.75,1.08]
 }];
 
@@ -362,12 +368,24 @@ const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
    RIGHT. The slope steepens with altitude: near base it runs
    out ~0.88 m horizontally per metre climbed (≈49°), near the
    summit only ~0.07 m (≈86°). Precomputed as a lookup. */
+function profileT(m,t){
+ const p=m.profile;
+ t=clamp(t,0,1);
+ for(let i=0;i<p.length-1;i++){
+  const t0=p[i][0],t1=p[i+1][0];
+  if(t<=t1||i===p.length-2){
+   const lt=t1>t0?clamp((t-t0)/(t1-t0),0,1):0;
+   return lerp(p[i][1],p[i+1][1],ease(lt));
+  }
+ }
+ return p[p.length-1][1];
+}
 function buildFace(m){
  const STEP=4, rows=[];
  let x=0;
  for(let a=m.base;a<=m.elev+140;a+=STEP){
   const t=clamp((a-m.base)/(m.elev-m.base),0,1);
-  x+=lerp(0.88,0.07,Math.pow(t,0.62))*STEP;
+  x+=lerp(0.07,0.88,profileT(m,t))*STEP;
   rows.push(x);
  }
  faceTable={base:m.base,step:STEP,rows};
@@ -409,16 +427,27 @@ function thumb(m,cn){
   c.beginPath();c.arc(x,y,r,0,7);c.fill();
  }
  c.globalAlpha=1;
- const sd=xmur3(m.id+'s');
- c.beginPath();c.moveTo(0,h);
- const N=52; let px=w*.06;
+ const sdL=xmur3(m.id+'sL'), sdR=xmur3(m.id+'sR'), af=xmur3(m.id+'apex');
+ const apexF=0.40+(af()%1000)/1000*0.2;
+ const apexX=w*apexF, apexY=h*.07, baseY=h*.97;
+ const baseL=-w*.06, baseR=w*1.06;
+ const N=44, run=[0]; let acc=0;
+ for(let i=1;i<=N;i++){acc+=lerp(0.003,0.030,profileT(m,i/N));run.push(acc);}
+ const total=run[N];
+ c.beginPath();c.moveTo(baseL,baseY);
  for(let i=0;i<=N;i++){
-  const t=i/N;
-  px+=lerp(0.030,0.003,Math.pow(t,.62))*w;
-  const jag=((sd()%1000)/1000-.5)*.03*w;
-  c.lineTo(px+jag, h*.96-t*h*.92);
+  const t=i/N, frac=run[i]/total;
+  const x=baseL+frac*(apexX-baseL), y=baseY-t*(baseY-apexY);
+  const jag=((sdL()%1000)/1000-.5)*.02*w*(1-t*.6);
+  c.lineTo(x+jag,y);
  }
- c.lineTo(0,0);c.closePath();
+ for(let i=N-1;i>=0;i--){
+  const t=i/N, frac=run[i]/total;
+  const x=baseR-frac*(baseR-apexX), y=baseY-t*(baseY-apexY);
+  const jag=((sdR()%1000)/1000-.5)*.02*w*(1-t*.6);
+  c.lineTo(x+jag,y);
+ }
+ c.lineTo(baseR,baseY);c.closePath();
  c.fillStyle=m.rock;c.fill();
  c.strokeStyle=m.accent;c.globalAlpha=.3;c.lineWidth=2;c.stroke();c.globalAlpha=1;
  const wd=xmur3(m.id+'w');c.strokeStyle='#fff';c.lineWidth=1.2;
@@ -596,7 +625,7 @@ function draw(ts){
   const y=wy(al),x=wx(al);
   ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(x+5,y);ctx.lineTo(x+27,y);ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,.26)';ctx.fillText(al+' m',x+32,y+3);
+  ctx.fillStyle='rgba(255,255,255,.26)';ctx.fillText(Math.round(al-M.base)+' m',x+32,y+3);
  }
 
  for(const z of M.zones){
@@ -611,7 +640,7 @@ function draw(ts){
  if(trail.length>1){
   ctx.beginPath();
   for(let i=0;i<trail.length;i++){
-   const x=wx(trail[i])+7,y=wy(trail[i]);
+   const x=wx(trail[i])+15,y=wy(trail[i]);
    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
   ctx.strokeStyle=phase==='fallen'?'rgba(239,68,68,.55)':a;
@@ -673,13 +702,15 @@ function limbPos(u,reach){
 }
 function drawClimber(ex,ey,alt,ts,t){
  const climbing=phase==='climbing', fallen=phase==='fallen';
- const rate=climbing?lerp(0.85,0.34,t):0.09;   // laboured at altitude
+ const shallow=profileT(M,t);   // 1=gentle local terrain, 0=steep
+ const rate=climbing?lerp(0.85,0.34,t)*lerp(0.55,1.3,shallow):0.09;   // laboured at altitude, quicker on shallow ground
  gait=(gait+rate*0.016)%1;
  const lean=clamp(slopeAngle(alt)*0.75,0,0.5);
  const col=fallen?'#ef4444':'#fff';
 
  ctx.save();
- ctx.translate(ex+7,ey-2);
+ ctx.translate(ex+15,ey-2);
+ ctx.scale(1.2,1.2);
  ctx.rotate(fallen?Math.sin(ts*0.009)*0.6+1.15:-lean*0.55);
  ctx.lineCap='round';ctx.lineJoin='round';
 
@@ -700,15 +731,15 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.strokeStyle=col;ctx.lineWidth=2.7;
  ctx.globalAlpha=.62;
  ctx.beginPath();ctx.moveTo(0,3);
- ctx.lineTo(-4+(swRF?3:0),3+yRF*.5+7);ctx.lineTo(-9,3+yRF+10);ctx.stroke();
+ ctx.lineTo(-7+(swRF?3:0),3+yRF*.5+7);ctx.lineTo(-13.5,3+yRF+10);ctx.stroke();
  ctx.globalAlpha=1;
  ctx.beginPath();ctx.moveTo(0,3);
- ctx.lineTo(-3+(swLF?4:0),3+yLF*.5+7);ctx.lineTo(-8,3+yLF+10);ctx.stroke();
+ ctx.lineTo(-6+(swLF?4:0),3+yLF*.5+7);ctx.lineTo(-12.5,3+yLF+10);ctx.stroke();
 
  if(!fallen){
   ctx.fillStyle=M.snowC;ctx.globalAlpha=.5;
-  ctx.fillRect(-11.5,3+yLF+9,3.5,1.6);
-  ctx.fillRect(-12.5,3+yRF+9,3.5,1.6);
+  ctx.fillRect(-16,3+yLF+9,3.5,1.6);
+  ctx.fillRect(-17,3+yRF+9,3.5,1.6);
   ctx.globalAlpha=1;
  }
 
@@ -724,14 +755,14 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.strokeStyle=col;ctx.lineWidth=2.5;
  ctx.globalAlpha=.62;
  ctx.beginPath();ctx.moveTo(-2,-7);
- ctx.lineTo(-7+(swRH?4:0),-7+yRH*.55-3);ctx.lineTo(-11,-7+yRH-6);ctx.stroke();
+ ctx.lineTo(-9+(swRH?4:0),-7+yRH*.55-3);ctx.lineTo(-11,-7+yRH-6);ctx.stroke();
  ctx.globalAlpha=1;
  ctx.beginPath();ctx.moveTo(-2,-7);
- ctx.lineTo(-6+(swLH?5:0),-7+yLH*.55-3);ctx.lineTo(-10,-7+yLH-6);ctx.stroke();
+ ctx.lineTo(-8+(swLH?5:0),-7+yLH*.55-3);ctx.lineTo(-10,-7+yLH-6);ctx.stroke();
 
  ctx.strokeStyle=fallen?'#ef4444':'#9aa8bd';ctx.lineWidth=1.9;
- ctx.beginPath();ctx.moveTo(-11,-7+yRH-6);ctx.lineTo(-16,-7+yRH-9.5);ctx.stroke();
- ctx.beginPath();ctx.moveTo(-10,-7+yLH-6);ctx.lineTo(-15,-7+yLH-9.5);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(-11,-7+yRH-6);ctx.lineTo(-14,-7+yRH-9.5);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(-10,-7+yLH-6);ctx.lineTo(-13,-7+yLH-9.5);ctx.stroke();
 
  ctx.fillStyle=col;
  ctx.beginPath();ctx.arc(-2.5,-13.5,4.1,0,7);ctx.fill();
@@ -872,7 +903,7 @@ function setStatus(){
 }
 function updHUD(){
  const alt=altOf(mult);
- document.getElementById('hud-alt').textContent=Math.round(alt).toLocaleString()+' m';
+ document.getElementById('hud-alt').textContent=Math.round(alt-M.base).toLocaleString()+' m';
  document.getElementById('hud-temp').textContent=tempAt(alt)+'°C';
  const z=zoneAt(alt),el=document.getElementById('hud-zone');
  if(z){el.textContent=z[1];el.style.color=z[2];}else el.textContent='';
@@ -958,7 +989,7 @@ function endRound(){
  document.getElementById('mult-lab').textContent=summit?'★ SUMMIT REACHED':'FELL AT';
  document.getElementById('mult-sub').textContent=summit
   ?M.name.toUpperCase()+' · '+M.elev.toLocaleString()+' M'
-  :Math.round(altOf(crashAt)).toLocaleString()+' M';
+  :Math.round(altOf(crashAt)-M.base).toLocaleString()+' M';
  shake=summit?4:14;flash=summit?0:1;
  M.hist.unshift(rnd(crashAt));if(M.hist.length>24)M.hist.pop();
  renderHist();
