@@ -9,272 +9,207 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#060a12; --panel:#0a0f1c; --panel2:#0d1424;
-  --bd:rgba(255,255,255,0.07); --bd2:rgba(255,255,255,0.035);
-  --tx:#e2e8f0; --mu:#64748b; --dim:#334155;
-  --gn:#10b981; --rd:#ef4444; --am:#f59e0b; --bl:#3b82f6;
+  --bg:#060a12;--panel:#0a0f1c;--panel2:#0d1424;
+  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.035);
+  --tx:#e2e8f0;--mu:#64748b;--dim:#334155;
+  --gn:#10b981;--rd:#ef4444;--am:#f59e0b;--bl:#3b82f6;
 }
 html,body{height:100%;overflow:hidden}
-body{
-  font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--tx);
-  display:flex;flex-direction:column;height:100vh;user-select:none;font-size:12px;
-}
+body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--tx);
+display:flex;flex-direction:column;height:100vh;user-select:none;font-size:12px}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.09);border-radius:2px}
 
-/* ══ HEADER ══ */
-#hdr{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:0 18px;height:48px;flex-shrink:0;
-  border-bottom:1px solid var(--bd);background:rgba(0,0,0,.4);
-}
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:48px;
+flex-shrink:0;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.4)}
 .lg{display:flex;align-items:center;gap:9px}
 .lg-m{color:var(--gn);font-size:16px}
 .lg-n{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:.09em;color:#f8fafc}
 .lg-t{font-size:8px;color:var(--dim);letter-spacing:.18em}
-#hdr-r{display:flex;align-items:center;gap:14px}
+#hdr-r{display:flex;align-items:center;gap:13px}
 .hstat{display:flex;align-items:baseline;gap:5px}
 .hstat-l{font-size:9px;color:var(--mu)}
 .hstat-v{font-size:13px;font-weight:700;color:#f8fafc}
 .hdiv{width:1px;height:16px;background:var(--bd)}
-.btn-s{
-  padding:5px 11px;font-size:9px;font-family:inherit;letter-spacing:.08em;
-  background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:5px;
-  color:var(--mu);cursor:pointer;transition:.15s;
-}
+.btn-s{padding:5px 11px;font-size:9px;font-family:inherit;letter-spacing:.08em;
+background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:5px;color:var(--mu);
+cursor:pointer;transition:.15s}
 .btn-s:hover{background:rgba(255,255,255,.1);color:var(--tx)}
 
-/* ══ SELECT SCREEN ══ */
-#select{flex:1;overflow-y:auto;padding:26px 22px 40px}
-#sel-h{max-width:640px;margin-bottom:24px}
-#sel-eye{font-size:9px;color:var(--mu);letter-spacing:.2em;margin-bottom:10px}
-#sel-t{font-family:'Syne',sans-serif;font-weight:800;font-size:34px;line-height:1.1;color:#f8fafc;margin-bottom:10px}
+#select{flex:1;overflow-y:auto;padding:24px 22px 40px}
+#sel-h{max-width:660px;margin-bottom:22px}
+#sel-eye{font-size:9px;color:var(--mu);letter-spacing:.2em;margin-bottom:9px}
+#sel-t{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;line-height:1.1;color:#f8fafc;margin-bottom:9px}
 #sel-t em{font-style:normal;color:var(--gn)}
 #sel-b{font-size:11px;color:var(--mu);line-height:1.7}
 #grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:1080px){#grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:700px){#grid{grid-template-columns:1fr}}
+@media(max-width:1100px){#grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:720px){#grid{grid-template-columns:1fr}}
 
-.mc{
-  border:1px solid var(--bd);border-radius:14px;background:var(--panel2);
-  overflow:hidden;cursor:pointer;transition:transform .22s,border-color .22s;
-}
+.mc{border:1px solid var(--bd);border-radius:14px;background:var(--panel2);overflow:hidden;
+cursor:pointer;transition:transform .22s,border-color .22s}
 .mc:hover{transform:translateY(-3px)}
-.mc-vis{position:relative;height:128px;overflow:hidden}
+.mc-vis{position:relative;height:120px;overflow:hidden}
 .mc-vis canvas{position:absolute;inset:0;width:100%;height:100%}
-.mc-tag{
-  position:absolute;top:9px;right:9px;padding:2px 8px;border-radius:20px;
-  font-size:8px;font-weight:700;letter-spacing:.09em;z-index:3;
-}
-.mc-alt{
-  position:absolute;bottom:8px;left:11px;z-index:3;
-  font-family:'Syne',sans-serif;font-weight:800;font-size:15px;
-  color:rgba(255,255,255,.55);text-shadow:0 2px 8px #000;
-}
-.mc-b{padding:13px 14px 14px}
-.mc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
+.mc-tag{position:absolute;top:9px;right:9px;padding:2px 8px;border-radius:20px;font-size:8px;
+font-weight:700;letter-spacing:.09em;z-index:3}
+.mc-alt{position:absolute;bottom:7px;left:11px;z-index:3;font-family:'Syne',sans-serif;
+font-weight:800;font-size:14px;color:rgba(255,255,255,.5);text-shadow:0 2px 8px #000}
+.mc-b{padding:12px 14px 14px}
 .mc-n{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;color:#f8fafc;line-height:1}
-.mc-r{font-size:9px;color:var(--mu);margin-bottom:9px}
-.mc-cl{
-  font-size:9.5px;color:var(--dim);line-height:1.6;margin-bottom:11px;
-  padding-bottom:11px;border-bottom:1px solid var(--bd2);min-height:46px;
-}
-.mc-st{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-bottom:11px}
+.mc-r{font-size:9px;color:var(--mu);margin:2px 0 8px}
+.mc-cl{font-size:9.5px;color:var(--dim);line-height:1.6;margin-bottom:10px;min-height:60px}
+.mc-off{border-top:1px solid var(--bd2);border-bottom:1px solid var(--bd2);padding:9px 0;margin-bottom:10px}
+.off-r{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
+.off-l{font-size:8.5px;color:var(--dim);letter-spacing:.06em}
+.off-v{font-size:10px;font-weight:700}
+.mc-st{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:10px}
 .ms-l{font-size:7.5px;color:var(--dim);letter-spacing:.1em;margin-bottom:3px}
-.ms-v{font-size:13px;font-weight:700;color:#f8fafc}
-.mc-hist{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:11px}
+.ms-v{font-size:12.5px;font-weight:700;color:#f8fafc}
+.mc-hist{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px}
 .hchip{padding:1px 6px;border-radius:3px;font-size:8.5px;font-weight:700}
-.mc-go{
-  width:100%;padding:10px 0;font-family:inherit;font-size:10px;font-weight:700;
-  letter-spacing:.09em;border:none;border-radius:7px;cursor:pointer;transition:.16s;
-}
+.mc-go{width:100%;padding:10px 0;font-family:inherit;font-size:10px;font-weight:700;
+letter-spacing:.09em;border:none;border-radius:7px;cursor:pointer;transition:.16s}
 .mc-go:hover{filter:brightness(1.13)}
 
-/* ══ GAME SCREEN ══ */
 #game{flex:1;display:none;min-height:0}
 #game.on{display:flex}
-
 #stage{flex:1;position:relative;overflow:hidden;background:#000}
 #cv{position:absolute;inset:0;width:100%;height:100%}
-
-/* HUD */
 .hud{position:absolute;z-index:5;pointer-events:none}
-#hud-tl{top:12px;left:14px}
-#hud-mtn{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;color:#fff;text-shadow:0 2px 10px #000}
-#hud-wx{font-size:9px;color:rgba(255,255,255,.5);margin-top:3px;text-shadow:0 1px 6px #000}
-#hud-tr{top:12px;right:14px;text-align:right}
+#hud-tl{top:11px;left:14px}
+#hud-mtn{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;text-shadow:0 2px 10px #000}
+#hud-wx{font-size:8.5px;color:rgba(255,255,255,.48);margin-top:3px;text-shadow:0 1px 6px #000}
+#hud-rw{font-size:8.5px;margin-top:4px;text-shadow:0 1px 6px #000;letter-spacing:.05em}
+#hud-tr{top:11px;right:14px;text-align:right}
 #hud-alt{font-size:11px;font-weight:700;color:rgba(255,255,255,.75);text-shadow:0 1px 8px #000}
-#hud-temp{font-size:9px;color:rgba(255,255,255,.42);margin-top:2px;text-shadow:0 1px 6px #000}
+#hud-temp{font-size:8.5px;color:rgba(255,255,255,.4);margin-top:2px;text-shadow:0 1px 6px #000}
 #hud-zone{font-size:8.5px;margin-top:4px;letter-spacing:.1em;font-weight:700;text-shadow:0 1px 6px #000}
-
-/* Centre multiplier */
-#mult-box{
-  position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);
-  text-align:center;z-index:6;pointer-events:none;
-}
-#mult-lab{font-size:9px;letter-spacing:.22em;margin-bottom:8px;min-height:14px;color:rgba(255,255,255,.4)}
-#mult-n{
-  font-family:'Syne',sans-serif;font-weight:800;font-size:80px;line-height:1;
-  text-shadow:0 4px 30px rgba(0,0,0,.85);letter-spacing:-.02em;
-}
-#mult-sub{font-size:9.5px;margin-top:9px;letter-spacing:.13em;min-height:14px;color:rgba(255,255,255,.45)}
-
-/* Status strip */
-#strip{
-  position:absolute;bottom:0;left:0;right:0;z-index:5;
-  display:flex;align-items:center;gap:8px;padding:7px 14px;
-  background:linear-gradient(0deg,rgba(0,0,0,.85),transparent);
-}
+#mult-box{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);text-align:center;
+z-index:6;pointer-events:none}
+#mult-lab{font-size:9px;letter-spacing:.22em;margin-bottom:7px;min-height:13px;color:rgba(255,255,255,.4)}
+#mult-n{font-family:'Syne',sans-serif;font-weight:800;font-size:74px;line-height:1;
+text-shadow:0 4px 34px rgba(0,0,0,.9);letter-spacing:-.02em}
+#mult-sub{font-size:9.5px;margin-top:8px;letter-spacing:.13em;min-height:13px;color:rgba(255,255,255,.45)}
+#strip{position:absolute;bottom:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:8px;
+padding:7px 14px;background:linear-gradient(0deg,rgba(0,0,0,.88),transparent)}
 #dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 #strip-t{font-size:8.5px;letter-spacing:.13em;color:rgba(255,255,255,.5)}
 #hist{display:flex;gap:3px;margin-left:auto;overflow:hidden}
 
-/* ══ RIGHT PANEL ══ */
-#side{width:292px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
-.sec-h{
-  padding:9px 14px 8px;font-size:8.5px;color:var(--dim);letter-spacing:.15em;
-  border-bottom:1px solid var(--bd2);flex-shrink:0;
-  display:flex;justify-content:space-between;align-items:center;
-}
-#bets{flex-shrink:0}
+#side{width:296px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--bd);
+display:flex;flex-direction:column;overflow:hidden}
+.sec-h{padding:8px 14px 7px;font-size:8.5px;color:var(--dim);letter-spacing:.15em;
+border-bottom:1px solid var(--bd2);flex-shrink:0;display:flex;justify-content:space-between}
+#rew{padding:9px 14px;border-bottom:1px solid var(--bd2);flex-shrink:0}
+.rw-r{display:flex;justify-content:space-between;padding:2px 0;font-size:9px}
+.rw-l{color:var(--dim)}
+.rw-v{font-weight:700}
 .bet{padding:11px 14px;border-bottom:1px solid var(--bd2)}
-.bet-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.bet-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
 .bet-t{font-size:8.5px;color:var(--mu);letter-spacing:.11em}
-.bet-st{font-size:8.5px;font-weight:700;letter-spacing:.06em}
-.row{display:flex;gap:5px;margin-bottom:7px}
+.bet-st{font-size:8.5px;font-weight:700;letter-spacing:.05em;color:var(--dim)}
+.row{display:flex;gap:5px;margin-bottom:6px}
 .fld{flex:1}
 .fld-l{font-size:7.5px;color:var(--dim);letter-spacing:.09em;margin-bottom:3px}
-input[type=number],input[type=text]{
-  width:100%;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.09);
-  border-radius:5px;padding:6px 8px;color:#f8fafc;font-size:12px;font-family:inherit;
-  outline:none;transition:border-color .18s;-moz-appearance:textfield;
-}
+input[type=number]{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
+border-radius:5px;padding:6px 8px;color:#f8fafc;font-size:12px;font-family:inherit;outline:none;
+transition:border-color .18s;-moz-appearance:textfield}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
-input:focus{border-color:rgba(255,255,255,.24)}
-input:disabled{opacity:.35;cursor:not-allowed}
-.qk{display:flex;gap:3px;margin-bottom:8px}
-.qk button{
-  flex:1;padding:3px 0;font-size:8.5px;font-family:inherit;
-  background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07);
-  border-radius:4px;color:var(--mu);cursor:pointer;transition:.14s;
-}
-.qk button:hover:not(:disabled){background:rgba(255,255,255,.1);color:var(--tx)}
-.qk button:disabled{opacity:.3;cursor:default}
-.act{
-  width:100%;padding:10px 0;border:none;border-radius:7px;font-family:inherit;
-  font-size:10.5px;font-weight:700;letter-spacing:.07em;cursor:pointer;transition:.16s;
-}
+input:focus{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.07)}
+.qk{display:flex;gap:3px;margin-bottom:7px}
+.qk button{flex:1;padding:3px 0;font-size:8.5px;font-family:inherit;background:rgba(255,255,255,.05);
+border:1px solid rgba(255,255,255,.08);border-radius:4px;color:var(--mu);cursor:pointer;transition:.14s}
+.qk button:hover{background:rgba(255,255,255,.11);color:var(--tx)}
+.auto-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
+.chk{width:13px;height:13px;border-radius:3px;border:1px solid rgba(255,255,255,.17);
+background:rgba(255,255,255,.04);cursor:pointer;flex-shrink:0;display:flex;align-items:center;
+justify-content:center;font-size:9px;color:var(--gn)}
+.chk.on{background:rgba(16,185,129,.18);border-color:rgba(16,185,129,.42)}
+.chk-l{font-size:8.5px;color:var(--mu);cursor:pointer}
+.act{width:100%;padding:10px 0;border:none;border-radius:7px;font-family:inherit;font-size:10.5px;
+font-weight:700;letter-spacing:.07em;cursor:pointer;transition:.16s}
 .act.place{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 3px 14px rgba(59,130,246,.3)}
 .act.place:hover{transform:translateY(-1px)}
-.act.queued{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.28);color:#60a5fa}
+.act.next{background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff}
+.act.queued{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#60a5fa}
 .act.cash{background:linear-gradient(135deg,#10b981,#059669);color:#fff;animation:pg 1.25s ease-in-out infinite}
-.act.done{background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.25);color:var(--gn);cursor:default}
-.act.dead{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:var(--rd);cursor:default}
-.act.off{background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.055);color:var(--dim);cursor:default}
+.act.done{background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.26);color:var(--gn);cursor:default}
+.act.dead{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:var(--rd);cursor:default}
 @keyframes pg{0%,100%{box-shadow:0 3px 16px rgba(16,185,129,.32)}50%{box-shadow:0 3px 30px rgba(16,185,129,.55)}}
-.auto-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
-.chk{
-  width:13px;height:13px;border-radius:3px;border:1px solid rgba(255,255,255,.16);
-  background:rgba(255,255,255,.04);cursor:pointer;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:9px;color:var(--gn);
-}
-.chk.on{background:rgba(16,185,129,.16);border-color:rgba(16,185,129,.4)}
-.chk-l{font-size:8.5px;color:var(--mu)}
-
 #feed{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 #feed-l{flex:1;overflow-y:auto}
-.fi{
-  display:flex;align-items:center;gap:7px;padding:5px 14px;
-  border-bottom:1px solid rgba(255,255,255,.022);animation:sl .26s ease;
-}
+.fi{display:flex;align-items:center;gap:7px;padding:5px 14px;
+border-bottom:1px solid rgba(255,255,255,.022);animation:sl .26s ease}
 @keyframes sl{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.fi-av{width:19px;height:19px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:7.5px;font-weight:700;flex-shrink:0}
+.fi-av{width:19px;height:19px;border-radius:50%;display:flex;align-items:center;
+justify-content:center;font-size:7.5px;font-weight:700;flex-shrink:0}
 .fi-n{font-size:10px;color:#94a3b8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .fi-m{font-size:9.5px;font-weight:700;min-width:38px;text-align:right}
-.fi-v{font-size:9.5px;font-weight:700;min-width:44px;text-align:right}
-#feed-e{padding:22px 14px;text-align:center;font-size:9px;color:#1c2739}
-
-#pf{padding:9px 14px;border-top:1px solid var(--bd2);flex-shrink:0;font-size:8px;color:var(--dim);line-height:1.65}
-#pf b{color:var(--mu);font-weight:400}
-#pf-hash{word-break:break-all;color:#2a3a52}
-
-/* Toast */
-#toast{
-  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);
-  padding:10px 20px;border-radius:9px;font-size:12px;font-weight:700;
-  font-family:'JetBrains Mono',monospace;z-index:999;opacity:0;
-  transition:.26s;pointer-events:none;white-space:nowrap;
-}
+.fi-v{font-size:9.5px;font-weight:700;min-width:46px;text-align:right}
+#feed-e{padding:20px 14px;text-align:center;font-size:9px;color:#1c2739}
+#pf{padding:8px 14px;border-top:1px solid var(--bd2);flex-shrink:0;font-size:8px;color:var(--dim);line-height:1.6}
+#pf-hash{word-break:break-all;color:#26344a}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);
+padding:10px 20px;border-radius:9px;font-size:12px;font-weight:700;z-index:999;opacity:0;
+transition:.26s;pointer-events:none;white-space:nowrap}
 #toast.on{opacity:1;transform:translateX(-50%)}
 #toast.w{background:rgba(16,185,129,.96);color:#fff}
 #toast.l{background:rgba(239,68,68,.96);color:#fff}
+#toast.i{background:rgba(99,102,241,.96);color:#fff}
 </style>
 </head>
 <body>
 
 <div id="hdr">
-  <div class="lg">
-    <span class="lg-m">▲</span><span class="lg-n">MOUNTAINEER</span>
-    <span class="lg-t">CRASH</span>
-  </div>
+  <div class="lg"><span class="lg-m">▲</span><span class="lg-n">MOUNTAINEER</span><span class="lg-t">CRASH</span></div>
   <div id="hdr-r">
     <button class="btn-s" id="back-btn" style="display:none" onclick="toSelect()">◀ BASE CAMP</button>
-    <div class="hdiv" id="hdiv1" style="display:none"></div>
-    <div class="hstat"><span class="hstat-l">RTP</span><span class="hstat-v" style="color:var(--gn)">97%</span></div>
+    <div class="hdiv" id="hd1" style="display:none"></div>
+    <div class="hstat"><span class="hstat-l">REWARDS</span><span class="hstat-v" id="rwtot" style="color:var(--am)">0.00</span></div>
     <div class="hdiv"></div>
     <div class="hstat"><span class="hstat-l">BALANCE</span><span class="hstat-v" id="bal">1000.00</span><span class="hstat-l">TKN</span></div>
   </div>
 </div>
 
-<!-- ══════ SELECT ══════ -->
 <div id="select">
   <div id="sel-h">
-    <div id="sel-eye">SIX PEAKS · SIX MATH MODELS · 97% RTP</div>
+    <div id="sel-eye">SIX PEAKS · SIX MATH MODELS · SIX REWARD STRUCTURES</div>
     <h1 id="sel-t">Choose your <em>ascent.</em></h1>
-    <p id="sel-b">Each mountain's ceiling is its real elevation divided by 100. Each mountain's volatility is derived from its real fatality rate. K2 sits 238&nbsp;m below Everest but kills six times as often — so it busts constantly and pays enormously. Weather, temperature and hazard zones are modelled on real conditions.</p>
+    <p id="sel-b">Ceiling is real elevation ÷ 100. Volatility comes from real fatality rate. Each peak runs its own RTP, rakeback and lossback — Kilimanjaro pays the highest base return, K2 pays the least but gives the most back through rewards. Weather, temperature and hazard zones are modelled on actual conditions.</p>
   </div>
   <div id="grid"></div>
 </div>
 
-<!-- ══════ GAME ══════ -->
 <div id="game">
   <div id="stage">
     <canvas id="cv"></canvas>
-
     <div class="hud" id="hud-tl">
-      <div id="hud-mtn">—</div>
-      <div id="hud-wx">—</div>
+      <div id="hud-mtn">—</div><div id="hud-wx">—</div><div id="hud-rw">—</div>
     </div>
     <div class="hud" id="hud-tr">
-      <div id="hud-alt">—</div>
-      <div id="hud-temp">—</div>
-      <div id="hud-zone"></div>
+      <div id="hud-alt">—</div><div id="hud-temp">—</div><div id="hud-zone"></div>
     </div>
-
     <div id="mult-box">
       <div id="mult-lab">NEXT ASCENT</div>
       <div id="mult-n">1.00×</div>
       <div id="mult-sub">PLACE YOUR STAKE</div>
     </div>
-
     <div id="strip">
-      <div id="dot"></div>
-      <span id="strip-t">—</span>
-      <div id="hist"></div>
+      <div id="dot"></div><span id="strip-t">—</span><div id="hist"></div>
     </div>
   </div>
 
   <div id="side">
-    <div id="bets">
-      <div class="bet" id="bet0"></div>
-      <div class="bet" id="bet1"></div>
-    </div>
+    <div id="rew"></div>
+    <div class="bet" id="bet0"></div>
+    <div class="bet" id="bet1"></div>
     <div id="feed">
       <div class="sec-h"><span>LIVE CLIMBERS</span><span id="feed-ct" style="color:#1e2a3d"></span></div>
       <div id="feed-l"><div id="feed-e">Waiting for the next ascent…</div></div>
     </div>
     <div id="pf">
-      <div><b>PROVABLY FAIR</b> · nonce <span id="pf-n">0</span></div>
+      <div>PROVABLY FAIR · nonce <span id="pf-n">0</span></div>
       <div id="pf-hash">—</div>
     </div>
   </div>
@@ -285,88 +220,93 @@ input:disabled{opacity:.35;cursor:not-allowed}
 <script>
 "use strict";
 
-/* ═══════════════════════════════════════════════════════════
-   MOUNTAIN DATA
+/* ═══════════════════════════════════════════════════════
+   MOUNTAINS
    ceiling  = elevation / 100
-   p0       = instant-fall probability (from real fatality rate)
-   alpha    = Pareto shape, tuned so RTP ≈ 97% at that
-              mountain's reference cash-out target
-   Climate figures are real.
-═══════════════════════════════════════════════════════════ */
-const MTN = [
+   p0       = instant-fall probability (real fatality rate)
+   alpha    = Pareto shape, tuned to hit baseRTP at xref
+   rake     = % of every stake returned regardless of result
+   lossback = % of lost stake returned when condition met
+═══════════════════════════════════════════════════════ */
+const MTN=[
 {
-  id:'kilimanjaro', name:'Kilimanjaro', elev:5895, base:4600,
-  region:'Tanzania · 3°S', risk:'VERY LOW', accent:'#34d399',
-  ceiling:58.95, p0:0.02, alpha:1.0175, growth:0.052,
-  summitTemp:-18, windMax:40,
-  climate:'Equatorial free-standing volcano. Five climate zones from rainforest to arctic summit. Stable, predictable weather in the January–March and June–October dry windows. Altitude sickness, not storms, is the hazard.',
-  wx:'CLEAR · LIGHT WIND 12 km/h',
-  zones:[[5000,'ARCTIC ZONE','#93c5fd'],[5700,'SUMMIT GLACIERS','#e0f2fe']],
-  weather:{ snow:0.25, wind:0.12, gust:0.15, dark:0.30, dust:0, flake:1.5 },
-  rock:'#1a1712', snowC:'#e8f4f8', skyLo:'#122033', skyHi:'#04070f',
-  hist:[2.31,1.84,3.02,1.41,2.68,4.15,1.97,2.44]
+ id:'kilimanjaro',name:'Kilimanjaro',elev:5895,base:4600,region:'Tanzania · 3°S',
+ risk:'VERY LOW',accent:'#34d399',ceiling:58.95,p0:0.02,alpha:1.044,growth:0.050,
+ baseRTP:95.5,rake:2.0,lossback:0,lbCond:0,effRTP:97.5,
+ offering:'Highest base return on the platform. No insurance — you simply keep more of every win.',
+ summitTemp:-18,
+ climate:'Equatorial free-standing volcano. Five climate zones from rainforest to arctic summit. Stable, predictable weather. Altitude sickness, not storms, is the hazard.',
+ wx:'CLEAR · LIGHT WIND 12 km/h',
+ zones:[[5000,'ARCTIC ZONE','#93c5fd'],[5700,'SUMMIT GLACIERS','#e0f2fe']],
+ weather:{snow:.25,wind:.12,gust:.15,dark:.30,dust:0,flake:1.5},
+ rock:'#191611',snowC:'#e8f4f8',skyLo:'#122033',skyHi:'#04070f',
+ hist:[2.31,1.84,3.02,1.41,2.68,4.15,1.97,2.44]
 },
 {
-  id:'aconcagua', name:'Aconcagua', elev:6961, base:5500,
-  region:'Argentina · Andes', risk:'LOW', accent:'#fbbf24',
-  ceiling:69.61, p0:0.04, alpha:0.9839, growth:0.055,
-  summitTemp:-30, windMax:160,
-  climate:'Highest peak outside Asia. Extremely arid Andean desert air. The signature hazard is the viento blanco — a sudden white wind that arrives with almost no warning and drives gusts past 160 km/h.',
-  wx:'VIENTO BLANCO RISK · 68 km/h',
-  zones:[[6000,'HIGH CAMP','#fcd34d'],[6700,'SUMMIT RIDGE','#fef3c7']],
-  weather:{ snow:0.3, wind:0.55, gust:0.7, dark:0.34, dust:0.45, flake:1.2 },
-  rock:'#1c1508', snowC:'#f5f0e0', skyLo:'#1a1408', skyHi:'#05060d',
-  hist:[1.62,2.90,1.18,5.41,2.07,1.75,3.36,1.44]
+ id:'aconcagua',name:'Aconcagua',elev:6961,base:5500,region:'Argentina · Andes',
+ risk:'LOW',accent:'#fbbf24',ceiling:69.61,p0:0.04,alpha:1.0163,growth:0.053,
+ baseRTP:95.0,rake:1.0,lossback:5,lbCond:1.5,effRTP:97.0,
+ offering:'5% back on any fall under 1.50× — protection against the early bust, plus 1% rakeback.',
+ summitTemp:-30,
+ climate:'Highest peak outside Asia. Extremely arid Andean desert air. The viento blanco — a white wind — arrives with almost no warning and drives gusts past 160 km/h.',
+ wx:'VIENTO BLANCO RISK · 68 km/h',
+ zones:[[6000,'HIGH CAMP','#fcd34d'],[6700,'SUMMIT RIDGE','#fef3c7']],
+ weather:{snow:.3,wind:.55,gust:.7,dark:.34,dust:.45,flake:1.2},
+ rock:'#1b1408',snowC:'#f5f0e0',skyLo:'#1a1408',skyHi:'#05060d',
+ hist:[1.62,2.90,1.18,5.41,2.07,1.75,3.36,1.44]
 },
 {
-  id:'montblanc', name:'Mont Blanc', elev:4808, base:3800,
-  region:'France–Italy · Alps', risk:'MEDIUM', accent:'#a78bfa',
-  ceiling:48.08, p0:0.07, alpha:0.9392, growth:0.058,
-  summitTemp:-15, windMax:100,
-  climate:'Lowest ceiling on the platform but deceptively lethal — roughly a hundred deaths a year. Alpine weather turns in minutes and the Grand Couloir rockfall traverse kills regardless of forecast.',
-  wx:'RAPID CHANGE · 45 km/h · CLOUD BUILD',
-  zones:[[4300,'GRAND COULOIR','#c4b5fd'],[4650,'SUMMIT DOME','#ede9fe']],
-  weather:{ snow:0.5, wind:0.35, gust:0.55, dark:0.42, dust:0.1, flake:1.9 },
-  rock:'#141220', snowC:'#eef0fb', skyLo:'#161428', skyHi:'#05050e',
-  hist:[1.24,3.85,1.06,2.18,1.51,6.72,1.33,2.05]
+ id:'montblanc',name:'Mont Blanc',elev:4808,base:3800,region:'France–Italy · Alps',
+ risk:'MEDIUM',accent:'#a78bfa',ceiling:48.08,p0:0.07,alpha:0.9923,growth:0.056,
+ baseRTP:93.5,rake:0,lossback:10,lbCond:999,effRTP:96.5,
+ offering:'10% back on every single fall, no conditions attached. The insurance peak.',
+ summitTemp:-15,
+ climate:'Lowest ceiling on the platform but deceptively lethal — around a hundred deaths a year. Alpine weather turns in minutes and the Grand Couloir rockfall kills regardless of forecast.',
+ wx:'RAPID CHANGE · 45 km/h · CLOUD BUILD',
+ zones:[[4300,'GRAND COULOIR','#c4b5fd'],[4650,'SUMMIT DOME','#ede9fe']],
+ weather:{snow:.5,wind:.35,gust:.55,dark:.42,dust:.1,flake:1.9},
+ rock:'#13111e',snowC:'#eef0fb',skyLo:'#161428',skyHi:'#05050e',
+ hist:[1.24,3.85,1.06,2.18,1.51,6.72,1.33,2.05]
 },
 {
-  id:'denali', name:'Denali', elev:6190, base:4300,
-  region:'Alaska · 63°N', risk:'MEDIUM', accent:'#38bdf8',
-  ceiling:61.90, p0:0.08, alpha:0.9236, growth:0.060,
-  summitTemp:-40, windMax:170,
-  climate:'The coldest of the six despite modest height. At 63° north the barometric pressure is far lower than the same altitude in the Himalaya, so 6,190 m climbs like 7,000 m. Recorded lows near −73 °C.',
-  wx:'EXTREME COLD · 74 km/h · ICE CRYSTALS',
-  zones:[[5200,'HEADWALL','#7dd3fc'],[5900,'SUMMIT RIDGE','#e0f2fe']],
-  weather:{ snow:0.62, wind:0.6, gust:0.75, dark:0.46, dust:0, flake:1.1, aurora:true },
-  rock:'#0d1620', snowC:'#e6f4fd', skyLo:'#0c1a2a', skyHi:'#03060e',
-  hist:[1.09,2.44,1.71,1.02,4.88,1.30,2.13,1.56]
+ id:'denali',name:'Denali',elev:6190,base:4300,region:'Alaska · 63°N',
+ risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,p0:0.08,alpha:1.0079,growth:0.058,
+ baseRTP:91.5,rake:5.0,lossback:0,lbCond:0,effRTP:96.5,
+ offering:'5% rakeback on every stake, win or lose. Built for high-volume play.',
+ summitTemp:-40,
+ climate:'Coldest of the six despite modest height. At 63° north the barometric pressure is far lower than the same altitude in the Himalaya, so 6,190 m climbs like 7,000 m. Lows near −73 °C.',
+ wx:'EXTREME COLD · 74 km/h · ICE CRYSTALS',
+ zones:[[5200,'HEADWALL','#7dd3fc'],[5900,'SUMMIT RIDGE','#e0f2fe']],
+ weather:{snow:.62,wind:.6,gust:.75,dark:.46,dust:0,flake:1.1,aurora:true},
+ rock:'#0c151f',snowC:'#e6f4fd',skyLo:'#0c1a2a',skyHi:'#03060e',
+ hist:[1.09,2.44,1.71,1.02,4.88,1.30,2.13,1.56]
 },
 {
-  id:'everest', name:'Everest', elev:8849, base:6400,
-  region:'Nepal–Tibet · Himalaya', risk:'HIGH', accent:'#818cf8',
-  ceiling:88.49, p0:0.12, alpha:0.8937, growth:0.064,
-  summitTemp:-36, windMax:280,
-  climate:'Highest ceiling on the platform. Above 8,000 m the death zone offers a third of sea-level oxygen. The jet stream parks on the summit for most of the year, driving winds past 280 km/h, and lifts only for a narrow window each May.',
-  wx:'JET STREAM · 118 km/h SUSTAINED',
-  zones:[[7000,'LHOTSE FACE','#a5b4fc'],[8000,'DEATH ZONE','#ef4444'],[8700,'HILLARY STEP','#e0e7ff']],
-  weather:{ snow:0.7, wind:0.85, gust:0.8, dark:0.55, dust:0.05, flake:1.0 },
-  rock:'#0f1020', snowC:'#e9ecfb', skyLo:'#101128', skyHi:'#02030b',
-  hist:[1.03,7.20,1.41,1.00,2.86,14.55,1.12,1.88]
+ id:'everest',name:'Everest',elev:8849,base:6400,region:'Nepal–Tibet · Himalaya',
+ risk:'HIGH',accent:'#818cf8',ceiling:88.49,p0:0.12,alpha:0.9397,growth:0.062,
+ baseRTP:93.0,rake:3.0,lossback:0,lbCond:0,effRTP:96.0,
+ offering:'Highest ceiling on the platform at 88×, with 3% rakeback on every stake.',
+ summitTemp:-36,
+ climate:'Above 8,000 m the death zone offers a third of sea-level oxygen. The jet stream parks on the summit for most of the year, driving winds past 280 km/h, lifting only for a narrow May window.',
+ wx:'JET STREAM · 118 km/h SUSTAINED',
+ zones:[[7000,'LHOTSE FACE','#a5b4fc'],[8000,'DEATH ZONE','#ef4444'],[8700,'HILLARY STEP','#e0e7ff']],
+ weather:{snow:.7,wind:.85,gust:.8,dark:.55,dust:.05,flake:1.0},
+ rock:'#0e0f1e',snowC:'#e9ecfb',skyLo:'#101128',skyHi:'#02030b',
+ hist:[1.03,7.20,1.41,1.00,2.86,14.55,1.12,1.88]
 },
 {
-  id:'k2', name:'K2', elev:8611, base:5150,
-  region:'Pakistan–China · Karakoram', risk:'EXTREME', accent:'#ef4444',
-  ceiling:86.11, p0:0.22, alpha:0.8015, growth:0.070,
-  summitTemp:-45, windMax:200,
-  climate:'The Savage Mountain. 238 m lower than Everest but roughly six times deadlier. Storms arrive without warning, there is no reliable weather window, and the Bottleneck serac at 8,200 m collapses without pattern. First winter ascent only in 2021.',
-  wx:'SEVERE STORM · 132 km/h · WHITEOUT',
-  zones:[[6800,'BLACK PYRAMID','#fca5a5'],[8000,'DEATH ZONE','#ef4444'],[8200,'THE BOTTLENECK','#dc2626']],
-  weather:{ snow:0.95, wind:1.0, gust:1.0, dark:0.66, dust:0, flake:0.9 },
-  rock:'#160c0e', snowC:'#f3e8e8', skyLo:'#180a0c', skyHi:'#030207',
-  hist:[1.00,1.04,28.40,1.00,1.16,1.02,62.75,1.08]
-}
-];
+ id:'k2',name:'K2',elev:8611,base:5150,region:'Pakistan–China · Karakoram',
+ risk:'EXTREME',accent:'#ef4444',ceiling:86.11,p0:0.22,alpha:0.9271,growth:0.068,
+ baseRTP:84.5,rake:8.0,lossback:15,lbCond:1.01,effRTP:95.5,
+ offering:'Lowest base RTP, largest rewards: 8% rakeback plus 15% back on instant falls.',
+ summitTemp:-45,
+ climate:'The Savage Mountain. 238 m lower than Everest but roughly six times deadlier. Storms arrive without warning, there is no reliable weather window, and the Bottleneck serac collapses without pattern.',
+ wx:'SEVERE STORM · 132 km/h · WHITEOUT',
+ zones:[[6800,'BLACK PYRAMID','#fca5a5'],[8000,'DEATH ZONE','#ef4444'],[8200,'THE BOTTLENECK','#dc2626']],
+ weather:{snow:.95,wind:1.0,gust:1.0,dark:.66,dust:0,flake:.9},
+ rock:'#150b0d',snowC:'#f3e8e8',skyLo:'#180a0c',skyHi:'#030207',
+ hist:[1.00,1.04,28.40,1.00,1.16,1.02,62.75,1.08]
+}];
 
 const NAMES=['AlpineTrdr','PeakSeeker','SummitCall','RidgeRider','IceBreaker','NordicPro',
 'GlacierBull','SnowCap','K2Bull','CrevassePro','FjordCap','TundraFund','BasecampX','NordIce',
@@ -374,816 +314,685 @@ const NAMES=['AlpineTrdr','PeakSeeker','SummitCall','RidgeRider','IceBreaker','N
 'RopeGunQ','BelayBull','SeracTrdr','MoraineX','RouteFindr','ColTrader','BivouacX','DepthHoar',
 'CruxFund','ZeroPoint','WhiteoutX','AltiTrader','OxygenBull','CampIV','ThinAir','IceAx9'];
 
-/* ═══════════════ HELPERS ═══════════════ */
-const fx  = n => n.toFixed(2)+'×';
-const f2  = n => n.toFixed(2);
-const rnd = (n,d=2)=>Math.round(n*10**d)/10**d;
-const pick= a => a[Math.floor(Math.random()*a.length)];
+const fx=n=>n.toFixed(2)+'×', f2=n=>n.toFixed(2);
+const rnd=(n,d=2)=>Math.round(n*10**d)/10**d;
+const pick=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
-const lerp =(a,b,t)=>a+(b-a)*t;
-
-function hexRGB(h){h=h.replace('#','');return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
-function mix(c1,c2,t){const a=hexRGB(c1),b=hexRGB(c2);return `rgb(${Math.round(lerp(a[0],b[0],t))},${Math.round(lerp(a[1],b[1],t))},${Math.round(lerp(a[2],b[2],t))})`;}
-
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+function hexRGB(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function mix(a,b,t){const x=hexRGB(a),y=hexRGB(b);return`rgb(${Math.round(lerp(x[0],y[0],t))},${Math.round(lerp(x[1],y[1],t))},${Math.round(lerp(x[2],y[2],t))})`;}
 function chipCSS(v){
-  if(v<1.5) return 'background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.22);color:#ef4444';
-  if(v<3)   return 'background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.22);color:#f59e0b';
-  if(v<10)  return 'background:rgba(16,185,129,.13);border:1px solid rgba(16,185,129,.22);color:#10b981';
-  return             'background:rgba(129,140,248,.13);border:1px solid rgba(129,140,248,.22);color:#818cf8';
+ if(v<1.5)return'background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.22);color:#ef4444';
+ if(v<3)return'background:rgba(245,158,11,.13);border:1px solid rgba(245,158,11,.22);color:#f59e0b';
+ if(v<10)return'background:rgba(16,185,129,.13);border:1px solid rgba(16,185,129,.22);color:#10b981';
+ return'background:rgba(129,140,248,.13);border:1px solid rgba(129,140,248,.22);color:#818cf8';
 }
+function xmur3(s){let h=1779033703^s.length;
+ for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19;}
+ return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return(h^=h>>>16)>>>0;};}
+function hashHex(s){const f=xmur3(s);let o='';for(let i=0;i<6;i++)o+=('00000000'+f().toString(16)).slice(-8);return o;}
 
-/* Deterministic hash — demo stand-in for SHA-256 */
-function xmur3(str){
-  let h=1779033703^str.length;
-  for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}
-  return function(){h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);return (h^=h>>>16)>>>0;};
-}
-function hashHex(s){const f=xmur3(s);let o='';for(let i=0;i<8;i++)o+=('00000000'+f().toString(16)).slice(-8);return o;}
-
-/* ═══════════════ CRASH GENERATION ═══════════════
-   With probability p0 the climber falls immediately (1.00×).
-   Otherwise crash ~ Pareto(alpha) capped at the summit ceiling.
-   RTP at target x = (1-p0)·x^(1-alpha) ≈ 0.97 at each
-   mountain's reference target.
-═════════════════════════════════════════════════ */
-let serverSeed = 'srv_'+Math.random().toString(36).slice(2,14);
-let clientSeed = 'mountaineer';
-let nonce = 0;
-
+let serverSeed='srv_'+Math.random().toString(36).slice(2,14);
+let clientSeed='mountaineer', nonce=0;
 function nextCrash(m){
-  nonce++;
-  const f = xmur3(serverSeed+':'+clientSeed+':'+nonce);
-  f();
-  const r = f()/4294967296;
-  if(r < m.p0) return 1.00;
-  const u = (r - m.p0)/(1 - m.p0);
-  let c = Math.pow(1-u, -1/m.alpha);
-  if(c >= m.ceiling) return rnd(m.ceiling);   // SUMMIT
-  return Math.max(1.00, rnd(c));
+ nonce++;
+ const f=xmur3(serverSeed+':'+clientSeed+':'+nonce); f();
+ const r=f()/4294967296;
+ if(r<m.p0)return 1.00;
+ const u=(r-m.p0)/(1-m.p0);
+ const c=Math.pow(1-u,-1/m.alpha);
+ if(c>=m.ceiling)return rnd(m.ceiling);
+ return Math.max(1.00,rnd(c));
 }
 
-/* ═══════════════ STATE ═══════════════ */
-let balance = 1000;
-let M = null;                 // active mountain
-let phase = 'idle';           // waiting | climbing | fallen
-let mult = 1.0, crashAt = 1.0;
-let countdown = 6;
-let bets = [null,null];       // {stake,auto,autoOn,state,cashMult}
-let feedRows = [], sims = [];
-let raf=null, tickI=null, toI=null;
+let balance=1000, rewardsTotal=0;
+let M=null, phase='idle', mult=1, crashAt=1, countdown=8;
+let bets=[null,null], sims=[];
+let raf=null,tickI=null,toI=null;
 let W=0,H=0,DPR=1;
+let camAlt=0, camX=0, gait=0, shake=0, flash=0;
+let flakes=[], puffs=[], trail=[];
+let faceTable=null;
 
-const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 
-/* Visual/anim state */
-let camAlt = 0, climbPhase = 0, shake = 0, flash = 0;
-let flakes = [], puffs = [], ropeTrail = [];
-
-/* ═══════════════ SELECT SCREEN ═══════════════ */
-function thumbFor(m, canvas){
-  const c = canvas.getContext('2d');
-  const w = canvas.width = canvas.clientWidth*2;
-  const h = canvas.height = canvas.clientHeight*2;
-  const g = c.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,m.skyHi); g.addColorStop(1,m.skyLo);
-  c.fillStyle=g; c.fillRect(0,0,w,h);
-  // stars
-  const f = xmur3(m.id);
-  for(let i=0;i<40;i++){
-    const x=(f()%1000)/1000*w, y=(f()%1000)/1000*h*0.75, r=(f()%10)/10*1.6+0.5;
-    c.globalAlpha=(f()%100)/100*0.5+0.1; c.fillStyle='#fff';
-    c.beginPath(); c.arc(x,y,r,0,7); c.fill();
-  }
-  c.globalAlpha=1;
-  // ridge line — jagged, tallest in centre
-  const seed=xmur3(m.id+'r');
-  c.beginPath(); c.moveTo(0,h);
-  const N=70;
-  for(let i=0;i<=N;i++){
-    const t=i/N;
-    const centre=1-Math.abs(t-0.52)*2.0;
-    const jag=((seed()%1000)/1000-0.5)*0.09;
-    const hgt=Math.max(0.04, Math.pow(clamp(centre,0,1),1.5)*0.86 + jag);
-    c.lineTo(t*w, h - hgt*h*0.94);
-  }
-  c.lineTo(w,h); c.closePath();
-  c.fillStyle=m.rock; c.fill();
-  c.strokeStyle=m.accent; c.globalAlpha=0.22; c.lineWidth=2; c.stroke(); c.globalAlpha=1;
-  // snow cap
-  c.save(); c.clip();
-  const sg=c.createLinearGradient(0,0,0,h*0.55);
-  sg.addColorStop(0,m.snowC); sg.addColorStop(1,'rgba(255,255,255,0)');
-  c.fillStyle=sg; c.globalAlpha=0.7; c.fillRect(0,0,w,h*0.55); c.restore(); c.globalAlpha=1;
-  // wind streaks
-  const wsd=xmur3(m.id+'w');
-  c.strokeStyle='#fff'; c.lineWidth=1.2;
-  for(let i=0;i<Math.round(m.weather.wind*26);i++){
-    const y=(wsd()%1000)/1000*h, x=(wsd()%1000)/1000*w, len=(wsd()%60)+25;
-    c.globalAlpha=0.10+(wsd()%40)/400;
-    c.beginPath(); c.moveTo(x,y); c.lineTo(x+len,y+len*0.13); c.stroke();
-  }
-  c.globalAlpha=1;
+/* ═══ FACE GEOMETRY — side-on profile ═══
+   Rock fills everything LEFT of the edge line; sky to the
+   RIGHT. The slope steepens with altitude: near base it runs
+   out ~0.88 m horizontally per metre climbed (≈49°), near the
+   summit only ~0.07 m (≈86°). Precomputed as a lookup. */
+function buildFace(m){
+ const STEP=4, rows=[];
+ let x=0;
+ for(let a=m.base;a<=m.elev+140;a+=STEP){
+  const t=clamp((a-m.base)/(m.elev-m.base),0,1);
+  x+=lerp(0.88,0.07,Math.pow(t,0.62))*STEP;
+  rows.push(x);
+ }
+ faceTable={base:m.base,step:STEP,rows};
+}
+function faceX(alt){
+ const T=faceTable;
+ const i=(alt-T.base)/T.step;
+ let base;
+ if(i<=0) base=T.rows[0]+i*0.88*T.step;
+ else if(i>=T.rows.length-1) base=T.rows[T.rows.length-1];
+ else { const i0=Math.floor(i); base=lerp(T.rows[i0],T.rows[i0+1],i-i0); }
+ const j=Math.sin(alt*0.055)*3.2+Math.sin(alt*0.021+1.7)*5.5+Math.sin(alt*0.13+3.1)*1.4;
+ return base+j;
+}
+function slopeAngle(alt){
+ const d=6;
+ return Math.atan2(faceX(alt+d)-faceX(alt-d), d*2);
 }
 
+function altOf(m){
+ if(!M)return 0;
+ const t=Math.log(Math.max(m,1))/Math.log(M.ceiling);
+ return M.base+(M.elev-M.base)*clamp(t,0,1);
+}
+function zoneAt(a){let z=null;for(const q of M.zones)if(a>=q[0])z=q;return z;}
+function tempAt(a){const t=clamp((a-M.base)/(M.elev-M.base),0,1);return Math.round(lerp(M.summitTemp+16,M.summitTemp,t));}
+
+/* ═══ THUMBNAILS ═══ */
+function thumb(m,cn){
+ const c=cn.getContext('2d');
+ const w=cn.width=cn.clientWidth*2, h=cn.height=cn.clientHeight*2;
+ const g=c.createLinearGradient(0,0,0,h);
+ g.addColorStop(0,m.skyHi);g.addColorStop(1,m.skyLo);
+ c.fillStyle=g;c.fillRect(0,0,w,h);
+ const f=xmur3(m.id);
+ for(let i=0;i<38;i++){
+  const x=(f()%1000)/1000*w,y=(f()%1000)/1000*h*.7,r=(f()%10)/10*1.5+.4;
+  c.globalAlpha=(f()%100)/100*.5+.1;c.fillStyle='#fff';
+  c.beginPath();c.arc(x,y,r,0,7);c.fill();
+ }
+ c.globalAlpha=1;
+ const sd=xmur3(m.id+'s');
+ c.beginPath();c.moveTo(0,h);
+ const N=52; let px=w*.06;
+ for(let i=0;i<=N;i++){
+  const t=i/N;
+  px+=lerp(0.030,0.003,Math.pow(t,.62))*w;
+  const jag=((sd()%1000)/1000-.5)*.03*w;
+  c.lineTo(px+jag, h*.96-t*h*.92);
+ }
+ c.lineTo(0,0);c.closePath();
+ c.fillStyle=m.rock;c.fill();
+ c.strokeStyle=m.accent;c.globalAlpha=.3;c.lineWidth=2;c.stroke();c.globalAlpha=1;
+ const wd=xmur3(m.id+'w');c.strokeStyle='#fff';c.lineWidth=1.2;
+ for(let i=0;i<Math.round(m.weather.wind*24);i++){
+  const y=(wd()%1000)/1000*h,x=(wd()%1000)/1000*w,l=(wd()%55)+22;
+  c.globalAlpha=.09+(wd()%40)/420;
+  c.beginPath();c.moveTo(x,y);c.lineTo(x+l,y+l*.12);c.stroke();
+ }
+ c.globalAlpha=1;
+}
+
+/* ═══ SELECT ═══ */
 function renderSelect(){
-  document.getElementById('grid').innerHTML = MTN.map(m=>{
-    const a=m.accent;
-    const chips=m.hist.slice(0,7).map(v=>`<span class="hchip" style="${chipCSS(v)}">${fx(v)}</span>`).join('');
-    return `<div class="mc" data-id="${m.id}"
-        onmouseenter="this.style.borderColor='${a}45'"
-        onmouseleave="this.style.borderColor='var(--bd)'">
-      <div class="mc-vis">
-        <canvas data-thumb="${m.id}"></canvas>
-        <div class="mc-tag" style="background:${a}18;border:1px solid ${a}38;color:${a}">${m.risk}</div>
-        <div class="mc-alt">${m.elev.toLocaleString()} m</div>
-      </div>
-      <div class="mc-b">
-        <div class="mc-top">
-          <div class="mc-n">${m.name}</div>
-        </div>
-        <div class="mc-r">${m.region}</div>
-        <div class="mc-cl">${m.climate}</div>
-        <div class="mc-st">
-          <div><div class="ms-l">CEILING</div><div class="ms-v" style="color:${a}">${m.ceiling.toFixed(0)}×</div></div>
-          <div><div class="ms-l">FALL RATE</div><div class="ms-v">${(m.p0*100).toFixed(0)}%</div></div>
-          <div><div class="ms-l">SUMMIT</div><div class="ms-v">${m.summitTemp}°C</div></div>
-        </div>
-        <div class="mc-hist">${chips}</div>
-        <button class="mc-go" style="background:${a}1c;border:1px solid ${a}3a;color:${a}">▲&nbsp; BEGIN ASCENT</button>
-      </div>
-    </div>`;
-  }).join('');
-
-  document.querySelectorAll('[data-thumb]').forEach(cn=>{
-    thumbFor(MTN.find(x=>x.id===cn.dataset.thumb), cn);
-  });
-  document.querySelectorAll('.mc').forEach(card=>{
-    card.onclick=()=>enter(card.dataset.id);
-  });
+ document.getElementById('grid').innerHTML=MTN.map(m=>{
+  const a=m.accent;
+  const chips=m.hist.slice(0,7).map(v=>`<span class="hchip" style="${chipCSS(v)}">${fx(v)}</span>`).join('');
+  const lb=m.lossback===0?'—':m.lbCond>=999?m.lossback+'% all falls':m.lossback+'% under '+m.lbCond.toFixed(2)+'×';
+  return `<div class="mc" data-id="${m.id}"
+   onmouseenter="this.style.borderColor='${a}45'" onmouseleave="this.style.borderColor='var(--bd)'">
+   <div class="mc-vis"><canvas data-thumb="${m.id}"></canvas>
+    <div class="mc-tag" style="background:${a}18;border:1px solid ${a}38;color:${a}">${m.risk}</div>
+    <div class="mc-alt">${m.elev.toLocaleString()} m</div></div>
+   <div class="mc-b">
+    <div class="mc-n">${m.name}</div>
+    <div class="mc-r">${m.region}</div>
+    <div class="mc-cl">${m.climate}</div>
+    <div class="mc-off">
+     <div class="off-r"><span class="off-l">BASE RTP</span><span class="off-v" style="color:#94a3b8">${m.baseRTP.toFixed(1)}%</span></div>
+     <div class="off-r"><span class="off-l">RAKEBACK</span><span class="off-v" style="color:${m.rake?'#f59e0b':'#334155'}">${m.rake?m.rake.toFixed(1)+'%':'—'}</span></div>
+     <div class="off-r"><span class="off-l">LOSSBACK</span><span class="off-v" style="color:${m.lossback?'#60a5fa':'#334155'};font-size:9px">${lb}</span></div>
+     <div class="off-r" style="border-top:1px solid var(--bd2);margin-top:4px;padding-top:5px">
+      <span class="off-l" style="color:var(--mu)">EFFECTIVE RTP</span>
+      <span class="off-v" style="color:${a}">${m.effRTP.toFixed(1)}%</span></div>
+    </div>
+    <div class="mc-st">
+     <div><div class="ms-l">CEILING</div><div class="ms-v" style="color:${a}">${m.ceiling.toFixed(0)}×</div></div>
+     <div><div class="ms-l">FALL RATE</div><div class="ms-v">${(m.p0*100).toFixed(0)}%</div></div>
+     <div><div class="ms-l">SUMMIT</div><div class="ms-v">${m.summitTemp}°C</div></div>
+    </div>
+    <div class="mc-hist">${chips}</div>
+    <button class="mc-go" style="background:${a}1c;border:1px solid ${a}3a;color:${a}">▲&nbsp; BEGIN ASCENT</button>
+   </div></div>`;
+ }).join('');
+ document.querySelectorAll('[data-thumb]').forEach(c=>thumb(MTN.find(x=>x.id===c.dataset.thumb),c));
+ document.querySelectorAll('.mc').forEach(c=>c.onclick=()=>enter(c.dataset.id));
 }
 
-/* ═══════════════ NAVIGATION ═══════════════ */
+/* ═══ NAV ═══ */
 function enter(id){
-  M = MTN.find(x=>x.id===id);
-  document.getElementById('select').style.display='none';
-  document.getElementById('game').classList.add('on');
-  document.getElementById('back-btn').style.display='';
-  document.getElementById('hdiv1').style.display='';
-  document.getElementById('hud-mtn').textContent=M.name;
-  document.getElementById('hud-wx').textContent=M.wx;
-  bets=[null,null];
-  feedRows=[];
-  resize();
-  buildBet(0); buildBet(1);
-  renderHist();
-  startWait();
+ M=MTN.find(x=>x.id===id);
+ buildFace(M);
+ document.getElementById('select').style.display='none';
+ document.getElementById('game').classList.add('on');
+ document.getElementById('back-btn').style.display='';
+ document.getElementById('hd1').style.display='';
+ document.getElementById('hud-mtn').textContent=M.name;
+ document.getElementById('hud-wx').textContent=M.wx;
+ const hr=document.getElementById('hud-rw');
+ hr.textContent=`${M.effRTP.toFixed(1)}% RTP · ${M.rake?M.rake+'% RAKEBACK':'NO RAKEBACK'}${M.lossback?' · '+M.lossback+'% LOSSBACK':''}`;
+ hr.style.color=M.accent;
+ bets=[null,null];
+ renderRewards(); buildBetPanel(0); buildBetPanel(1); renderHist();
+ resize(); startWait();
 }
 function toSelect(){
-  stopAll();
-  M=null; phase='idle';
-  document.getElementById('game').classList.remove('on');
-  document.getElementById('select').style.display='';
-  document.getElementById('back-btn').style.display='none';
-  document.getElementById('hdiv1').style.display='none';
+ stopAll(); M=null; phase='idle';
+ document.getElementById('game').classList.remove('on');
+ document.getElementById('select').style.display='';
+ document.getElementById('back-btn').style.display='none';
+ document.getElementById('hd1').style.display='none';
 }
 function stopAll(){
-  if(raf){cancelAnimationFrame(raf);raf=null;}
-  if(tickI){clearInterval(tickI);tickI=null;}
-  if(toI){clearTimeout(toI);toI=null;}
+ if(raf){cancelAnimationFrame(raf);raf=null;}
+ if(tickI){clearInterval(tickI);tickI=null;}
+ if(toI){clearTimeout(toI);toI=null;}
 }
-
-/* ═══════════════ CANVAS SIZE ═══════════════ */
 function resize(){
-  const s=document.getElementById('stage');
-  if(!s.clientWidth) return;
-  DPR=Math.min(window.devicePixelRatio||1,2);
-  W=s.clientWidth; H=s.clientHeight;
-  cv.width=W*DPR; cv.height=H*DPR;
-  cv.style.width=W+'px'; cv.style.height=H+'px';
-  ctx.setTransform(DPR,0,0,DPR,0,0);
-  seedFlakes();
+ const s=document.getElementById('stage');
+ if(!s.clientWidth)return;
+ DPR=Math.min(window.devicePixelRatio||1,2);
+ W=s.clientWidth;H=s.clientHeight;
+ cv.width=W*DPR;cv.height=H*DPR;
+ cv.style.width=W+'px';cv.style.height=H+'px';
+ ctx.setTransform(DPR,0,0,DPR,0,0);
+ seedFlakes();
 }
 window.addEventListener('resize',resize);
-
 function seedFlakes(){
-  if(!M) return;
-  flakes=[];
-  const n=Math.round(80+M.weather.snow*220);
-  for(let i=0;i<n;i++){
-    flakes.push({
-      x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*M.weather.flake+0.4,
-      sp:0.4+Math.random()*1.6,
-      o:0.15+Math.random()*0.55,
-      ph:Math.random()*7
-    });
-  }
+ if(!M)return; flakes=[];
+ const n=Math.round(70+M.weather.snow*200);
+ for(let i=0;i<n;i++)flakes.push({x:Math.random()*W,y:Math.random()*H,
+  r:Math.random()*M.weather.flake+.4,sp:.4+Math.random()*1.6,o:.15+Math.random()*.55});
 }
 
-/* ═══════════════ ALTITUDE MAPPING ═══════════════ */
-// altitude rises logarithmically with the multiplier so the
-// full ceiling maps exactly to the true summit elevation
-function altOf(m){
-  if(!M) return 0;
-  const t = Math.log(Math.max(m,1)) / Math.log(M.ceiling);
-  return M.base + (M.elev - M.base) * clamp(t,0,1);
-}
-function zoneAt(a){
-  if(!M) return null;
-  let z=null;
-  for(const q of M.zones) if(a>=q[0]) z=q;
-  return z;
-}
-function tempAt(a){
-  if(!M) return 0;
-  const t=clamp((a-M.base)/(M.elev-M.base),0,1);
-  return Math.round(lerp(M.summitTemp+16, M.summitTemp, t));
-}
-
-/* ═══════════════ MOUNTAIN GEOMETRY ═══════════════ */
-// Face edges as a function of world altitude. The couloir
-// narrows with height — the climb literally gets tighter.
-let faceSeed=null;
-function faceAt(alt){
-  if(!faceSeed) faceSeed=xmur3(M.id+'face');
-  const t = clamp((alt-M.base)/(M.elev-M.base),0,1);
-  const halfBase = W*0.42;
-  const halfTop  = W*0.11;
-  let half = lerp(halfBase, halfTop, Math.pow(t,0.85));
-  // jagged detail from layered sine
-  const n1=Math.sin(alt*0.031)*0.5+Math.sin(alt*0.0117+2.1)*0.32+Math.sin(alt*0.073+4.4)*0.18;
-  const n2=Math.sin(alt*0.024+1.3)*0.5+Math.sin(alt*0.0091+3.7)*0.3+Math.sin(alt*0.061+0.9)*0.2;
-  const rough = W*0.05*(1-t*0.55);
-  return { l: W*0.5 - half + n1*rough, r: W*0.5 + half + n2*rough };
-}
-
-/* ═══════════════ RENDER ═══════════════ */
-const PX_PER_M = () => H/230;   // ~230 m of face visible
-const CLIMBER_Y = () => H*0.66;
+/* ═══ RENDER ═══ */
+const PPM=()=>H/210;
+const CY =()=>H*0.62;
+const CXS=()=>W*0.40;
 
 function draw(ts){
-  if(!M) return;
-  const a=M.accent;
-  const alt = altOf(mult);
-  camAlt = lerp(camAlt, alt, 0.16);
-  const ppm = PX_PER_M(), cy = CLIMBER_Y();
-  const t = clamp((camAlt-M.base)/(M.elev-M.base),0,1);
+ if(!M)return;
+ const a=M.accent, ppm=PPM(), cy=CY(), cxs=CXS();
+ const alt=altOf(mult);
+ camAlt=lerp(camAlt,alt,0.15);
+ camX  =lerp(camX,faceX(alt),0.15);
+ const t=clamp((camAlt-M.base)/(M.elev-M.base),0,1);
+ const wx=w=>cxs+(faceX(w)-camX);
+ const wy=w=>cy-(w-camAlt)*ppm;
 
-  ctx.save();
-  if(shake>0.1){
-    ctx.translate((Math.random()-0.5)*shake,(Math.random()-0.5)*shake);
-    shake*=0.88;
+ ctx.save();
+ if(shake>0.1){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.88;}
+
+ const g=ctx.createLinearGradient(0,0,0,H);
+ g.addColorStop(0,mix(M.skyHi,'#000000',t*.72));
+ g.addColorStop(.55,mix(M.skyLo,M.skyHi,t*.8));
+ g.addColorStop(1,mix(M.skyLo,'#000000',t*.3));
+ ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+
+ const sf=xmur3(M.id+'st');
+ for(let i=0;i<80;i++){
+  const x=(sf()%10000)/10000*W,y=(sf()%10000)/10000*H*.72,r=(sf()%10)/10*1.3+.3;
+  ctx.globalAlpha=clamp(t*1.2-.05,0,.9)*((sf()%100)/150+.25);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
+ }
+ ctx.globalAlpha=1;
+
+ if(M.weather.aurora){
+  for(let b=0;b<3;b++){
+   const ag=ctx.createLinearGradient(0,H*.05+b*28,0,H*.05+b*28+84);
+   ag.addColorStop(0,'rgba(52,211,153,0)');
+   ag.addColorStop(.5,`rgba(52,211,153,${.05*t+.02})`);
+   ag.addColorStop(1,'rgba(52,211,153,0)');
+   ctx.fillStyle=ag;ctx.beginPath();
+   for(let x=0;x<=W;x+=16){const y=H*.05+b*28+Math.sin(x*.008+ts*.0004+b)*20;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+   for(let x=W;x>=0;x-=16)ctx.lineTo(x,H*.05+b*28+84+Math.sin(x*.008+ts*.0004+b)*20);
+   ctx.closePath();ctx.fill();
   }
+ }
 
-  /* ── SKY: darkens with altitude ── */
-  const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0, mix(M.skyHi,'#000000', t*0.75));
-  g.addColorStop(0.55, mix(M.skyLo, M.skyHi, t*0.8));
-  g.addColorStop(1, mix(M.skyLo,'#000000', t*0.35));
-  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+ ctx.fillStyle='rgba(255,255,255,.03)';
+ ctx.beginPath();ctx.moveTo(0,H);
+ const df=xmur3(M.id+'d');
+ for(let x=0;x<=W;x+=26)
+  ctx.lineTo(x,H*.66-Math.abs(Math.sin(x*.005+1.4))*H*.19-((df()%100)/100)*16+t*H*.34);
+ ctx.lineTo(W,H);ctx.closePath();ctx.fill();
 
-  /* ── STARS (emerge with altitude) ── */
-  const sf=xmur3(M.id+'stars');
-  ctx.globalAlpha=clamp(t*1.15-0.05,0,0.9);
-  for(let i=0;i<90;i++){
-    const x=(sf()%10000)/10000*W, y=(sf()%10000)/10000*H*0.7;
-    const r=(sf()%10)/10*1.3+0.3;
-    ctx.fillStyle='#fff'; ctx.globalAlpha=clamp(t*1.15-0.05,0,0.9)*((sf()%100)/140+0.25);
-    ctx.beginPath(); ctx.arc(x,y,r,0,7); ctx.fill();
-  }
-  ctx.globalAlpha=1;
+ /* ── THE FACE ── */
+ const topAlt=camAlt+cy/ppm+50, botAlt=camAlt-(H-cy)/ppm-50;
+ ctx.beginPath();
+ ctx.moveTo(-60,H+60);ctx.lineTo(-60,-60);
+ for(let al=topAlt;al>=botAlt;al-=4)ctx.lineTo(wx(al),wy(al));
+ ctx.lineTo(-60,H+60);ctx.closePath();
+ ctx.fillStyle=M.rock;ctx.fill();
 
-  /* ── AURORA (Denali only, 63°N) ── */
-  if(M.weather.aurora){
-    for(let b=0;b<3;b++){
-      const ag=ctx.createLinearGradient(0,H*0.06+b*30,0,H*0.06+b*30+90);
-      ag.addColorStop(0,'rgba(52,211,153,0)');
-      ag.addColorStop(0.5,`rgba(52,211,153,${0.05*t+0.02})`);
-      ag.addColorStop(1,'rgba(52,211,153,0)');
-      ctx.fillStyle=ag;
-      ctx.beginPath();
-      for(let x=0;x<=W;x+=14){
-        const y=H*0.06+b*30+Math.sin(x*0.008+ts*0.0004+b)*22;
-        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
-      }
-      for(let x=W;x>=0;x-=14){
-        const y=H*0.06+b*30+90+Math.sin(x*0.008+ts*0.0004+b)*22;
-        ctx.lineTo(x,y);
-      }
-      ctx.closePath(); ctx.fill();
-    }
-  }
+ ctx.beginPath();
+ for(let al=topAlt;al>=botAlt;al-=4){const x=wx(al),y=wy(al);al===topAlt?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+ ctx.strokeStyle=a;ctx.globalAlpha=.45;ctx.lineWidth=1.6;ctx.stroke();
+ ctx.globalAlpha=.10;ctx.lineWidth=9;ctx.stroke();ctx.globalAlpha=1;
 
-  /* ── DISTANT RANGE ── */
-  ctx.fillStyle='rgba(255,255,255,0.028)';
-  ctx.beginPath(); ctx.moveTo(0,H);
-  const df=xmur3(M.id+'dist');
-  for(let x=0;x<=W;x+=28){
-    const y=H*0.62 - Math.abs(Math.sin(x*0.006+2))*H*0.16 - ((df()%100)/100)*18 + t*H*0.3;
-    ctx.lineTo(x,y);
-  }
-  ctx.lineTo(W,H); ctx.closePath(); ctx.fill();
+ ctx.globalAlpha=.055;ctx.fillStyle=M.snowC;
+ for(let al=Math.floor(botAlt/25)*25;al<topAlt;al+=25){
+  const y=wy(al),x=wx(al);
+  ctx.fillRect(x-190,y,190,2.6);
+ }
+ ctx.globalAlpha=1;
 
-  /* ── THE FACE ── */
-  const topAlt    = camAlt + (cy)/ppm;
-  const botAlt    = camAlt - (H-cy)/ppm;
-  const STEP = 5;
+ ctx.strokeStyle='rgba(255,255,255,.035)';ctx.lineWidth=1;
+ for(let al=Math.floor(botAlt/60)*60;al<topAlt;al+=60){
+  const y=wy(al),x=wx(al);
+  ctx.beginPath();ctx.moveTo(x-170,y+20);ctx.lineTo(x,y);ctx.stroke();
+ }
 
-  // left mass
-  ctx.beginPath(); ctx.moveTo(0,H+4); ctx.lineTo(0,-4);
-  for(let al=topAlt; al>=botAlt; al-=STEP){
-    const y = cy - (al-camAlt)*ppm;
-    ctx.lineTo(faceAt(al).l, y);
-  }
-  ctx.lineTo(0,H+4); ctx.closePath();
-  ctx.fillStyle=M.rock; ctx.fill();
-  ctx.strokeStyle=a; ctx.globalAlpha=0.30; ctx.lineWidth=1.4; ctx.stroke(); ctx.globalAlpha=1;
+ ctx.font='500 8px "JetBrains Mono",monospace';
+ for(let al=Math.ceil(botAlt/100)*100;al<topAlt;al+=100){
+  const y=wy(al),x=wx(al);
+  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x+5,y);ctx.lineTo(x+27,y);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.26)';ctx.fillText(al+' m',x+32,y+3);
+ }
 
-  // right mass
-  ctx.beginPath(); ctx.moveTo(W,H+4); ctx.lineTo(W,-4);
-  for(let al=topAlt; al>=botAlt; al-=STEP){
-    const y = cy - (al-camAlt)*ppm;
-    ctx.lineTo(faceAt(al).r, y);
-  }
-  ctx.lineTo(W,H+4); ctx.closePath();
-  ctx.fillStyle=M.rock; ctx.fill();
-  ctx.strokeStyle=a; ctx.globalAlpha=0.30; ctx.stroke(); ctx.globalAlpha=1;
+ for(const z of M.zones){
+  const y=wy(z[0]);if(y<-40||y>H+40)continue;
+  const x=wx(z[0]);
+  ctx.strokeStyle=z[2];ctx.globalAlpha=.5;ctx.lineWidth=1.4;ctx.setLineDash([5,5]);
+  ctx.beginPath();ctx.moveTo(x-180,y);ctx.lineTo(x+140,y);ctx.stroke();ctx.setLineDash([]);
+  ctx.globalAlpha=.9;ctx.fillStyle=z[2];ctx.font='700 8px "JetBrains Mono",monospace';
+  ctx.fillText(z[1],x+9,y-5);ctx.globalAlpha=1;
+ }
 
-  // snow/ice banding on the rock
-  ctx.globalAlpha=0.055;
-  ctx.fillStyle=M.snowC;
-  for(let al=Math.floor(botAlt/40)*40; al<topAlt; al+=40){
-    const y=cy-(al-camAlt)*ppm;
-    const f=faceAt(al);
-    ctx.fillRect(0,y,f.l,3.5);
-    ctx.fillRect(f.r,y,W-f.r,3.5);
-  }
-  ctx.globalAlpha=1;
-
-  /* ── ALTITUDE GRADUATIONS ── */
-  ctx.font='500 8px "JetBrains Mono",monospace';
-  for(let al=Math.ceil(botAlt/100)*100; al<topAlt; al+=100){
-    const y=cy-(al-camAlt)*ppm;
-    const f=faceAt(al);
-    ctx.strokeStyle='rgba(255,255,255,0.05)'; ctx.lineWidth=1;
-    ctx.beginPath(); ctx.moveTo(f.l,y); ctx.lineTo(f.r,y); ctx.stroke();
-    ctx.fillStyle='rgba(255,255,255,0.20)';
-    ctx.fillText(al+' m', f.l+6, y-3);
-  }
-
-  /* ── HAZARD ZONE BANDS ── */
-  for(const z of M.zones){
-    const y=cy-(z[0]-camAlt)*ppm;
-    if(y<-30||y>H+30) continue;
-    const f=faceAt(z[0]);
-    ctx.strokeStyle=z[2]; ctx.globalAlpha=0.45; ctx.lineWidth=1.4;
-    ctx.setLineDash([5,5]);
-    ctx.beginPath(); ctx.moveTo(f.l,y); ctx.lineTo(f.r,y); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.globalAlpha=0.85; ctx.fillStyle=z[2];
-    ctx.font='700 8px "JetBrains Mono",monospace';
-    ctx.fillText(z[1], f.l+6, y+11);
-    ctx.globalAlpha=1;
-  }
-
-  /* ── ROPE TRAIL ── */
-  if(ropeTrail.length>1){
-    ctx.beginPath();
-    for(let i=0;i<ropeTrail.length;i++){
-      const p=ropeTrail[i];
-      const y=cy-(p.alt-camAlt)*ppm;
-      i===0?ctx.moveTo(p.x,y):ctx.lineTo(p.x,y);
-    }
-    ctx.strokeStyle= phase==='fallen'? 'rgba(239,68,68,0.5)' : a;
-    ctx.globalAlpha=0.55; ctx.lineWidth=1.6; ctx.stroke();
-    ctx.globalAlpha=0.12; ctx.lineWidth=7; ctx.stroke();
-    ctx.globalAlpha=1;
-  }
-
-  /* ── CLIMBER ── */
-  const cx = W*0.5 + Math.sin(alt*0.02)*W*0.055;
-  drawClimber(cx, cy, ts, t);
-
-  /* ── SNOW / SPINDRIFT ── */
-  const wind = M.weather.wind*(1+t*0.85);
-  const gust = 1 + Math.sin(ts*0.0011)*M.weather.gust*0.75;
-  for(const fl of flakes){
-    fl.x += wind*5.2*gust*fl.sp;
-    fl.y += fl.sp*(0.5+M.weather.snow) + (phase==='climbing'? 2.4:0.4);
-    fl.ph += 0.05;
-    if(fl.x>W+8) fl.x=-8;
-    if(fl.y>H+8){ fl.y=-8; fl.x=Math.random()*W; }
-    ctx.globalAlpha=fl.o*(0.45+t*0.55);
-    ctx.fillStyle=M.snowC;
-    ctx.beginPath();
-    ctx.ellipse(fl.x,fl.y,fl.r*(1+wind*1.5),fl.r,0.2,0,7);
-    ctx.fill();
-  }
-  ctx.globalAlpha=1;
-
-  /* ── DUST (Aconcagua viento blanco) ── */
-  if(M.weather.dust>0){
-    ctx.globalAlpha=M.weather.dust*0.07*(1+Math.sin(ts*0.0013)*0.5);
-    const dg=ctx.createLinearGradient(0,0,W,H);
-    dg.addColorStop(0,'rgba(251,191,36,0)');
-    dg.addColorStop(0.5,'rgba(251,191,36,0.5)');
-    dg.addColorStop(1,'rgba(251,191,36,0)');
-    ctx.fillStyle=dg; ctx.fillRect(0,0,W,H); ctx.globalAlpha=1;
-  }
-
-  /* ── ALTITUDE VIGNETTE — thinning air ── */
-  const vg=ctx.createRadialGradient(W/2,H*0.5,H*0.22,W/2,H*0.5,H*0.85);
-  vg.addColorStop(0,'rgba(0,0,0,0)');
-  vg.addColorStop(1,`rgba(0,0,0,${0.35+t*0.42+M.weather.dark*0.2})`);
-  ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
-
-  /* ── OXYGEN PULSE above 7,000 m ── */
-  if(alt>7000 && phase==='climbing'){
-    const p=(alt-7000)/(M.elev-7000);
-    ctx.globalAlpha=0.10*p*(0.5+Math.sin(ts*0.004)*0.5);
-    ctx.fillStyle='#ef4444'; ctx.fillRect(0,0,W,H); ctx.globalAlpha=1;
-  }
-
-  /* ── FALL FLASH ── */
-  if(flash>0.01){
-    ctx.globalAlpha=flash*0.5; ctx.fillStyle='#ef4444';
-    ctx.fillRect(0,0,W,H); ctx.globalAlpha=1; flash*=0.90;
-  }
-
-  ctx.restore();
-}
-
-function drawClimber(x,y,ts,t){
-  const climbing = phase==='climbing';
-  const fallen   = phase==='fallen';
-  // Cycle slows as the air thins — laboured movement at altitude
-  const speed = climbing ? lerp(0.011,0.0045,t) : 0.002;
-  climbPhase += speed*16;
-  const sw = Math.sin(climbPhase);
-  const sw2= Math.sin(climbPhase+Math.PI);
-  const S = 1.0;
-
-  ctx.save();
-  ctx.translate(x,y);
-  if(fallen){ ctx.rotate(Math.sin(ts*0.01)*0.5+0.9); ctx.translate(0,14); }
-
-  ctx.lineCap='round'; ctx.lineJoin='round';
-  const col = fallen? '#ef4444' : '#ffffff';
-
-  // glow
-  ctx.globalAlpha=0.16; ctx.fillStyle= fallen? '#ef4444' : M.accent;
-  ctx.beginPath(); ctx.arc(0,-6,20,0,7); ctx.fill(); ctx.globalAlpha=1;
-
-  // rope to anchor below
-  if(!fallen){
-    ctx.strokeStyle=M.accent; ctx.globalAlpha=0.4; ctx.lineWidth=1.1;
-    ctx.beginPath(); ctx.moveTo(-1,4); ctx.quadraticCurveTo(-9,22,-4,40); ctx.stroke();
-    ctx.globalAlpha=1;
-  }
-
-  // legs
-  ctx.strokeStyle=col; ctx.lineWidth=2.6*S;
+ if(trail.length>1){
   ctx.beginPath();
-  ctx.moveTo(0,4); ctx.lineTo(-3+sw*4, 11); ctx.lineTo(-5+sw*6, 19);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(0,4); ctx.lineTo(3+sw2*4, 11); ctx.lineTo(5+sw2*6, 19);
-  ctx.stroke();
+  for(let i=0;i<trail.length;i++){
+   const x=wx(trail[i])+7,y=wy(trail[i]);
+   i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle=phase==='fallen'?'rgba(239,68,68,.55)':a;
+  ctx.globalAlpha=.6;ctx.lineWidth=1.5;ctx.stroke();
+  ctx.globalAlpha=.13;ctx.lineWidth=7;ctx.stroke();ctx.globalAlpha=1;
+ }
 
-  // torso
-  ctx.lineWidth=3.4*S;
-  ctx.beginPath(); ctx.moveTo(0,4); ctx.lineTo(0,-7); ctx.stroke();
+ if(M.elev-camAlt<cy/ppm){
+  const sy=wy(M.elev),sx=wx(M.elev);
+  ctx.strokeStyle=a;ctx.globalAlpha=.85;ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx,sy-17);ctx.stroke();
+  ctx.fillStyle=a;ctx.beginPath();
+  ctx.moveTo(sx,sy-17);ctx.lineTo(sx+12,sy-13.5);ctx.lineTo(sx,sy-10);ctx.closePath();ctx.fill();
+  ctx.font='700 8px "JetBrains Mono",monospace';
+  ctx.fillText('SUMMIT '+M.ceiling.toFixed(0)+'×',sx+16,sy-12);ctx.globalAlpha=1;
+ }
 
-  // pack
-  ctx.fillStyle= fallen? 'rgba(239,68,68,.8)' : M.accent;
-  ctx.globalAlpha=0.85;
-  ctx.beginPath(); ctx.roundRect(-6.5,-7,5,10,1.5); ctx.fill();
+ drawClimber(wx(alt),wy(alt),alt,ts,t);
+
+ const wind=M.weather.wind*(1+t*.9), gust=1+Math.sin(ts*.0011)*M.weather.gust*.75;
+ for(const f of flakes){
+  f.x+=wind*5.4*gust*f.sp; f.y+=f.sp*(.5+M.weather.snow)+(phase==='climbing'?2.2:.4);
+  if(f.x>W+8)f.x=-8; if(f.y>H+8){f.y=-8;f.x=Math.random()*W;}
+  ctx.globalAlpha=f.o*(.45+t*.55);ctx.fillStyle=M.snowC;
+  ctx.beginPath();ctx.ellipse(f.x,f.y,f.r*(1+wind*1.6),f.r,.2,0,7);ctx.fill();
+ }
+ ctx.globalAlpha=1;
+
+ if(M.weather.dust>0){
+  ctx.globalAlpha=M.weather.dust*.07*(1+Math.sin(ts*.0013)*.5);
+  const dg=ctx.createLinearGradient(0,0,W,H);
+  dg.addColorStop(0,'rgba(251,191,36,0)');dg.addColorStop(.5,'rgba(251,191,36,.5)');
+  dg.addColorStop(1,'rgba(251,191,36,0)');
+  ctx.fillStyle=dg;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+ }
+
+ const vg=ctx.createRadialGradient(W/2,H*.5,H*.2,W/2,H*.5,H*.86);
+ vg.addColorStop(0,'rgba(0,0,0,0)');
+ vg.addColorStop(1,`rgba(0,0,0,${.34+t*.42+M.weather.dark*.2})`);
+ ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+
+ if(alt>7000&&phase==='climbing'){
+  const p=(alt-7000)/(M.elev-7000);
+  ctx.globalAlpha=.1*p*(.5+Math.sin(ts*.004)*.5);
+  ctx.fillStyle='#ef4444';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+ }
+ if(flash>.01){ctx.globalAlpha=flash*.5;ctx.fillStyle='#ef4444';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;flash*=.9;}
+ ctx.restore();
+}
+
+/* ═══ CLIMBER — side-on, four-beat gait ═══
+   Each limb plants on the rock, then drifts DOWN relative to
+   the body as it rises, before swinging up to re-plant.
+   Offsets are staggered so only one limb moves at a time —
+   the same three-points-of-contact rule real climbers use. */
+function limbPos(u,reach){
+ if(u<0.28){const e=ease(u/0.28);return lerp(reach*0.42,-reach*0.42,e);}
+ return lerp(-reach*0.42,reach*0.42,(u-0.28)/0.72);
+}
+function drawClimber(ex,ey,alt,ts,t){
+ const climbing=phase==='climbing', fallen=phase==='fallen';
+ const rate=climbing?lerp(0.85,0.34,t):0.09;   // laboured at altitude
+ gait=(gait+rate*0.016)%1;
+ const lean=clamp(slopeAngle(alt)*0.75,0,0.5);
+ const col=fallen?'#ef4444':'#fff';
+
+ ctx.save();
+ ctx.translate(ex+7,ey-2);
+ ctx.rotate(fallen?Math.sin(ts*0.009)*0.6+1.15:-lean*0.55);
+ ctx.lineCap='round';ctx.lineJoin='round';
+
+ ctx.globalAlpha=.15;ctx.fillStyle=fallen?'#ef4444':M.accent;
+ ctx.beginPath();ctx.arc(0,-8,19,0,7);ctx.fill();ctx.globalAlpha=1;
+
+ if(!fallen){
+  ctx.strokeStyle=M.accent;ctx.globalAlpha=.42;ctx.lineWidth=1.1;
+  ctx.beginPath();ctx.moveTo(-2,2);ctx.quadraticCurveTo(-14,20,-8,42);ctx.stroke();ctx.globalAlpha=1;
+ }
+
+ const R=15;
+ const yRH=limbPos(gait,R), yLF=limbPos((gait+.25)%1,R),
+       yLH=limbPos((gait+.5)%1,R), yRF=limbPos((gait+.75)%1,R);
+ const mv=u=>u<0.28;
+ const swRH=mv(gait), swLF=mv((gait+.25)%1), swLH=mv((gait+.5)%1), swRF=mv((gait+.75)%1);
+
+ ctx.strokeStyle=col;ctx.lineWidth=2.7;
+ ctx.globalAlpha=.62;
+ ctx.beginPath();ctx.moveTo(0,3);
+ ctx.lineTo(-4+(swRF?3:0),3+yRF*.5+7);ctx.lineTo(-9,3+yRF+10);ctx.stroke();
+ ctx.globalAlpha=1;
+ ctx.beginPath();ctx.moveTo(0,3);
+ ctx.lineTo(-3+(swLF?4:0),3+yLF*.5+7);ctx.lineTo(-8,3+yLF+10);ctx.stroke();
+
+ if(!fallen){
+  ctx.fillStyle=M.snowC;ctx.globalAlpha=.5;
+  ctx.fillRect(-11.5,3+yLF+9,3.5,1.6);
+  ctx.fillRect(-12.5,3+yRF+9,3.5,1.6);
   ctx.globalAlpha=1;
+ }
 
-  // arms + ice axes
-  ctx.strokeStyle=col; ctx.lineWidth=2.4*S;
-  const a1=-sw*0.9, a2=-sw2*0.9;
-  ctx.beginPath();
-  ctx.moveTo(0,-5); ctx.lineTo(-6, -10+a1*4); ctx.lineTo(-10, -17+a1*7);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(0,-5); ctx.lineTo(6, -10+a2*4); ctx.lineTo(10, -17+a2*7);
-  ctx.stroke();
-  // axe heads
-  ctx.strokeStyle= fallen? '#ef4444' : '#94a3b8'; ctx.lineWidth=1.8;
-  ctx.beginPath(); ctx.moveTo(-10,-17+a1*7); ctx.lineTo(-14,-21+a1*7); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(10,-17+a2*7);  ctx.lineTo(14,-21+a2*7);  ctx.stroke();
+ ctx.lineWidth=3.6;
+ ctx.beginPath();ctx.moveTo(0,3);ctx.lineTo(-2,-9);ctx.stroke();
 
-  // head
-  ctx.fillStyle=col;
-  ctx.beginPath(); ctx.arc(0,-11.5,4.2*S,0,7); ctx.fill();
-  // goggles
-  ctx.fillStyle= fallen? '#7f1d1d' : '#0f172a';
-  ctx.fillRect(-3.6,-13,7.2,2.6);
+ ctx.fillStyle=fallen?'rgba(239,68,68,.85)':M.accent;
+ ctx.globalAlpha=.88;
+ ctx.save();ctx.translate(3.2,-5);ctx.rotate(.12);
+ ctx.beginPath();ctx.roundRect(0,-4,5,10,1.6);ctx.fill();ctx.restore();
+ ctx.globalAlpha=1;
 
-  ctx.restore();
+ ctx.strokeStyle=col;ctx.lineWidth=2.5;
+ ctx.globalAlpha=.62;
+ ctx.beginPath();ctx.moveTo(-2,-7);
+ ctx.lineTo(-7+(swRH?4:0),-7+yRH*.55-3);ctx.lineTo(-11,-7+yRH-6);ctx.stroke();
+ ctx.globalAlpha=1;
+ ctx.beginPath();ctx.moveTo(-2,-7);
+ ctx.lineTo(-6+(swLH?5:0),-7+yLH*.55-3);ctx.lineTo(-10,-7+yLH-6);ctx.stroke();
 
-  // breath puffs at altitude
-  if(climbing && t>0.35 && Math.random()<0.06){
-    puffs.push({x:x+5,y:y-12,alt:altOf(mult),r:2,o:0.4});
-  }
-  for(let i=puffs.length-1;i>=0;i--){
-    const p=puffs[i];
-    p.r+=0.55; p.o-=0.014; p.x+=M.weather.wind*2.5;
-    if(p.o<=0){puffs.splice(i,1);continue;}
-    ctx.globalAlpha=p.o; ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
-  }
-  ctx.globalAlpha=1;
+ ctx.strokeStyle=fallen?'#ef4444':'#9aa8bd';ctx.lineWidth=1.9;
+ ctx.beginPath();ctx.moveTo(-11,-7+yRH-6);ctx.lineTo(-16,-7+yRH-9.5);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(-10,-7+yLH-6);ctx.lineTo(-15,-7+yLH-9.5);ctx.stroke();
+
+ ctx.fillStyle=col;
+ ctx.beginPath();ctx.arc(-2.5,-13.5,4.1,0,7);ctx.fill();
+ ctx.fillStyle=fallen?'#7f1d1d':'#0d1626';
+ ctx.save();ctx.translate(-2.5,-14);ctx.rotate(.1);ctx.fillRect(-3.4,-1.3,6.8,2.5);ctx.restore();
+ ctx.restore();
+
+ if(climbing&&(swRH||swLH)&&Math.random()<.22)
+  puffs.push({x:ex-4,y:ey-16+Math.random()*8,r:1,o:.55,vx:-.6-Math.random(),vy:.5+Math.random(),ice:true});
+ if(climbing&&t>.3&&Math.random()<.05)
+  puffs.push({x:ex+11,y:ey-14,r:1.6,o:.42,vx:M.weather.wind*2.6+1,vy:-.25,ice:false});
+ for(let i=puffs.length-1;i>=0;i--){
+  const p=puffs[i];
+  p.x+=p.vx;p.y+=p.vy;p.r+=p.ice?.1:.55;p.o-=p.ice?.03:.014;
+  if(p.o<=0){puffs.splice(i,1);continue;}
+  ctx.globalAlpha=p.o;ctx.fillStyle=p.ice?M.snowC:'#fff';
+  ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();
+ }
+ ctx.globalAlpha=1;
 }
 
-/* ═══════════════ BET PANELS ═══════════════ */
-function buildBet(i){
-  const el=document.getElementById('bet'+i);
-  const b=bets[i];
-  const canEdit = phase==='waiting' && !b;
-  let stateTxt='', stateCol='var(--dim)';
-  if(b){
-    if(b.state==='queued'){stateTxt='QUEUED';stateCol='#60a5fa';}
-    if(b.state==='live'){stateTxt='CLIMBING';stateCol='var(--gn)';}
-    if(b.state==='cashed'){stateTxt='TURNED BACK @ '+fx(b.cashMult);stateCol='var(--gn)';}
-    if(b.state==='lost'){stateTxt='FELL';stateCol='var(--rd)';}
-  }
-  el.innerHTML=`
-    <div class="bet-hd">
-      <span class="bet-t">STAKE ${i+1}</span>
-      <span class="bet-st" style="color:${stateCol}">${stateTxt}</span>
-    </div>
-    <div class="row">
-      <div class="fld">
-        <div class="fld-l">AMOUNT (TKN)</div>
-        <input type="number" id="s${i}" value="${b?b.stake:10}" min="1" step="1" ${canEdit?'':'disabled'}>
-      </div>
-      <div class="fld">
-        <div class="fld-l">AUTO TURN-BACK (×)</div>
-        <input type="number" id="a${i}" value="${b&&b.auto?b.auto:''}" placeholder="—" min="1.01" step="0.01" ${canEdit?'':'disabled'}>
-      </div>
-    </div>
-    <div class="qk">
-      <button onclick="qk(${i},0.5)"  ${canEdit?'':'disabled'}>½</button>
-      <button onclick="qk(${i},2)"    ${canEdit?'':'disabled'}>2×</button>
-      <button onclick="qkSet(${i},50)" ${canEdit?'':'disabled'}>50</button>
-      <button onclick="qkSet(${i},200)"${canEdit?'':'disabled'}>200</button>
-      <button onclick="qkMax(${i})"   ${canEdit?'':'disabled'}>MAX</button>
-    </div>
-    <div class="auto-row">
-      <div class="chk ${b&&b.autoOn?'on':''}" onclick="toggleAuto(${i})">${b&&b.autoOn?'✓':''}</div>
-      <span class="chk-l">Auto turn-back enabled</span>
-    </div>
-    ${btnFor(i)}`;
+/* ═══ REWARDS ═══ */
+function renderRewards(){
+ const lb=M.lossback===0?'—':M.lbCond>=999?M.lossback+'% on all falls':M.lossback+'% under '+M.lbCond.toFixed(2)+'×';
+ document.getElementById('rew').innerHTML=`
+  <div style="font-size:8.5px;color:var(--dim);letter-spacing:.15em;margin-bottom:7px">${M.name.toUpperCase()} · OFFERING</div>
+  <div class="rw-r"><span class="rw-l">Base RTP</span><span class="rw-v" style="color:#94a3b8">${M.baseRTP.toFixed(1)}%</span></div>
+  <div class="rw-r"><span class="rw-l">Rakeback</span><span class="rw-v" style="color:${M.rake?'#f59e0b':'#334155'}">${M.rake?M.rake.toFixed(1)+'%':'—'}</span></div>
+  <div class="rw-r"><span class="rw-l">Lossback</span><span class="rw-v" style="color:${M.lossback?'#60a5fa':'#334155'};font-size:8.5px">${lb}</span></div>
+  <div class="rw-r" style="border-top:1px solid var(--bd2);margin-top:5px;padding-top:5px">
+   <span class="rw-l" style="color:var(--mu)">Effective RTP</span>
+   <span class="rw-v" style="color:${M.accent}">${M.effRTP.toFixed(1)}%</span></div>
+  <div style="font-size:8.5px;color:var(--dim);line-height:1.5;margin-top:7px">${M.offering}</div>`;
 }
 
-function btnFor(i){
-  const b=bets[i];
-  if(phase==='climbing' && b && b.state==='live')
-    return `<button class="act cash" onclick="cashOut(${i})">TURN BACK · ${fx(mult)}</button>`;
-  if(b && b.state==='cashed')
-    return `<button class="act done">✓ +${f2(b.stake*b.cashMult)} TKN</button>`;
-  if(b && b.state==='lost')
-    return `<button class="act dead">FELL AT ${fx(crashAt)}</button>`;
-  if(b && b.state==='queued')
-    return `<button class="act queued" onclick="cancelBet(${i})">✕ CANCEL · ${f2(b.stake)} TKN</button>`;
-  if(phase==='waiting')
-    return `<button class="act place" onclick="placeBet(${i})">PLACE STAKE</button>`;
-  return `<button class="act off">ASCENT IN PROGRESS</button>`;
+/* ═══ BET PANELS — built once, inputs never rebuilt ═══ */
+function buildBetPanel(i){
+ document.getElementById('bet'+i).innerHTML=`
+  <div class="bet-hd"><span class="bet-t">STAKE ${i+1}</span><span class="bet-st" id="bs${i}"></span></div>
+  <div class="row">
+   <div class="fld"><div class="fld-l">AMOUNT (TKN)</div>
+    <input type="number" id="s${i}" value="${i===0?10:25}" min="1" step="1"></div>
+   <div class="fld"><div class="fld-l">AUTO TURN-BACK (×)</div>
+    <input type="number" id="a${i}" value="${i===0?'':'2.00'}" placeholder="—" min="1.01" step="0.01"></div>
+  </div>
+  <div class="qk">
+   <button onclick="qm(${i},.5)">½</button><button onclick="qm(${i},2)">2×</button>
+   <button onclick="qs(${i},50)">50</button><button onclick="qs(${i},200)">200</button>
+   <button onclick="qx(${i})">MAX</button>
+  </div>
+  <div class="auto-row">
+   <div class="chk ${i===1?'on':''}" id="c${i}" onclick="tgl(${i})">${i===1?'✓':''}</div>
+   <span class="chk-l" onclick="tgl(${i})">Auto turn-back enabled</span>
+  </div>
+  <button class="act place" id="b${i}">PLACE STAKE</button>`;
+ document.getElementById('b'+i).onclick=()=>betAction(i);
+ updBet(i);
 }
-function refreshBtn(i){
-  const el=document.getElementById('bet'+i);
-  const old=el.querySelector('.act');
-  if(!old) return;
-  const tmp=document.createElement('div'); tmp.innerHTML=btnFor(i);
-  old.replaceWith(tmp.firstElementChild);
+function updBet(i){
+ const b=bets[i],btn=document.getElementById('b'+i),st=document.getElementById('bs'+i);
+ if(!btn)return;
+ let cls='place',txt='PLACE STAKE',s='',sc='var(--dim)';
+ if(b){
+  if(b.state==='queued'){cls='queued';txt='✕ CANCEL · '+f2(b.stake)+' TKN';s='QUEUED';sc='#60a5fa';}
+  else if(b.state==='next'){cls='queued';txt='✕ CANCEL NEXT · '+f2(b.stake);s='NEXT ROUND';sc='#818cf8';}
+  else if(b.state==='live'){cls='cash';txt='TURN BACK · '+fx(mult);s='CLIMBING';sc='var(--gn)';}
+  else if(b.state==='cashed'){cls='done';txt='✓ +'+f2(b.payout)+' TKN';s='TURNED BACK @ '+fx(b.cashMult);sc='var(--gn)';}
+  else if(b.state==='lost'){cls='dead';txt=b.refund>0?'FELL · '+f2(b.refund)+' BACK':'FELL AT '+fx(crashAt);s='FELL';sc='var(--rd)';}
+ } else if(phase==='climbing'||phase==='fallen'){cls='next';txt='STAKE NEXT ROUND';}
+ btn.className='act '+cls;btn.textContent=txt;
+ st.textContent=s;st.style.color=sc;
 }
+function updBetLive(i){
+ const b=bets[i];
+ if(b&&b.state==='live'){const btn=document.getElementById('b'+i);if(btn)btn.textContent='TURN BACK · '+fx(mult);}
+}
+function qm(i,f){const e=document.getElementById('s'+i);e.value=Math.max(1,Math.round(+e.value*f));}
+function qs(i,v){document.getElementById('s'+i).value=v;}
+function qx(i){document.getElementById('s'+i).value=Math.floor(balance);}
+function tgl(i){const c=document.getElementById('c'+i);c.classList.toggle('on');c.textContent=c.classList.contains('on')?'✓':'';}
 
-function qk(i,f){const el=document.getElementById('s'+i);el.value=Math.max(1,Math.round(+el.value*f));}
-function qkSet(i,v){document.getElementById('s'+i).value=Math.min(v,Math.floor(balance));}
-function qkMax(i){document.getElementById('s'+i).value=Math.floor(balance);}
-function toggleAuto(i){
-  if(!bets[i]){ bets[i]={stake:0,auto:null,autoOn:true,state:'draft'}; buildBet(i); return; }
-  bets[i].autoOn=!bets[i].autoOn; buildBet(i);
-}
-
-function placeBet(i){
-  if(phase!=='waiting') return;
-  const s=+document.getElementById('s'+i).value||0;
-  const a=+document.getElementById('a'+i).value||null;
-  const autoOn = document.querySelector(`#bet${i} .chk`).classList.contains('on');
-  if(s<=0||s>balance){ toast('Insufficient balance','l'); return; }
-  balance=rnd(balance-s); updBal();
-  bets[i]={stake:s, auto:(a&&a>1.01)?a:null, autoOn:autoOn&&!!a, state:'queued', cashMult:null};
-  buildBet(i);
-}
-function cancelBet(i){
-  if(phase!=='waiting'||!bets[i]||bets[i].state!=='queued') return;
-  balance=rnd(balance+bets[i].stake); updBal();
-  bets[i]=null; buildBet(i);
+function betAction(i){
+ const b=bets[i];
+ if(b&&b.state==='live'){cashOut(i);return;}
+ if(b&&(b.state==='queued'||b.state==='next')){
+  balance=rnd(balance+b.stake);updBal();bets[i]=null;updBet(i);return;
+ }
+ if(b&&(b.state==='cashed'||b.state==='lost'))return;
+ const s=+document.getElementById('s'+i).value||0;
+ const a=+document.getElementById('a'+i).value||null;
+ const autoOn=document.getElementById('c'+i).classList.contains('on');
+ if(s<=0){toast('Enter a stake amount','i');return;}
+ if(s>balance){toast('Insufficient balance','l');return;}
+ balance=rnd(balance-s);updBal();
+ bets[i]={stake:s,auto:(a&&a>1.01)?a:null,autoOn:autoOn&&!!a,
+  state:phase==='waiting'?'queued':'next',cashMult:null,payout:0,refund:0};
+ updBet(i);
+ if(phase!=='waiting')toast('Staked for the next ascent','i');
 }
 function cashOut(i){
-  const b=bets[i];
-  if(!b||b.state!=='live'||phase!=='climbing') return;
-  b.state='cashed'; b.cashMult=rnd(mult);
-  const win=rnd(b.stake*b.cashMult);
-  balance=rnd(balance+win); updBal();
-  buildBet(i);
-  addFeed('You', b.cashMult, win, true, true);
-  toast('+'+f2(win)+' TKN — turned back at '+fx(b.cashMult),'w');
+ const b=bets[i];
+ if(!b||b.state!=='live'||phase!=='climbing')return;
+ b.state='cashed';b.cashMult=rnd(mult);
+ const win=rnd(b.stake*b.cashMult), rake=rnd(b.stake*M.rake/100);
+ b.payout=rnd(win+rake);
+ balance=rnd(balance+b.payout);rewardsTotal=rnd(rewardsTotal+rake);
+ updBal();updBet(i);
+ addFeed('You',b.cashMult,win,true,true);
+ toast('+'+f2(win)+' TKN'+(rake>0?' · +'+f2(rake)+' rakeback':'')+' at '+fx(b.cashMult),'w');
 }
-function updBal(){document.getElementById('bal').textContent=f2(balance);}
-
-/* ═══════════════ FEED ═══════════════ */
-function addFeed(name,m,val,win,you){
-  const l=document.getElementById('feed-l');
-  const e=document.getElementById('feed-e'); if(e)e.remove();
-  const d=document.createElement('div');
-  d.className='fi';
-  const c=win?'#10b981':'#ef4444';
-  d.innerHTML=`
-    <div class="fi-av" style="background:${you?M.accent+'2a':'rgba(255,255,255,.05)'};color:${you?M.accent:'#64748b'}">${name.slice(0,2).toUpperCase()}</div>
-    <span class="fi-n" style="${you?'color:'+M.accent+';font-weight:700':''}">${name}</span>
-    <span class="fi-m" style="color:${c}">${win?fx(m):'—'}</span>
-    <span class="fi-v" style="color:${c}">${win?'+'+Math.round(val):'−'+Math.round(val)}</span>`;
-  l.insertBefore(d,l.firstChild);
-  while(l.children.length>40) l.removeChild(l.lastChild);
-  document.getElementById('feed-ct').textContent=l.children.length;
+function updBal(){
+ document.getElementById('bal').textContent=f2(balance);
+ document.getElementById('rwtot').textContent=f2(rewardsTotal);
 }
 
+function addFeed(n,m,v,win,you){
+ const l=document.getElementById('feed-l');
+ const e=document.getElementById('feed-e');if(e)e.remove();
+ const d=document.createElement('div');d.className='fi';
+ const c=win?'#10b981':'#ef4444';
+ d.innerHTML=`<div class="fi-av" style="background:${you?M.accent+'2a':'rgba(255,255,255,.05)'};color:${you?M.accent:'#64748b'}">${n.slice(0,2).toUpperCase()}</div>
+  <span class="fi-n" style="${you?'color:'+M.accent+';font-weight:700':''}">${n}</span>
+  <span class="fi-m" style="color:${c}">${win?fx(m):'—'}</span>
+  <span class="fi-v" style="color:${c}">${win?'+'+Math.round(v):'−'+Math.round(v)}</span>`;
+ l.insertBefore(d,l.firstChild);
+ while(l.children.length>40)l.removeChild(l.lastChild);
+ document.getElementById('feed-ct').textContent=l.children.length;
+}
 function renderHist(){
-  document.getElementById('hist').innerHTML =
-    M.hist.slice(0,10).map(v=>`<span class="hchip" style="${chipCSS(v)}">${fx(v)}</span>`).join('');
+ document.getElementById('hist').innerHTML=
+  M.hist.slice(0,10).map(v=>`<span class="hchip" style="${chipCSS(v)}">${fx(v)}</span>`).join('');
 }
-
-/* ═══════════════ STATUS ═══════════════ */
 function setStatus(){
-  const d=document.getElementById('dot'), s=document.getElementById('strip-t');
-  const map={
-    waiting:['#f59e0b','ACCEPTING STAKES'],
-    climbing:['#10b981','ASCENT IN PROGRESS'],
-    fallen:['#ef4444','FALL — ROUND SETTLED']
-  };
-  const [c,txt]=map[phase]||['#334155','—'];
-  d.style.background=c; d.style.boxShadow='0 0 7px '+c;
-  s.textContent=txt;
+ const d=document.getElementById('dot'),s=document.getElementById('strip-t');
+ const m={waiting:['#f59e0b','ACCEPTING STAKES'],climbing:['#10b981','ASCENT IN PROGRESS'],
+  fallen:['#ef4444','ROUND SETTLED']}[phase]||['#334155','—'];
+ d.style.background=m[0];d.style.boxShadow='0 0 7px '+m[0];s.textContent=m[1];
 }
 function updHUD(){
-  const alt=altOf(mult);
-  document.getElementById('hud-alt').textContent=Math.round(alt).toLocaleString()+' m';
-  document.getElementById('hud-temp').textContent=tempAt(alt)+'°C · '+M.wx.split('·')[0].trim();
-  const z=zoneAt(alt);
-  const el=document.getElementById('hud-zone');
-  if(z){ el.textContent=z[1]; el.style.color=z[2]; } else el.textContent='';
+ const alt=altOf(mult);
+ document.getElementById('hud-alt').textContent=Math.round(alt).toLocaleString()+' m';
+ document.getElementById('hud-temp').textContent=tempAt(alt)+'°C';
+ const z=zoneAt(alt),el=document.getElementById('hud-zone');
+ if(z){el.textContent=z[1];el.style.color=z[2];}else el.textContent='';
 }
-function toast(msg,type){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className=type+' on';
-  clearTimeout(t._t); t._t=setTimeout(()=>t.className='',3200);
+function toast(m,t){
+ const e=document.getElementById('toast');
+ e.textContent=m;e.className=t+' on';
+ clearTimeout(e._t);e._t=setTimeout(()=>e.className='',3000);
 }
 
-/* ═══════════════ ROUND LIFECYCLE ═══════════════ */
+/* ═══ LIFECYCLE ═══ */
 function startWait(){
-  stopAll();
-  phase='waiting'; mult=1.0; countdown=6;
-  ropeTrail=[]; puffs=[]; sims=[];
-  camAlt=altOf(1); flash=0; shake=0;
-  crashAt=nextCrash(M);
-
-  document.getElementById('pf-n').textContent=nonce;
-  document.getElementById('pf-hash').textContent='sha256('+hashHex(serverSeed).slice(0,40)+'…)';
-  document.getElementById('feed-l').innerHTML='<div id="feed-e">Waiting for the next ascent…</div>';
-  document.getElementById('feed-ct').textContent='';
-
-  const n=document.getElementById('mult-n');
-  n.style.color='rgba(255,255,255,.85)';
-  n.textContent=countdown;
-  document.getElementById('mult-lab').textContent='NEXT ASCENT IN';
-  document.getElementById('mult-sub').textContent='PLACE YOUR STAKE';
-
-  setStatus(); updHUD();
-  buildBet(0); buildBet(1);
-  loop();
-
-  tickI=setInterval(()=>{
-    countdown--;
-    n.textContent=countdown;
-    if(countdown<=0){ clearInterval(tickI); tickI=null; beginClimb(); }
-  },1000);
+ stopAll();
+ phase='waiting';mult=1;countdown=8;
+ trail=[];puffs=[];sims=[];camAlt=altOf(1);camX=faceX(altOf(1));flash=0;shake=0;
+ crashAt=nextCrash(M);
+ document.getElementById('pf-n').textContent=nonce;
+ document.getElementById('pf-hash').textContent='sha256('+hashHex(serverSeed).slice(0,36)+'…)';
+ document.getElementById('feed-l').innerHTML='<div id="feed-e">Waiting for the next ascent…</div>';
+ document.getElementById('feed-ct').textContent='';
+ const n=document.getElementById('mult-n');
+ n.style.color='rgba(255,255,255,.85)';n.textContent=countdown;
+ document.getElementById('mult-lab').textContent='NEXT ASCENT IN';
+ document.getElementById('mult-sub').textContent='PLACE YOUR STAKE';
+ for(let i=0;i<2;i++){
+  if(bets[i]&&bets[i].state==='next')bets[i].state='queued';
+  else if(bets[i]&&(bets[i].state==='cashed'||bets[i].state==='lost'))bets[i]=null;
+  updBet(i);
+ }
+ setStatus();updHUD();loop();
+ tickI=setInterval(()=>{
+  countdown--;n.textContent=countdown;
+  if(countdown<=0){clearInterval(tickI);tickI=null;beginClimb();}
+ },1000);
 }
 
 function beginClimb(){
-  phase='climbing'; mult=1.0;
-  document.getElementById('mult-lab').textContent='ALTITUDE MULTIPLIER';
-  document.getElementById('mult-n').style.color='#fff';
-  document.getElementById('mult-sub').textContent='';
-
-  for(let i=0;i<2;i++) if(bets[i]&&bets[i].state==='queued') bets[i].state='live';
-  buildBet(0); buildBet(1);
-
-  // simulated climbers
-  sims=[];
-  const n=5+Math.floor(Math.random()*10);
-  for(let i=0;i<n;i++){
-    let target;
-    const r=Math.random();
-    if(r<0.55) target=1.05+Math.random()*1.2;
-    else if(r<0.88) target=2.2+Math.random()*3.5;
-    else target=5+Math.random()*Math.min(M.ceiling-5,25);
-    sims.push({name:pick(NAMES),target:rnd(target),stake:(2+Math.floor(Math.random()*40))*10,done:false});
+ phase='climbing';mult=1;
+ document.getElementById('mult-lab').textContent='ALTITUDE MULTIPLIER';
+ document.getElementById('mult-n').style.color='#fff';
+ document.getElementById('mult-sub').textContent='';
+ for(let i=0;i<2;i++){if(bets[i]&&bets[i].state==='queued')bets[i].state='live';updBet(i);}
+ sims=[];
+ const n=5+Math.floor(Math.random()*10);
+ for(let i=0;i<n;i++){
+  const r=Math.random();
+  const tg=r<.55?1.05+Math.random()*1.2
+        :r<.88?2.2+Math.random()*3.5
+        :5+Math.random()*Math.min(M.ceiling-5,25);
+  sims.push({name:pick(NAMES),target:rnd(tg),stake:(2+Math.floor(Math.random()*40))*10,done:false});
+ }
+ setStatus();
+ let last=performance.now();
+ function step(now){
+  const dt=Math.min((now-last)/1000,.1);last=now;
+  const frac=clamp(Math.log(mult)/Math.log(M.ceiling),0,1);
+  mult*=Math.exp(M.growth*(1+4.2*Math.pow(frac,1.35))*dt);
+  const al=altOf(mult);
+  if(trail.length===0||al-trail[trail.length-1]>5){trail.push(al);if(trail.length>150)trail.shift();}
+  document.getElementById('mult-n').textContent=fx(mult);
+  updHUD();
+  for(let i=0;i<2;i++){
+   const b=bets[i];
+   if(b&&b.state==='live'&&b.autoOn&&b.auto&&mult>=b.auto)cashOut(i);
+   else updBetLive(i);
   }
-
-  setStatus();
-  let last=performance.now();
-
-  function step(now){
-    const dt=Math.min((now-last)/1000,0.1); last=now;
-
-    // ── ACCELERATING CLIMB ──
-    // growth rate scales with altitude fraction: the higher the
-    // climber goes, the faster the multiplier runs away
-    const frac = clamp(Math.log(mult)/Math.log(M.ceiling),0,1);
-    const rate = M.growth * (1 + 4.2*Math.pow(frac,1.35));
-    mult *= Math.exp(rate*dt);
-
-    if(ropeTrail.length===0 || altOf(mult)-ropeTrail[ropeTrail.length-1].alt > 6){
-      ropeTrail.push({alt:altOf(mult), x:W*0.5+Math.sin(altOf(mult)*0.02)*W*0.055});
-      if(ropeTrail.length>140) ropeTrail.shift();
-    }
-
-    document.getElementById('mult-n').textContent=fx(mult);
-    updHUD();
-
-    // auto turn-back
-    for(let i=0;i<2;i++){
-      const b=bets[i];
-      if(b&&b.state==='live'&&b.autoOn&&b.auto&&mult>=b.auto) cashOut(i);
-      else if(b&&b.state==='live') refreshBtn(i);
-    }
-
-    // sims
-    for(const s of sims){
-      if(!s.done && mult>=s.target){
-        s.done=true;
-        addFeed(s.name,s.target,s.stake*(s.target-1),true,false);
-      }
-    }
-
-    if(mult>=crashAt){
-      mult=crashAt;
-      endRound();
-      return;
-    }
-    raf=requestAnimationFrame(step);
+  for(const s of sims)if(!s.done&&mult>=s.target){
+   s.done=true;addFeed(s.name,s.target,s.stake*(s.target-1),true,false);
   }
+  if(mult>=crashAt){mult=crashAt;endRound();return;}
   raf=requestAnimationFrame(step);
+ }
+ raf=requestAnimationFrame(step);
 }
 
 function endRound(){
-  if(raf){cancelAnimationFrame(raf);raf=null;}
-  phase='fallen';
-  const summited = crashAt >= M.ceiling-0.01;
-
-  const n=document.getElementById('mult-n');
-  n.textContent=fx(crashAt);
-  n.style.color= summited ? M.accent : '#ef4444';
-  document.getElementById('mult-lab').textContent = summited ? '★ SUMMIT REACHED' : 'FELL AT';
-  document.getElementById('mult-sub').textContent =
-    summited ? M.name.toUpperCase()+' · '+M.elev.toLocaleString()+' M' : Math.round(altOf(crashAt)).toLocaleString()+' M';
-
-  shake=summited?4:14; flash=summited?0:1;
-
-  M.hist.unshift(rnd(crashAt));
-  if(M.hist.length>24) M.hist.pop();
-  renderHist();
-
-  for(const s of sims) if(!s.done) addFeed(s.name,0,s.stake,false,false);
-
-  let lost=false;
-  for(let i=0;i<2;i++){
-    const b=bets[i];
-    if(b&&b.state==='live'){ b.state='lost'; lost=true; addFeed('You',0,b.stake,false,true); }
-    buildBet(i);
+ if(raf){cancelAnimationFrame(raf);raf=null;}
+ phase='fallen';
+ const summit=crashAt>=M.ceiling-.01;
+ const n=document.getElementById('mult-n');
+ n.textContent=fx(crashAt);
+ n.style.color=summit?M.accent:'#ef4444';
+ document.getElementById('mult-lab').textContent=summit?'★ SUMMIT REACHED':'FELL AT';
+ document.getElementById('mult-sub').textContent=summit
+  ?M.name.toUpperCase()+' · '+M.elev.toLocaleString()+' M'
+  :Math.round(altOf(crashAt)).toLocaleString()+' M';
+ shake=summit?4:14;flash=summit?0:1;
+ M.hist.unshift(rnd(crashAt));if(M.hist.length>24)M.hist.pop();
+ renderHist();
+ for(const s of sims)if(!s.done)addFeed(s.name,0,s.stake,false,false);
+ let msg=null;
+ for(let i=0;i<2;i++){
+  const b=bets[i];
+  if(b&&b.state==='live'){
+   b.state='lost';
+   const rake=rnd(b.stake*M.rake/100);
+   const lb=(M.lossback>0&&crashAt<M.lbCond)?rnd(b.stake*M.lossback/100):0;
+   b.refund=rnd(rake+lb);
+   if(b.refund>0){
+    balance=rnd(balance+b.refund);rewardsTotal=rnd(rewardsTotal+b.refund);
+    msg='Fell at '+fx(crashAt)+' · '+f2(b.refund)+' TKN returned';
+   } else msg='Fell at '+fx(crashAt);
+   addFeed('You',0,b.stake,false,true);
   }
-  if(lost) toast('Fell at '+fx(crashAt),'l');
-  if(summited) toast('★ SUMMIT — '+M.name+' topped out at '+fx(crashAt),'w');
-
-  setStatus();
-  loop();
-  toI=setTimeout(()=>{ bets=[null,null]; startWait(); }, 4200);
+  updBet(i);
+ }
+ updBal();
+ if(msg)toast(msg,'l');
+ if(summit)toast('★ SUMMIT — '+M.name+' topped out at '+fx(crashAt),'w');
+ setStatus();loop();
+ toI=setTimeout(startWait,4200);
 }
 
 function loop(){
-  if(raf) return;
-  const f=(ts)=>{ draw(ts); raf=requestAnimationFrame(f); };
-  raf=requestAnimationFrame(f);
+ if(raf)return;
+ const f=ts=>{draw(ts);raf=requestAnimationFrame(f);};
+ raf=requestAnimationFrame(f);
 }
 
-/* ═══════════════ BOOT ═══════════════ */
-renderSelect();
-updBal();
+renderSelect();updBal();
 </script>
 </body>
 </html>
