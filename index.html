@@ -357,7 +357,7 @@ let M=null, phase='idle', mult=1, crashAt=1, countdown=8;
 let bets=[null,null], sims=[];
 let raf=null,tickI=null,toI=null;
 let W=0,H=0,DPR=1;
-let camAlt=0, camX=0, gait=0, shake=0, flash=0;
+let camAlt=0, camX=0, gait=0, shake=0, flash=0, fallTS=0, roundSummit=false;
 let flakes=[], puffs=[], trail=[];
 let faceTable=null;
 
@@ -394,7 +394,7 @@ function faceX(alt){
  const T=faceTable;
  const i=(alt-T.base)/T.step;
  let base;
- if(i<=0) base=T.rows[0]+i*0.88*T.step;
+ if(i<=0) base=T.rows[0]+i*(T.rows[1]-T.rows[0]);
  else if(i>=T.rows.length-1) base=T.rows[T.rows.length-1];
  else { const i0=Math.floor(i); base=lerp(T.rows[i0],T.rows[i0+1],i-i0); }
  const j=Math.sin(alt*0.055)*3.2+Math.sin(alt*0.021+1.7)*5.5+Math.sin(alt*0.13+3.1)*1.4;
@@ -407,8 +407,9 @@ function slopeAngle(alt){
 
 function altOf(m){
  if(!M)return 0;
- const t=Math.log(Math.max(m,1))/Math.log(M.ceiling);
- return M.base+(M.elev-M.base)*clamp(t,0,1);
+ const lt=clamp(Math.log(Math.max(m,1))/Math.log(M.ceiling),0,1);
+ const t=Math.pow(lt,0.6);   // altitude gain keeps pace with the multiplier instead of lagging behind it
+ return M.base+(M.elev-M.base)*t;
 }
 function zoneAt(a){let z=null;for(const q of M.zones)if(a>=q[0])z=q;return z;}
 function tempAt(a){const t=clamp((a-M.base)/(M.elev-M.base),0,1);return Math.round(lerp(M.summitTemp+16,M.summitTemp,t));}
@@ -503,7 +504,7 @@ function enter(id){
  document.getElementById('game').classList.add('on');
  document.getElementById('back-btn').style.display='';
  document.getElementById('hd1').style.display='';
- document.getElementById('hud-mtn').textContent=M.name;
+ document.getElementById('hud-mtn').textContent=M.name+' · '+M.elev.toLocaleString()+' m';
  document.getElementById('hud-wx').textContent=M.wx;
  const hr=document.getElementById('hud-rw');
  hr.textContent=`${M.effRTP.toFixed(1)}% RTP · ${M.rake?M.rake+'% RAKEBACK':'NO RAKEBACK'}${M.lossback?' · '+M.lossback+'% LOSSBACK':''}`;
@@ -596,14 +597,19 @@ function draw(ts){
 
  /* ── THE FACE ── */
  const topAlt=camAlt+cy/ppm+50, botAlt=camAlt-(H-cy)/ppm-50;
+ const facePts=[];let minFX=-60;
+ for(let al=topAlt;al>=botAlt;al-=4){
+  const x=wx(al),y=wy(al);facePts.push([x,y]);if(x<minFX)minFX=x;
+ }
+ const leftAnchor=minFX-40;
  ctx.beginPath();
- ctx.moveTo(-60,H+60);ctx.lineTo(-60,-60);
- for(let al=topAlt;al>=botAlt;al-=4)ctx.lineTo(wx(al),wy(al));
- ctx.lineTo(-60,H+60);ctx.closePath();
+ ctx.moveTo(leftAnchor,H+60);ctx.lineTo(leftAnchor,-60);
+ for(const p of facePts)ctx.lineTo(p[0],p[1]);
+ ctx.lineTo(leftAnchor,H+60);ctx.closePath();
  ctx.fillStyle=M.rock;ctx.fill();
 
  ctx.beginPath();
- for(let al=topAlt;al>=botAlt;al-=4){const x=wx(al),y=wy(al);al===topAlt?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+ facePts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));
  ctx.strokeStyle=a;ctx.globalAlpha=.45;ctx.lineWidth=1.6;ctx.stroke();
  ctx.globalAlpha=.10;ctx.lineWidth=9;ctx.stroke();ctx.globalAlpha=1;
 
@@ -705,13 +711,16 @@ function drawClimber(ex,ey,alt,ts,t){
  const shallow=profileT(M,t);   // 1=gentle local terrain, 0=steep
  const rate=climbing?lerp(0.85,0.34,t)*lerp(0.55,1.3,shallow):0.09;   // laboured at altitude, quicker on shallow ground
  gait=(gait+rate*0.016)%1;
- const lean=clamp(slopeAngle(alt)*0.75,0,0.5);
+ const lean=clamp(0.06+slopeAngle(alt)*0.3,0,0.34);   // gentle baseline tilt keeps legs pressed into the face without overdoing it
  const col=fallen?'#ef4444':'#fff';
+ const falling=fallen&&!roundSummit;
+ const fallEl=falling?Math.max(0,(ts-fallTS)/1000):0;
+ const dropX=fallEl*95, dropY=170*fallEl*fallEl;
 
  ctx.save();
- ctx.translate(ex+15,ey-2);
+ ctx.translate(ex+15+dropX,ey-2+dropY);
  ctx.scale(1.2,1.2);
- ctx.rotate(fallen?Math.sin(ts*0.009)*0.6+1.15:-lean*0.55);
+ ctx.rotate(falling?1.1+fallEl*5.2+Math.sin(ts*0.02)*0.25:fallen?Math.sin(ts*0.009)*0.6+1.15:lean);
  ctx.lineCap='round';ctx.lineJoin='round';
 
  ctx.globalAlpha=.15;ctx.fillStyle=fallen?'#ef4444':M.accent;
@@ -983,6 +992,7 @@ function endRound(){
  if(raf){cancelAnimationFrame(raf);raf=null;}
  phase='fallen';
  const summit=crashAt>=M.ceiling-.01;
+ roundSummit=summit;fallTS=performance.now();
  const n=document.getElementById('mult-n');
  n.textContent=fx(crashAt);
  n.style.color=summit?M.accent:'#ef4444';
