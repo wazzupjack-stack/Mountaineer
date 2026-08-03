@@ -9,154 +9,214 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#060a12;--panel:#0a0f1c;--panel2:#0d1424;
-  --bd:rgba(255,255,255,.07);--bd2:rgba(255,255,255,.035);
-  --tx:#e2e8f0;--mu:#64748b;--dim:#334155;
-  --gn:#10b981;--rd:#ef4444;--am:#f59e0b;--bl:#3b82f6;
+  --bg:#101a2e;--panel:#1a2540;--panel2:#1f2c4a;--panel3:#26355a;
+  --bd:rgba(160,190,235,.22);--bd2:rgba(160,190,235,.12);
+  --tx:#f2f7ff;--mu:#bccce4;--dim:#93a8c8;
+  --gn:#34d399;--rd:#f87171;--am:#fbbf24;--bl:#60a5fa;
 }
 html,body{height:100%;overflow:hidden}
 body{font-family:'JetBrains Mono',monospace;background:var(--bg);color:var(--tx);
-display:flex;flex-direction:column;height:100vh;user-select:none;font-size:12px}
-::-webkit-scrollbar{width:3px;height:3px}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.09);border-radius:2px}
+display:flex;flex-direction:column;height:100vh;user-select:none;font-size:13px}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:rgba(160,190,235,.24);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:rgba(160,190,235,.4)}
+:focus-visible{outline:2px solid #7dd3fc;outline-offset:2px}
 
-#hdr{display:flex;align-items:center;justify-content:space-between;padding:0 18px;height:48px;
-flex-shrink:0;border-bottom:1px solid var(--bd);background:rgba(0,0,0,.4)}
-.lg{display:flex;align-items:center;gap:9px}
-.lg-m{color:var(--gn);font-size:16px}
-.lg-n{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;letter-spacing:.09em;color:#f8fafc}
-.lg-t{font-size:8px;color:var(--dim);letter-spacing:.18em}
-#hdr-r{display:flex;align-items:center;gap:13px}
-.hstat{display:flex;align-items:baseline;gap:5px}
-.hstat-l{font-size:9px;color:var(--mu)}
-.hstat-v{font-size:13px;font-weight:700;color:#f8fafc}
-.hdiv{width:1px;height:16px;background:var(--bd)}
-.btn-s{padding:5px 11px;font-size:9px;font-family:inherit;letter-spacing:.08em;
-background:rgba(255,255,255,.05);border:1px solid var(--bd);border-radius:5px;color:var(--mu);
+#hdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:56px;
+flex-shrink:0;border-bottom:1px solid var(--bd);background:#16203a}
+.lg{display:flex;align-items:center;gap:10px}
+.lg-m{color:var(--gn);font-size:19px}
+.lg-n{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:.09em;color:#fff}
+.lg-t{font-size:10px;color:var(--dim);letter-spacing:.18em}
+#hdr-r{display:flex;align-items:center;gap:15px}
+.hstat{display:flex;align-items:baseline;gap:6px}
+.hstat-l{font-size:11px;color:var(--mu)}
+.hstat-v{font-size:16px;font-weight:700;color:#fff}
+.hdiv{width:1px;height:20px;background:var(--bd)}
+.btn-s{padding:7px 13px;font-size:11px;font-family:inherit;letter-spacing:.08em;font-weight:500;
+background:rgba(160,190,235,.10);border:1px solid var(--bd);border-radius:6px;color:var(--mu);
 cursor:pointer;transition:.15s}
-.btn-s:hover{background:rgba(255,255,255,.1);color:var(--tx)}
+.btn-s:hover{background:rgba(160,190,235,.2);color:#fff;border-color:rgba(160,190,235,.4)}
 
-#select{flex:1;overflow-y:auto;padding:24px 22px 40px}
-#sel-h{max-width:660px;margin-bottom:22px}
-#sel-eye{font-size:9px;color:var(--mu);letter-spacing:.2em;margin-bottom:9px}
-#sel-t{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;line-height:1.1;color:#f8fafc;margin-bottom:9px}
+/* ── VIP header chip ── */
+#vipchip{display:flex;flex-direction:column;gap:5px;padding:7px 13px 8px;border-radius:8px;
+cursor:pointer;border:1px solid var(--bd);background:rgba(160,190,235,.08);transition:.16s;min-width:154px}
+#vipchip:hover{background:rgba(160,190,235,.17)}
+#vc-top{display:flex;align-items:center;gap:7px}
+#vc-mark{font-size:11px;line-height:1}
+#vc-name{font-size:11.5px;font-weight:700;letter-spacing:.09em}
+#vc-alt{font-size:10px;color:var(--dim);margin-left:auto}
+#vc-bar{height:3px;border-radius:2px;background:rgba(160,190,235,.18);overflow:hidden}
+#vc-fill{height:100%;width:0;border-radius:2px;transition:width .5s ease}
+
+#select{flex:1;overflow-y:auto;padding:28px 24px 48px}
+#sel-h{max-width:700px;margin-bottom:26px}
+#sel-eye{font-size:11px;color:var(--bl);letter-spacing:.2em;margin-bottom:11px;font-weight:500}
+#sel-t{font-family:'Syne',sans-serif;font-weight:800;font-size:38px;line-height:1.1;color:#fff;margin-bottom:11px}
 #sel-t em{font-style:normal;color:var(--gn)}
-#sel-b{font-size:11px;color:var(--mu);line-height:1.7}
-#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media(max-width:1100px){#grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:720px){#grid{grid-template-columns:1fr}}
+#sel-b{font-size:13px;color:var(--mu);line-height:1.75}
+#grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:1250px){#grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:820px){#grid{grid-template-columns:1fr}}
 
 .mc{border:1px solid var(--bd);border-radius:14px;background:var(--panel2);overflow:hidden;
-cursor:pointer;transition:transform .22s,border-color .22s}
-.mc:hover{transform:translateY(-3px)}
-.mc-vis{position:relative;height:120px;overflow:hidden}
+cursor:pointer;transition:transform .22s,border-color .22s,box-shadow .22s}
+.mc:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.mc-vis{position:relative;height:128px;overflow:hidden}
 .mc-vis canvas{position:absolute;inset:0;width:100%;height:100%}
-.mc-tag{position:absolute;top:9px;right:9px;padding:2px 8px;border-radius:20px;font-size:8px;
+.mc-tag{position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:20px;font-size:10px;
 font-weight:700;letter-spacing:.09em;z-index:3}
-.mc-alt{position:absolute;bottom:7px;left:11px;z-index:3;font-family:'Syne',sans-serif;
-font-weight:800;font-size:14px;color:rgba(255,255,255,.5);text-shadow:0 2px 8px #000}
-.mc-b{padding:12px 14px 14px}
-.mc-n{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;color:#f8fafc;line-height:1}
-.mc-r{font-size:9px;color:var(--mu);margin:2px 0 8px}
-.mc-cl{font-size:9.5px;color:var(--dim);line-height:1.6;margin-bottom:10px;min-height:60px}
-.mc-off{border-top:1px solid var(--bd2);border-bottom:1px solid var(--bd2);padding:9px 0;margin-bottom:10px}
-.off-r{display:flex;justify-content:space-between;align-items:center;padding:2px 0}
-.off-l{font-size:8.5px;color:var(--dim);letter-spacing:.06em}
-.off-v{font-size:10px;font-weight:700}
-.mc-st{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:10px}
-.ms-l{font-size:7.5px;color:var(--dim);letter-spacing:.1em;margin-bottom:3px}
-.ms-v{font-size:12.5px;font-weight:700;color:#f8fafc}
-.mc-hist{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:10px}
-.hchip{padding:1px 6px;border-radius:3px;font-size:8.5px;font-weight:700}
-.mc-go{width:100%;padding:10px 0;font-family:inherit;font-size:10px;font-weight:700;
-letter-spacing:.09em;border:none;border-radius:7px;cursor:pointer;transition:.16s}
-.mc-go:hover{filter:brightness(1.13)}
+.mc-vm{position:absolute;top:10px;left:10px;padding:3px 9px;border-radius:20px;font-size:10px;
+font-weight:700;letter-spacing:.06em;z-index:3;background:rgba(10,16,30,.75);
+border:1px solid rgba(200,220,255,.3);color:#dce8fa}
+.mc-alt{position:absolute;bottom:8px;left:12px;z-index:3;font-family:'Syne',sans-serif;
+font-weight:800;font-size:17px;color:rgba(255,255,255,.82);text-shadow:0 2px 10px #000}
+.mc-b{padding:14px 16px 16px}
+.mc-n{font-family:'Syne',sans-serif;font-weight:800;font-size:22px;color:#fff;line-height:1}
+.mc-r{font-size:11px;color:var(--bl);margin:4px 0 9px}
+.mc-cl{font-size:11.5px;color:var(--mu);line-height:1.65;margin-bottom:12px;min-height:76px}
+.mc-off{border-top:1px solid var(--bd2);border-bottom:1px solid var(--bd2);padding:10px 0;margin-bottom:12px}
+.off-r{display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:8px}
+.off-l{font-size:10.5px;color:var(--dim);letter-spacing:.05em}
+.off-v{font-size:12px;font-weight:700;text-align:right}
+.mc-st{display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:12px;gap:6px}
+.ms-l{font-size:9.5px;color:var(--dim);letter-spacing:.1em;margin-bottom:4px}
+.ms-v{font-size:15px;font-weight:700;color:#fff}
+.mc-hist{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+.hchip{padding:2px 7px;border-radius:4px;font-size:10.5px;font-weight:700}
+.mc-go{width:100%;padding:12px 0;font-family:inherit;font-size:12px;font-weight:700;
+letter-spacing:.09em;border:none;border-radius:8px;cursor:pointer;transition:.16s}
+.mc-go:hover{filter:brightness(1.2)}
 
 #game{flex:1;display:none;min-height:0}
 #game.on{display:flex}
 #stage{flex:1;position:relative;overflow:hidden;background:#000}
 #cv{position:absolute;inset:0;width:100%;height:100%}
 .hud{position:absolute;z-index:5;pointer-events:none}
-#hud-tl{top:11px;left:14px}
-#hud-mtn{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:#fff;text-shadow:0 2px 10px #000}
-#hud-wx{font-size:8.5px;color:rgba(255,255,255,.48);margin-top:3px;text-shadow:0 1px 6px #000}
-#hud-rw{font-size:8.5px;margin-top:4px;text-shadow:0 1px 6px #000;letter-spacing:.05em}
-#hud-tr{top:11px;right:14px;text-align:right}
-#hud-alt{font-size:11px;font-weight:700;color:rgba(255,255,255,.75);text-shadow:0 1px 8px #000}
-#hud-temp{font-size:8.5px;color:rgba(255,255,255,.4);margin-top:2px;text-shadow:0 1px 6px #000}
-#hud-zone{font-size:8.5px;margin-top:4px;letter-spacing:.1em;font-weight:700;text-shadow:0 1px 6px #000}
+#hud-tl{top:13px;left:16px}
+#hud-mtn{font-family:'Syne',sans-serif;font-weight:800;font-size:19px;color:#fff;text-shadow:0 2px 12px #000}
+#hud-wx{font-size:11px;color:rgba(255,255,255,.78);margin-top:4px;text-shadow:0 1px 8px #000}
+#hud-rw{font-size:11px;margin-top:5px;text-shadow:0 1px 8px #000;letter-spacing:.04em;font-weight:500}
+#hud-tr{top:13px;right:16px;text-align:right}
+#hud-alt{font-size:14px;font-weight:700;color:#fff;text-shadow:0 1px 10px #000}
+#hud-temp{font-size:11px;color:rgba(255,255,255,.72);margin-top:3px;text-shadow:0 1px 8px #000}
+#hud-zone{font-size:11px;margin-top:5px;letter-spacing:.1em;font-weight:700;text-shadow:0 1px 8px #000}
 #mult-box{position:absolute;top:42%;left:50%;transform:translate(-50%,-50%);text-align:center;
 z-index:6;pointer-events:none}
-#mult-lab{font-size:9px;letter-spacing:.22em;margin-bottom:7px;min-height:13px;color:rgba(255,255,255,.4)}
-#mult-n{font-family:'Syne',sans-serif;font-weight:800;font-size:74px;line-height:1;
-text-shadow:0 4px 34px rgba(0,0,0,.9);letter-spacing:-.02em}
-#mult-sub{font-size:9.5px;margin-top:8px;letter-spacing:.13em;min-height:13px;color:rgba(255,255,255,.45)}
-#strip{position:absolute;bottom:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:8px;
-padding:7px 14px;background:linear-gradient(0deg,rgba(0,0,0,.88),transparent)}
-#dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-#strip-t{font-size:8.5px;letter-spacing:.13em;color:rgba(255,255,255,.5)}
-#hist{display:flex;gap:3px;margin-left:auto;overflow:hidden}
+#mult-lab{font-size:11px;letter-spacing:.22em;margin-bottom:9px;min-height:15px;color:rgba(255,255,255,.72);font-weight:500}
+#mult-n{font-family:'Syne',sans-serif;font-weight:800;font-size:80px;line-height:1;
+text-shadow:0 4px 34px rgba(0,0,0,.95);letter-spacing:-.02em}
+#mult-sub{font-size:11.5px;margin-top:10px;letter-spacing:.13em;min-height:15px;color:rgba(255,255,255,.75)}
+#strip{position:absolute;bottom:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:10px;
+padding:9px 16px;background:linear-gradient(0deg,rgba(6,10,20,.94),transparent)}
+#dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+#strip-t{font-size:11px;letter-spacing:.13em;color:rgba(255,255,255,.82);font-weight:500}
+#hist{display:flex;gap:4px;margin-left:auto;overflow:hidden}
+#vmpop{position:absolute;top:calc(42% + 80px);left:50%;transform:translateX(-50%);z-index:7;
+font-size:14px;font-weight:700;letter-spacing:.1em;opacity:0;pointer-events:none;transition:.3s;
+text-shadow:0 2px 12px #000}
+#vmpop.on{opacity:1;transform:translateX(-50%) translateY(-14px)}
 
-#side{width:296px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--bd);
+#side{width:340px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--bd);
 display:flex;flex-direction:column;overflow:hidden}
-.sec-h{padding:8px 14px 7px;font-size:8.5px;color:var(--dim);letter-spacing:.15em;
-border-bottom:1px solid var(--bd2);flex-shrink:0;display:flex;justify-content:space-between}
-#rew{padding:9px 14px;border-bottom:1px solid var(--bd2);flex-shrink:0}
-.rw-r{display:flex;justify-content:space-between;padding:2px 0;font-size:9px}
-.rw-l{color:var(--dim)}
-.rw-v{font-weight:700}
-.bet{padding:11px 14px;border-bottom:1px solid var(--bd2)}
-.bet-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
-.bet-t{font-size:8.5px;color:var(--mu);letter-spacing:.11em}
-.bet-st{font-size:8.5px;font-weight:700;letter-spacing:.05em;color:var(--dim)}
-.row{display:flex;gap:5px;margin-bottom:6px}
+.sec-h{padding:10px 16px 9px;font-size:10.5px;color:var(--dim);letter-spacing:.15em;
+border-bottom:1px solid var(--bd2);flex-shrink:0;display:flex;justify-content:space-between;
+background:rgba(160,190,235,.04)}
+#rew{padding:12px 16px;border-bottom:1px solid var(--bd2);flex-shrink:0}
+.rw-r{display:flex;justify-content:space-between;padding:3px 0;font-size:11.5px;gap:8px}
+.rw-l{color:var(--mu)}
+.rw-v{font-weight:700;text-align:right}
+.vipflag{font-size:10px;font-weight:700;padding:1px 5px;border-radius:4px;margin-left:5px}
+.bet{padding:13px 16px;border-bottom:1px solid var(--bd2)}
+.bet-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.bet-t{font-size:10.5px;color:var(--mu);letter-spacing:.11em;font-weight:500}
+.bet-st{font-size:10.5px;font-weight:700;letter-spacing:.05em;color:var(--dim)}
+.row{display:flex;gap:7px;margin-bottom:8px}
 .fld{flex:1}
-.fld-l{font-size:7.5px;color:var(--dim);letter-spacing:.09em;margin-bottom:3px}
-input[type=number]{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);
-border-radius:5px;padding:6px 8px;color:#f8fafc;font-size:12px;font-family:inherit;outline:none;
-transition:border-color .18s;-moz-appearance:textfield}
+.fld-l{font-size:9.5px;color:var(--dim);letter-spacing:.09em;margin-bottom:4px}
+input[type=number]{width:100%;background:rgba(10,16,30,.55);border:1px solid rgba(160,190,235,.28);
+border-radius:6px;padding:8px 10px;color:#fff;font-size:14px;font-family:inherit;outline:none;
+transition:border-color .18s,background .18s;-moz-appearance:textfield;font-weight:500}
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
-input:focus{border-color:rgba(255,255,255,.28);background:rgba(255,255,255,.07)}
-.qk{display:flex;gap:3px;margin-bottom:7px}
-.qk button{flex:1;padding:3px 0;font-size:8.5px;font-family:inherit;background:rgba(255,255,255,.05);
-border:1px solid rgba(255,255,255,.08);border-radius:4px;color:var(--mu);cursor:pointer;transition:.14s}
-.qk button:hover{background:rgba(255,255,255,.11);color:var(--tx)}
-.auto-row{display:flex;align-items:center;gap:6px;margin-bottom:7px}
-.chk{width:13px;height:13px;border-radius:3px;border:1px solid rgba(255,255,255,.17);
-background:rgba(255,255,255,.04);cursor:pointer;flex-shrink:0;display:flex;align-items:center;
-justify-content:center;font-size:9px;color:var(--gn)}
-.chk.on{background:rgba(16,185,129,.18);border-color:rgba(16,185,129,.42)}
-.chk-l{font-size:8.5px;color:var(--mu);cursor:pointer}
-.act{width:100%;padding:10px 0;border:none;border-radius:7px;font-family:inherit;font-size:10.5px;
+input::placeholder{color:#6f84a4}
+input:focus{border-color:#7dd3fc;background:rgba(10,16,30,.75)}
+.qk{display:flex;gap:4px;margin-bottom:9px}
+.qk button{flex:1;padding:5px 0;font-size:10.5px;font-family:inherit;background:rgba(160,190,235,.10);
+border:1px solid rgba(160,190,235,.2);border-radius:5px;color:var(--mu);cursor:pointer;transition:.14s;font-weight:500}
+.qk button:hover{background:rgba(160,190,235,.24);color:#fff}
+.auto-row{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.chk{width:16px;height:16px;border-radius:4px;border:1px solid rgba(160,190,235,.35);
+background:rgba(10,16,30,.4);cursor:pointer;flex-shrink:0;display:flex;align-items:center;
+justify-content:center;font-size:11px;color:var(--gn)}
+.chk.on{background:rgba(52,211,153,.25);border-color:rgba(52,211,153,.65)}
+.chk-l{font-size:10.5px;color:var(--mu);cursor:pointer}
+.act{width:100%;padding:12px 0;border:none;border-radius:8px;font-family:inherit;font-size:12.5px;
 font-weight:700;letter-spacing:.07em;cursor:pointer;transition:.16s}
-.act.place{background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;box-shadow:0 3px 14px rgba(59,130,246,.3)}
-.act.place:hover{transform:translateY(-1px)}
-.act.next{background:linear-gradient(135deg,#6366f1,#4338ca);color:#fff}
-.act.queued{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);color:#60a5fa}
+.act.place{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;box-shadow:0 3px 16px rgba(59,130,246,.4)}
+.act.place:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.act.next{background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff}
+.act.queued{background:rgba(96,165,250,.18);border:1px solid rgba(96,165,250,.5);color:#93c5fd}
 .act.cash{background:linear-gradient(135deg,#10b981,#059669);color:#fff;animation:pg 1.25s ease-in-out infinite}
-.act.done{background:rgba(16,185,129,.09);border:1px solid rgba(16,185,129,.26);color:var(--gn);cursor:default}
-.act.dead{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.22);color:var(--rd);cursor:default}
-@keyframes pg{0%,100%{box-shadow:0 3px 16px rgba(16,185,129,.32)}50%{box-shadow:0 3px 30px rgba(16,185,129,.55)}}
+.act.done{background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.45);color:#6ee7b7;cursor:default}
+.act.dead{background:rgba(248,113,113,.14);border:1px solid rgba(248,113,113,.4);color:#fca5a5;cursor:default}
+@keyframes pg{0%,100%{box-shadow:0 3px 16px rgba(16,185,129,.4)}50%{box-shadow:0 3px 32px rgba(16,185,129,.7)}}
 #feed{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
 #feed-l{flex:1;overflow-y:auto}
-.fi{display:flex;align-items:center;gap:7px;padding:5px 14px;
-border-bottom:1px solid rgba(255,255,255,.022);animation:sl .26s ease}
+.fi{display:flex;align-items:center;gap:8px;padding:7px 16px;
+border-bottom:1px solid rgba(160,190,235,.07);animation:sl .26s ease}
 @keyframes sl{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
-.fi-av{width:19px;height:19px;border-radius:50%;display:flex;align-items:center;
-justify-content:center;font-size:7.5px;font-weight:700;flex-shrink:0}
-.fi-n{font-size:10px;color:#94a3b8;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fi-m{font-size:9.5px;font-weight:700;min-width:38px;text-align:right}
-.fi-v{font-size:9.5px;font-weight:700;min-width:46px;text-align:right}
-#feed-e{padding:20px 14px;text-align:center;font-size:9px;color:#1c2739}
-#pf{padding:8px 14px;border-top:1px solid var(--bd2);flex-shrink:0;font-size:8px;color:var(--dim);line-height:1.6}
-#pf-hash{word-break:break-all;color:#26344a}
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(8px);
-padding:10px 20px;border-radius:9px;font-size:12px;font-weight:700;z-index:999;opacity:0;
-transition:.26s;pointer-events:none;white-space:nowrap}
+.fi-av{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;
+justify-content:center;font-size:9.5px;font-weight:700;flex-shrink:0}
+.fi-n{font-size:12px;color:#cbd9ee;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fi-tag{font-size:9px;font-weight:700;padding:2px 5px;border-radius:4px;letter-spacing:.06em;flex-shrink:0}
+.fi-m{font-size:11.5px;font-weight:700;min-width:44px;text-align:right}
+.fi-v{font-size:11.5px;font-weight:700;min-width:54px;text-align:right}
+#feed-e{padding:24px 16px;text-align:center;font-size:11px;color:#7c90ae}
+#pf{padding:10px 16px;border-top:1px solid var(--bd2);flex-shrink:0;font-size:10px;color:var(--dim);line-height:1.7}
+#pf-hash{word-break:break-all;color:#7c90ae}
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);
+padding:13px 24px;border-radius:10px;font-size:14px;font-weight:700;z-index:999;opacity:0;
+transition:.26s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5)}
 #toast.on{opacity:1;transform:translateX(-50%)}
-#toast.w{background:rgba(16,185,129,.96);color:#fff}
-#toast.l{background:rgba(239,68,68,.96);color:#fff}
-#toast.i{background:rgba(99,102,241,.96);color:#fff}
+#toast.w{background:#10b981;color:#04231a}
+#toast.l{background:#f87171;color:#2c0707}
+#toast.i{background:#818cf8;color:#12102e}
+
+/* ══ VIP OVERLAY ══ */
+#vip{position:fixed;inset:0;z-index:200;background:rgba(12,20,36,.97);
+backdrop-filter:blur(7px);display:none;flex-direction:column}
+#vip.on{display:flex}
+#vip-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;
+border-bottom:1px solid var(--bd);flex-shrink:0;background:#16203a}
+#vip-ttl{font-family:'Syne',sans-serif;font-weight:800;font-size:23px;color:#fff;letter-spacing:.02em}
+#vip-sub{font-size:11px;color:var(--bl);letter-spacing:.16em;margin-top:4px}
+#vip-body{flex:1;overflow-y:auto;padding:26px 28px 48px}
+#vip-grid{display:grid;grid-template-columns:390px 1fr;gap:26px;max-width:1320px}
+@media(max-width:1080px){#vip-grid{grid-template-columns:1fr}}
+#ladder-wrap{border:1px solid var(--bd);border-radius:14px;background:var(--panel2);
+padding:16px;position:relative}
+#ladder{width:100%;height:470px;display:block;border-radius:8px}
+#lad-cap{font-size:10.5px;color:var(--mu);line-height:1.7;margin-top:12px;text-align:center}
+#vip-now{border:1px solid var(--bd);border-radius:14px;background:var(--panel2);padding:18px 20px;margin-bottom:18px}
+#vn-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:12px}
+#vn-name{font-family:'Syne',sans-serif;font-weight:800;font-size:30px;line-height:1}
+.vn-lab{font-size:10.5px;color:var(--dim);letter-spacing:.16em;margin-bottom:6px}
+#vn-vm{font-size:24px;font-weight:700;color:#fff;font-family:'Syne',sans-serif}
+#vn-bar{height:7px;border-radius:4px;background:rgba(160,190,235,.16);overflow:hidden;margin-bottom:9px}
+#vn-fill{height:100%;border-radius:4px;transition:width .6s ease}
+#vn-note{font-size:11.5px;color:var(--mu);line-height:1.6}
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.tbl th{text-align:left;font-size:10px;color:var(--dim);letter-spacing:.12em;font-weight:500;
+padding:0 10px 9px;border-bottom:1px solid var(--bd2)}
+.tbl td{padding:10px;border-bottom:1px solid rgba(160,190,235,.07);color:#c2d1e8}
+.tbl tr.cur td{background:rgba(160,190,235,.10)}
+.tbl tr.locked td{opacity:.6}
+.t-nm{font-weight:700;font-size:12.5px}
+.sect-h{font-size:10.5px;color:var(--bl);letter-spacing:.16em;margin:26px 0 11px;font-weight:500}
+.card{border:1px solid var(--bd);border-radius:14px;background:var(--panel2);padding:16px 18px}
+.mini{font-size:10.5px;color:var(--mu);line-height:1.8;margin-top:12px}
+.pill{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700;margin-left:6px}
+#vip-body a{color:#7dd3fc}
 </style>
 </head>
 <body>
@@ -166,6 +226,13 @@ transition:.26s;pointer-events:none;white-space:nowrap}
   <div id="hdr-r">
     <button class="btn-s" id="back-btn" style="display:none" onclick="toSelect()">◀ BASE CAMP</button>
     <div class="hdiv" id="hd1" style="display:none"></div>
+    <div id="vipchip" onclick="openVIP()">
+      <div id="vc-top">
+        <span id="vc-mark">▲</span><span id="vc-name">TRAILHEAD</span><span id="vc-alt">0 m</span>
+      </div>
+      <div id="vc-bar"><div id="vc-fill"></div></div>
+    </div>
+    <div class="hdiv"></div>
     <div class="hstat"><span class="hstat-l">REWARDS</span><span class="hstat-v" id="rwtot" style="color:var(--am)">0.00</span></div>
     <div class="hdiv"></div>
     <div class="hstat"><span class="hstat-l">BALANCE</span><span class="hstat-v" id="bal">1000.00</span><span class="hstat-l">TKN</span></div>
@@ -176,7 +243,7 @@ transition:.26s;pointer-events:none;white-space:nowrap}
   <div id="sel-h">
     <div id="sel-eye">SIX PEAKS · SIX MATH MODELS · SIX REWARD STRUCTURES</div>
     <h1 id="sel-t">Choose your <em>ascent.</em></h1>
-    <p id="sel-b">Ceiling is real elevation ÷ 100. Volatility comes from real fatality rate. Each peak runs its own RTP, rakeback and lossback — Kilimanjaro pays the highest base return, K2 pays the least but gives the most back through rewards. Weather, temperature and hazard zones are modelled on actual conditions.</p>
+    <p id="sel-b">Ceiling is real elevation ÷ 100. Volatility comes from real fatality rate. Each peak runs its own RTP, rakeback and lossback — Kilimanjaro pays the highest base return, K2 pays the least but gives the most back through rewards. Every metre you climb banks Vertical Metres toward the expedition ladder, weighted by how dangerous the peak is.</p>
   </div>
   <div id="grid"></div>
 </div>
@@ -195,6 +262,7 @@ transition:.26s;pointer-events:none;white-space:nowrap}
       <div id="mult-n">1.00×</div>
       <div id="mult-sub">PLACE YOUR STAKE</div>
     </div>
+    <div id="vmpop"></div>
     <div id="strip">
       <div id="dot"></div><span id="strip-t">—</span><div id="hist"></div>
     </div>
@@ -215,6 +283,50 @@ transition:.26s;pointer-events:none;white-space:nowrap}
   </div>
 </div>
 
+<!-- ══ VIP OVERLAY ══ -->
+<div id="vip">
+  <div id="vip-hd">
+    <div>
+      <div id="vip-ttl">The Expedition Ladder</div>
+      <div id="vip-sub">SEVEN CAMPS · REAL ALTITUDES · CLIMB TO UNLOCK</div>
+    </div>
+    <button class="btn-s" onclick="closeVIP()">CLOSE ✕</button>
+  </div>
+  <div id="vip-body">
+    <div id="vip-grid">
+      <div>
+        <div id="ladder-wrap">
+          <canvas id="ladder"></canvas>
+          <div id="lad-cap">Camp altitudes are Everest's real staging points.<br>Your position is where your Vertical Metres put you.</div>
+        </div>
+      </div>
+      <div>
+        <div id="vip-now"></div>
+        <div class="sect-h">THE CAMPS</div>
+        <div class="card" style="padding:14px 10px"><div id="tier-tbl"></div></div>
+        <div class="sect-h">YOUR RAKEBACK, PEAK BY PEAK</div>
+        <div class="card" style="padding:14px 10px"><div id="rake-tbl"></div></div>
+        <div class="sect-h">HOW VERTICAL METRES WORK</div>
+        <div class="card">
+          <div style="font-size:10px;color:#c2d1e8;line-height:1.8">
+            Every stake banks metres for the altitude it actually reached — <strong style="color:#f8fafc">a fall still counts the climb</strong>.
+            Dangerous peaks pay a higher weight, so K2 advances you 1.8× as fast as Kilimanjaro for the same stake and altitude.
+          </div>
+          <div style="font-family:'JetBrains Mono';font-size:9.5px;color:var(--gn);background:rgba(16,185,129,.06);
+          border:1px solid rgba(16,185,129,.14);border-radius:7px;padding:9px 11px;margin-top:11px;line-height:1.6">
+            VM = stake × (metres above base ÷ 100) × peak weight
+          </div>
+          <div class="mini">
+            Camps decay. Hold a camp by banking 30% of its requirement each month, or drop one camp.
+            Rakeback boosts stack on top of the peak's own offering but are capped so effective RTP never passes 99.5%.
+            <br><br><span style="color:#93a8c8">Demo build — thresholds are tuned short so the ladder is visible in a single session. Progress is not saved between reloads.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -227,92 +339,119 @@ transition:.26s;pointer-events:none;white-space:nowrap}
    alpha    = Pareto shape, tuned to hit baseRTP at xref
    rake     = % of every stake returned regardless of result
    lossback = % of lost stake returned when condition met
+   vmW      = Vertical Metre weight — danger pays progression
 ═══════════════════════════════════════════════════════ */
 const MTN=[
 {
  id:'kilimanjaro',name:'Kilimanjaro',elev:5895,base:4600,region:'Tanzania · 3°S',
  risk:'VERY LOW',accent:'#34d399',ceiling:58.95,p0:0.02,alpha:1.044,growth:0.050,
- baseRTP:95.5,rake:2.0,lossback:0,lbCond:0,effRTP:97.5,
+ baseRTP:95.5,rake:2.0,lossback:0,lbCond:0,effRTP:97.5,vmW:1.00,
  offering:'Highest base return on the platform. No insurance — you simply keep more of every win.',
  summitTemp:-18,
  climate:'Equatorial free-standing volcano. Five climate zones from rainforest to arctic summit. Stable, predictable weather. Altitude sickness, not storms, is the hazard.',
  wx:'CLEAR · LIGHT WIND 12 km/h',
  zones:[[5000,'ARCTIC ZONE','#93c5fd'],[5700,'SUMMIT GLACIERS','#e0f2fe']],
  weather:{snow:.25,wind:.12,gust:.15,dark:.30,dust:0,flake:1.5},
- rock:'#191611',snowC:'#e8f4f8',skyLo:'#122033',skyHi:'#04070f',
+ rock:'#474135',snowC:'#e8f4f8',skyLo:'#38567f',skyHi:'#181f32',
  profile:[[0,.95],[.31,.88],[.6,.72],[.85,.55],[.93,.42],[1,.5]],
  hist:[2.31,1.84,3.02,1.41,2.68,4.15,1.97,2.44]
 },
 {
  id:'aconcagua',name:'Aconcagua',elev:6961,base:5500,region:'Argentina · Andes',
  risk:'LOW',accent:'#fbbf24',ceiling:69.61,p0:0.04,alpha:1.0163,growth:0.053,
- baseRTP:95.0,rake:1.0,lossback:5,lbCond:1.5,effRTP:97.0,
+ baseRTP:95.0,rake:1.0,lossback:5,lbCond:1.5,effRTP:97.0,vmW:1.15,
  offering:'5% back on any fall under 1.50× — protection against the early bust, plus 1% rakeback.',
  summitTemp:-30,
  climate:'Highest peak outside Asia. Extremely arid Andean desert air. The viento blanco — a white wind — arrives with almost no warning and drives gusts past 160 km/h.',
  wx:'VIENTO BLANCO RISK · 68 km/h',
  zones:[[6000,'HIGH CAMP','#fcd34d'],[6700,'SUMMIT RIDGE','#fef3c7']],
  weather:{snow:.3,wind:.55,gust:.7,dark:.34,dust:.45,flake:1.2},
- rock:'#1b1408',snowC:'#f5f0e0',skyLo:'#1a1408',skyHi:'#05060d',
+ rock:'#4c3c20',snowC:'#f5f0e0',skyLo:'#493c22',skyHi:'#1a1c2d',
  profile:[[0,.9],[.34,.8],[.6,.62],[.82,.4],[1,.28]],
  hist:[1.62,2.90,1.18,5.41,2.07,1.75,3.36,1.44]
 },
 {
  id:'montblanc',name:'Mont Blanc',elev:4808,base:3800,region:'France–Italy · Alps',
  risk:'MEDIUM',accent:'#a78bfa',ceiling:48.08,p0:0.07,alpha:0.9923,growth:0.056,
- baseRTP:93.5,rake:0,lossback:10,lbCond:999,effRTP:96.5,
+ baseRTP:93.5,rake:0,lossback:10,lbCond:999,effRTP:96.5,vmW:1.30,
  offering:'10% back on every single fall, no conditions attached. The insurance peak.',
  summitTemp:-15,
  climate:'Lowest ceiling on the platform but deceptively lethal — around a hundred deaths a year. Alpine weather turns in minutes and the Grand Couloir rockfall kills regardless of forecast.',
  wx:'RAPID CHANGE · 45 km/h · CLOUD BUILD',
  zones:[[4300,'GRAND COULOIR','#c4b5fd'],[4650,'SUMMIT DOME','#ede9fe']],
  weather:{snow:.5,wind:.35,gust:.55,dark:.42,dust:.1,flake:1.9},
- rock:'#13111e',snowC:'#eef0fb',skyLo:'#161428',skyHi:'#05050e',
+ rock:'#3a3553',snowC:'#eef0fb',skyLo:'#403c68',skyHi:'#1a1a30',
  profile:[[0,.85],[.3,.68],[.5,.38],[.65,.55],[.84,.62],[1,.7]],
  hist:[1.24,3.85,1.06,2.18,1.51,6.72,1.33,2.05]
 },
 {
  id:'denali',name:'Denali',elev:6190,base:4300,region:'Alaska · 63°N',
  risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,p0:0.08,alpha:1.0079,growth:0.058,
- baseRTP:91.5,rake:5.0,lossback:0,lbCond:0,effRTP:96.5,
+ baseRTP:91.5,rake:5.0,lossback:0,lbCond:0,effRTP:96.5,vmW:1.40,
  offering:'5% rakeback on every stake, win or lose. Built for high-volume play.',
  summitTemp:-40,
  climate:'Coldest of the six despite modest height. At 63° north the barometric pressure is far lower than the same altitude in the Himalaya, so 6,190 m climbs like 7,000 m. Lows near −73 °C.',
  wx:'EXTREME COLD · 74 km/h · ICE CRYSTALS',
  zones:[[5200,'HEADWALL','#7dd3fc'],[5900,'SUMMIT RIDGE','#e0f2fe']],
  weather:{snow:.62,wind:.6,gust:.75,dark:.46,dust:0,flake:1.1,aurora:true},
- rock:'#0c151f',snowC:'#e6f4fd',skyLo:'#0c1a2a',skyHi:'#03060e',
+ rock:'#2a3e55',snowC:'#e6f4fd',skyLo:'#2a496c',skyHi:'#151c30',
  profile:[[0,.9],[.48,.42],[.62,.75],[.85,.45],[1,.3]],
  hist:[1.09,2.44,1.71,1.02,4.88,1.30,2.13,1.56]
 },
 {
  id:'everest',name:'Everest',elev:8849,base:6400,region:'Nepal–Tibet · Himalaya',
  risk:'HIGH',accent:'#818cf8',ceiling:88.49,p0:0.12,alpha:0.9397,growth:0.062,
- baseRTP:93.0,rake:3.0,lossback:0,lbCond:0,effRTP:96.0,
+ baseRTP:93.0,rake:3.0,lossback:0,lbCond:0,effRTP:96.0,vmW:1.60,
  offering:'Highest ceiling on the platform at 88×, with 3% rakeback on every stake.',
  summitTemp:-36,
  climate:'Above 8,000 m the death zone offers a third of sea-level oxygen. The jet stream parks on the summit for most of the year, driving winds past 280 km/h, lifting only for a narrow May window.',
  wx:'JET STREAM · 118 km/h SUSTAINED',
  zones:[[7000,'LHOTSE FACE','#a5b4fc'],[8000,'DEATH ZONE','#ef4444'],[8700,'HILLARY STEP','#e0e7ff']],
  weather:{snow:.7,wind:.85,gust:.8,dark:.55,dust:.05,flake:1.0},
- rock:'#0e0f1e',snowC:'#e9ecfb',skyLo:'#101128',skyHi:'#02030b',
+ rock:'#2e3053',snowC:'#e9ecfb',skyLo:'#333568',skyHi:'#131528',
  profile:[[0,.85],[.25,.4],[.45,.6],[.65,.48],[.85,.55],[.94,.18],[1,.35]],
  hist:[1.03,7.20,1.41,1.00,2.86,14.55,1.12,1.88]
 },
 {
  id:'k2',name:'K2',elev:8611,base:5150,region:'Pakistan–China · Karakoram',
  risk:'EXTREME',accent:'#ef4444',ceiling:86.11,p0:0.22,alpha:0.9271,growth:0.068,
- baseRTP:84.5,rake:8.0,lossback:15,lbCond:1.01,effRTP:95.5,
+ baseRTP:84.5,rake:8.0,lossback:15,lbCond:1.01,effRTP:95.5,vmW:1.80,
  offering:'Lowest base RTP, largest rewards: 8% rakeback plus 15% back on instant falls.',
  summitTemp:-45,
  climate:'The Savage Mountain. 238 m lower than Everest but roughly six times deadlier. Storms arrive without warning, there is no reliable weather window, and the Bottleneck serac collapses without pattern.',
  wx:'SEVERE STORM · 132 km/h · WHITEOUT',
  zones:[[6800,'BLACK PYRAMID','#fca5a5'],[8000,'DEATH ZONE','#ef4444'],[8200,'THE BOTTLENECK','#dc2626']],
  weather:{snow:.95,wind:1.0,gust:1.0,dark:.66,dust:0,flake:.9},
- rock:'#150b0d',snowC:'#f3e8e8',skyLo:'#180a0c',skyHi:'#030207',
+ rock:'#3e272c',snowC:'#f3e8e8',skyLo:'#45262a',skyHi:'#15131f',
  profile:[[0,.6],[.3,.5],[.48,.3],[.65,.42],[.82,.32],[.88,.12],[1,.22]],
  hist:[1.00,1.04,28.40,1.00,1.16,1.02,62.75,1.08]
 }];
+
+/* ═══════════════════════════════════════════════════════
+   THE EXPEDITION LADDER
+   Camp altitudes are Everest's real staging points, so the
+   ladder reads as a route rather than a loyalty scheme.
+   boost    = extra rakeback %, stacked on the peak's own
+   lbBonus  = lossback threshold widened by this many ×
+   RTP_CAP  = hard ceiling — boost is trimmed to respect it
+═══════════════════════════════════════════════════════ */
+const RTP_CAP=99.5;
+const TIERS=[
+ {n:'Trailhead', alt:5150, vm:0,      boost:0,   lbBonus:0,    col:'#64748b',
+  perk:'The standard offering on every peak.'},
+ {n:'Base Camp', alt:5364, vm:2500,   boost:0.5, lbBonus:0,    col:'#34d399',
+  perk:'Rope trail takes your camp colour.'},
+ {n:'Camp I',    alt:6065, vm:10000,  boost:1.0, lbBonus:0,    col:'#38bdf8',
+  perk:'Weekly reload.'},
+ {n:'Camp II',   alt:6400, vm:30000,  boost:1.5, lbBonus:0.25, col:'#a78bfa',
+  perk:'Lossback window widens by 0.25×.'},
+ {n:'Camp III',  alt:7200, vm:80000,  boost:2.5, lbBonus:0.25, col:'#fbbf24',
+  perk:'Two weeks early on every new peak.'},
+ {n:'Death Zone',alt:8000, vm:200000, boost:4.0, lbBonus:0.50, col:'#ef4444',
+  perk:'Named in the live feed. Custom summit flag.'},
+ {n:'Summit',    alt:8849, vm:500000, boost:6.0, lbBonus:0.50, col:'#f8fafc',
+  perk:'Dedicated host. Bespoke terms.'}
+];
 
 const NAMES=['AlpineTrdr','PeakSeeker','SummitCall','RidgeRider','IceBreaker','NordicPro',
 'GlacierBull','SnowCap','K2Bull','CrevassePro','FjordCap','TundraFund','BasecampX','NordIce',
@@ -326,6 +465,7 @@ const pick=a=>a[Math.floor(Math.random()*a.length)];
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
 const lerp=(a,b,t)=>a+(b-a)*t;
 const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const cm=n=>Math.round(n).toLocaleString();
 function hexRGB(h){h=h.replace('#','');return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
 function mix(a,b,t){const x=hexRGB(a),y=hexRGB(b);return`rgb(${Math.round(lerp(x[0],y[0],t))},${Math.round(lerp(x[1],y[1],t))},${Math.round(lerp(x[2],y[2],t))})`;}
 function chipCSS(v){
@@ -353,6 +493,7 @@ function nextCrash(m){
 }
 
 let balance=1000, rewardsTotal=0;
+let vm=0, tier=0;
 let M=null, phase='idle', mult=1, crashAt=1, countdown=8;
 let bets=[null,null], sims=[];
 let raf=null,tickI=null,toI=null;
@@ -363,11 +504,60 @@ let faceTable=null;
 
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 
-/* ═══ FACE GEOMETRY — side-on profile ═══
-   Rock fills everything LEFT of the edge line; sky to the
-   RIGHT. The slope steepens with altitude: near base it runs
-   out ~0.88 m horizontally per metre climbed (≈49°), near the
-   summit only ~0.07 m (≈86°). Precomputed as a lookup. */
+/* ═══ VIP MATHS ═══
+   The boost stacks on the peak's own rake, then gets trimmed
+   so no combination of camp and peak pushes effective RTP
+   past the cap. K2 has the most headroom by design — its
+   base return is the lowest, so its grinders get the most. */
+function headroom(m){return Math.max(0,RTP_CAP-m.effRTP);}
+function boostOn(m){return Math.min(TIERS[tier].boost,headroom(m));}
+function effRake(m){return m.rake+boostOn(m);}
+function effLbCond(m){return m.lossback>0?m.lbCond+TIERS[tier].lbBonus:m.lbCond;}
+function tierEffRTP(m){return m.effRTP+boostOn(m);}
+function vmFor(stake,alt,m){return stake*((alt-m.base)/100)*m.vmW;}
+function nextTier(){return tier<TIERS.length-1?TIERS[tier+1]:null;}
+function tierProg(){
+ const nx=nextTier();
+ if(!nx)return 1;
+ const cur=TIERS[tier].vm;
+ return clamp((vm-cur)/(nx.vm-cur),0,1);
+}
+function awardVM(amount){
+ if(amount<=0)return;
+ vm+=amount;
+ showVMPop(amount);
+ let up=false;
+ while(tier<TIERS.length-1&&vm>=TIERS[tier+1].vm){tier++;up=true;}
+ updVIPChip();
+ if(up){
+  const T=TIERS[tier];
+  toast('▲ '+T.n.toUpperCase()+' REACHED · '+T.perk,'w');
+  if(M)renderRewards();
+  shake=Math.max(shake,7);
+ }
+ if(document.getElementById('vip').classList.contains('on'))renderVIP();
+}
+function showVMPop(a){
+ const e=document.getElementById('vmpop');
+ if(!e)return;
+ e.textContent='+'+cm(a)+' VM';
+ e.style.color=TIERS[tier].col;
+ e.className='on';
+ clearTimeout(e._t);e._t=setTimeout(()=>e.className='',1400);
+}
+function updVIPChip(){
+ const T=TIERS[tier],nx=nextTier();
+ document.getElementById('vc-name').textContent=T.n.toUpperCase();
+ document.getElementById('vc-name').style.color=T.col;
+ document.getElementById('vc-mark').style.color=T.col;
+ document.getElementById('vc-alt').textContent=cm(T.alt)+' m';
+ const f=document.getElementById('vc-fill');
+ f.style.width=(tierProg()*100)+'%';
+ f.style.background=nx?nx.col:T.col;
+ document.getElementById('vipchip').style.borderColor=tier>0?T.col+'40':'var(--bd)';
+}
+
+/* ═══ FACE GEOMETRY — side-on profile ═══ */
 function profileT(m,t){
  const p=m.profile;
  t=clamp(t,0,1);
@@ -404,11 +594,10 @@ function slopeAngle(alt){
  const d=6;
  return Math.atan2(faceX(alt+d)-faceX(alt-d), d*2);
 }
-
 function altOf(m){
  if(!M)return 0;
  const lt=clamp(Math.log(Math.max(m,1))/Math.log(M.ceiling),0,1);
- const t=Math.pow(lt,0.6);   // altitude gain keeps pace with the multiplier instead of lagging behind it
+ const t=Math.pow(lt,0.6);
  return M.base+(M.elev-M.base)*t;
 }
 function zoneAt(a){let z=null;for(const q of M.zones)if(a>=q[0])z=q;return z;}
@@ -450,7 +639,7 @@ function thumb(m,cn){
  }
  c.lineTo(baseR,baseY);c.closePath();
  c.fillStyle=m.rock;c.fill();
- c.strokeStyle=m.accent;c.globalAlpha=.3;c.lineWidth=2;c.stroke();c.globalAlpha=1;
+ c.strokeStyle=m.accent;c.globalAlpha=.6;c.lineWidth=2.5;c.stroke();c.globalAlpha=1;
  const wd=xmur3(m.id+'w');c.strokeStyle='#fff';c.lineWidth=1.2;
  for(let i=0;i<Math.round(m.weather.wind*24);i++){
   const y=(wd()%1000)/1000*h,x=(wd()%1000)/1000*w,l=(wd()%55)+22;
@@ -465,10 +654,14 @@ function renderSelect(){
  document.getElementById('grid').innerHTML=MTN.map(m=>{
   const a=m.accent;
   const chips=m.hist.slice(0,7).map(v=>`<span class="hchip" style="${chipCSS(v)}">${fx(v)}</span>`).join('');
-  const lb=m.lossback===0?'—':m.lbCond>=999?m.lossback+'% all falls':m.lossback+'% under '+m.lbCond.toFixed(2)+'×';
+  const bo=boostOn(m);
+  const lbC=effLbCond(m);
+  const lb=m.lossback===0?'—':lbC>=999?m.lossback+'% all falls':m.lossback+'% under '+lbC.toFixed(2)+'×';
+  const rk=m.rake||bo?((m.rake+bo).toFixed(1)+'%'+(bo?`<span class="pill" style="background:${TIERS[tier].col}20;color:${TIERS[tier].col}">+${bo.toFixed(1)} VIP</span>`:'')):'—';
   return `<div class="mc" data-id="${m.id}"
    onmouseenter="this.style.borderColor='${a}45'" onmouseleave="this.style.borderColor='var(--bd)'">
    <div class="mc-vis"><canvas data-thumb="${m.id}"></canvas>
+    <div class="mc-vm">VM ×${m.vmW.toFixed(2)}</div>
     <div class="mc-tag" style="background:${a}18;border:1px solid ${a}38;color:${a}">${m.risk}</div>
     <div class="mc-alt">${m.elev.toLocaleString()} m</div></div>
    <div class="mc-b">
@@ -476,12 +669,12 @@ function renderSelect(){
     <div class="mc-r">${m.region}</div>
     <div class="mc-cl">${m.climate}</div>
     <div class="mc-off">
-     <div class="off-r"><span class="off-l">BASE RTP</span><span class="off-v" style="color:#94a3b8">${m.baseRTP.toFixed(1)}%</span></div>
-     <div class="off-r"><span class="off-l">RAKEBACK</span><span class="off-v" style="color:${m.rake?'#f59e0b':'#334155'}">${m.rake?m.rake.toFixed(1)+'%':'—'}</span></div>
-     <div class="off-r"><span class="off-l">LOSSBACK</span><span class="off-v" style="color:${m.lossback?'#60a5fa':'#334155'};font-size:9px">${lb}</span></div>
+     <div class="off-r"><span class="off-l">BASE RTP</span><span class="off-v" style="color:#c2d1e8">${m.baseRTP.toFixed(1)}%</span></div>
+     <div class="off-r"><span class="off-l">RAKEBACK</span><span class="off-v" style="color:${(m.rake+bo)?'#f59e0b':'#7c90ae'}">${rk}</span></div>
+     <div class="off-r"><span class="off-l">LOSSBACK</span><span class="off-v" style="color:${m.lossback?'#7dd3fc':'#7c90ae'};font-size:9px">${lb}</span></div>
      <div class="off-r" style="border-top:1px solid var(--bd2);margin-top:4px;padding-top:5px">
       <span class="off-l" style="color:var(--mu)">EFFECTIVE RTP</span>
-      <span class="off-v" style="color:${a}">${m.effRTP.toFixed(1)}%</span></div>
+      <span class="off-v" style="color:${a}">${tierEffRTP(m).toFixed(1)}%</span></div>
     </div>
     <div class="mc-st">
      <div><div class="ms-l">CEILING</div><div class="ms-v" style="color:${a}">${m.ceiling.toFixed(0)}×</div></div>
@@ -506,12 +699,17 @@ function enter(id){
  document.getElementById('hd1').style.display='';
  document.getElementById('hud-mtn').textContent=M.name+' · '+M.elev.toLocaleString()+' m';
  document.getElementById('hud-wx').textContent=M.wx;
- const hr=document.getElementById('hud-rw');
- hr.textContent=`${M.effRTP.toFixed(1)}% RTP · ${M.rake?M.rake+'% RAKEBACK':'NO RAKEBACK'}${M.lossback?' · '+M.lossback+'% LOSSBACK':''}`;
- hr.style.color=M.accent;
+ setHudRewards();
  bets=[null,null];
  renderRewards(); buildBetPanel(0); buildBetPanel(1); renderHist();
  resize(); startWait();
+}
+function setHudRewards(){
+ const hr=document.getElementById('hud-rw');
+ const r=effRake(M);
+ hr.textContent=`${tierEffRTP(M).toFixed(1)}% RTP · ${r?r.toFixed(1)+'% RAKEBACK':'NO RAKEBACK'}`+
+  `${M.lossback?' · '+M.lossback+'% LOSSBACK':''} · VM ×${M.vmW.toFixed(2)}`;
+ hr.style.color=M.accent;
 }
 function toSelect(){
  stopAll(); M=null; phase='idle';
@@ -519,6 +717,7 @@ function toSelect(){
  document.getElementById('select').style.display='';
  document.getElementById('back-btn').style.display='none';
  document.getElementById('hd1').style.display='none';
+ renderSelect();
 }
 function stopAll(){
  if(raf){cancelAnimationFrame(raf);raf=null;}
@@ -535,7 +734,7 @@ function resize(){
  ctx.setTransform(DPR,0,0,DPR,0,0);
  seedFlakes();
 }
-window.addEventListener('resize',resize);
+window.addEventListener('resize',()=>{resize();if(document.getElementById('vip').classList.contains('on'))drawLadder();});
 function seedFlakes(){
  if(!M)return; flakes=[];
  const n=Math.round(70+M.weather.snow*200);
@@ -562,9 +761,9 @@ function draw(ts){
  if(shake>0.1){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.88;}
 
  const g=ctx.createLinearGradient(0,0,0,H);
- g.addColorStop(0,mix(M.skyHi,'#000000',t*.72));
+ g.addColorStop(0,mix(M.skyHi,'#000000',t*.40));
  g.addColorStop(.55,mix(M.skyLo,M.skyHi,t*.8));
- g.addColorStop(1,mix(M.skyLo,'#000000',t*.3));
+ g.addColorStop(1,mix(M.skyLo,'#000000',t*.14));
  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 
  const sf=xmur3(M.id+'st');
@@ -588,7 +787,7 @@ function draw(ts){
   }
  }
 
- ctx.fillStyle='rgba(255,255,255,.03)';
+ ctx.fillStyle='rgba(255,255,255,.07)';
  ctx.beginPath();ctx.moveTo(0,H);
  const df=xmur3(M.id+'d');
  for(let x=0;x<=W;x+=26)
@@ -610,46 +809,49 @@ function draw(ts){
 
  ctx.beginPath();
  facePts.forEach((p,i)=>i===0?ctx.moveTo(p[0],p[1]):ctx.lineTo(p[0],p[1]));
- ctx.strokeStyle=a;ctx.globalAlpha=.45;ctx.lineWidth=1.6;ctx.stroke();
- ctx.globalAlpha=.10;ctx.lineWidth=9;ctx.stroke();ctx.globalAlpha=1;
+ ctx.strokeStyle=a;ctx.globalAlpha=.75;ctx.lineWidth=2;ctx.stroke();
+ ctx.globalAlpha=.16;ctx.lineWidth=10;ctx.stroke();ctx.globalAlpha=1;
 
- ctx.globalAlpha=.055;ctx.fillStyle=M.snowC;
+ ctx.globalAlpha=.13;ctx.fillStyle=M.snowC;
  for(let al=Math.floor(botAlt/25)*25;al<topAlt;al+=25){
   const y=wy(al),x=wx(al);
   ctx.fillRect(x-190,y,190,2.6);
  }
  ctx.globalAlpha=1;
 
- ctx.strokeStyle='rgba(255,255,255,.035)';ctx.lineWidth=1;
+ ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;
  for(let al=Math.floor(botAlt/60)*60;al<topAlt;al+=60){
   const y=wy(al),x=wx(al);
   ctx.beginPath();ctx.moveTo(x-170,y+20);ctx.lineTo(x,y);ctx.stroke();
  }
 
- ctx.font='500 8px "JetBrains Mono",monospace';
+ ctx.font='600 11px "JetBrains Mono",monospace';
  for(let al=Math.ceil(botAlt/100)*100;al<topAlt;al+=100){
   const y=wy(al),x=wx(al);
-  ctx.strokeStyle='rgba(255,255,255,.07)';ctx.lineWidth=1;
-  ctx.beginPath();ctx.moveTo(x+5,y);ctx.lineTo(x+27,y);ctx.stroke();
-  ctx.fillStyle='rgba(255,255,255,.26)';ctx.fillText(Math.round(al-M.base)+' m',x+32,y+3);
+  ctx.strokeStyle='rgba(255,255,255,.28)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(x+5,y);ctx.lineTo(x+30,y);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.78)';ctx.fillText(Math.round(al-M.base)+' m',x+36,y+4);
  }
 
  for(const z of M.zones){
   const y=wy(z[0]);if(y<-40||y>H+40)continue;
   const x=wx(z[0]);
-  ctx.strokeStyle=z[2];ctx.globalAlpha=.5;ctx.lineWidth=1.4;ctx.setLineDash([5,5]);
+  ctx.strokeStyle=z[2];ctx.globalAlpha=.8;ctx.lineWidth=1.6;ctx.setLineDash([6,5]);
   ctx.beginPath();ctx.moveTo(x-180,y);ctx.lineTo(x+140,y);ctx.stroke();ctx.setLineDash([]);
-  ctx.globalAlpha=.9;ctx.fillStyle=z[2];ctx.font='700 8px "JetBrains Mono",monospace';
-  ctx.fillText(z[1],x+9,y-5);ctx.globalAlpha=1;
+  ctx.globalAlpha=1;ctx.fillStyle=z[2];ctx.font='700 11px "JetBrains Mono",monospace';
+  ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=6;
+  ctx.fillText(z[1],x+10,y-6);ctx.shadowBlur=0;
  }
 
+ /* rope trail — takes the camp colour from Base Camp up */
  if(trail.length>1){
+  const tc=tier>0?TIERS[tier].col:a;
   ctx.beginPath();
   for(let i=0;i<trail.length;i++){
    const x=wx(trail[i])+15,y=wy(trail[i]);
    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
   }
-  ctx.strokeStyle=phase==='fallen'?'rgba(239,68,68,.55)':a;
+  ctx.strokeStyle=phase==='fallen'?'rgba(239,68,68,.55)':tc;
   ctx.globalAlpha=.6;ctx.lineWidth=1.5;ctx.stroke();
   ctx.globalAlpha=.13;ctx.lineWidth=7;ctx.stroke();ctx.globalAlpha=1;
  }
@@ -658,10 +860,11 @@ function draw(ts){
   const sy=wy(M.elev),sx=wx(M.elev);
   ctx.strokeStyle=a;ctx.globalAlpha=.85;ctx.lineWidth=1.5;
   ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(sx,sy-17);ctx.stroke();
-  ctx.fillStyle=a;ctx.beginPath();
+  ctx.fillStyle=tier>=5?TIERS[tier].col:a;ctx.beginPath();
   ctx.moveTo(sx,sy-17);ctx.lineTo(sx+12,sy-13.5);ctx.lineTo(sx,sy-10);ctx.closePath();ctx.fill();
-  ctx.font='700 8px "JetBrains Mono",monospace';
-  ctx.fillText('SUMMIT '+M.ceiling.toFixed(0)+'×',sx+16,sy-12);ctx.globalAlpha=1;
+  ctx.fillStyle=a;ctx.font='700 11px "JetBrains Mono",monospace';
+  ctx.shadowColor='rgba(0,0,0,.9)';ctx.shadowBlur=6;
+  ctx.fillText('SUMMIT '+M.ceiling.toFixed(0)+'×',sx+17,sy-12);ctx.shadowBlur=0;ctx.globalAlpha=1;
  }
 
  drawClimber(wx(alt),wy(alt),alt,ts,t);
@@ -685,37 +888,34 @@ function draw(ts){
 
  const vg=ctx.createRadialGradient(W/2,H*.5,H*.2,W/2,H*.5,H*.86);
  vg.addColorStop(0,'rgba(0,0,0,0)');
- vg.addColorStop(1,`rgba(0,0,0,${.34+t*.42+M.weather.dark*.2})`);
+ vg.addColorStop(1,`rgba(0,0,0,${.14+t*.20+M.weather.dark*.10})`);
  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
 
  if(alt>7000&&phase==='climbing'){
   const p=(alt-7000)/(M.elev-7000);
-  ctx.globalAlpha=.1*p*(.5+Math.sin(ts*.004)*.5);
+  ctx.globalAlpha=.06*p*(.5+Math.sin(ts*.004)*.5);
   ctx.fillStyle='#ef4444';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
  }
  if(flash>.01){ctx.globalAlpha=flash*.5;ctx.fillStyle='#ef4444';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;flash*=.9;}
  ctx.restore();
 }
 
-/* ═══ CLIMBER — side-on, four-beat gait ═══
-   Each limb plants on the rock, then drifts DOWN relative to
-   the body as it rises, before swinging up to re-plant.
-   Offsets are staggered so only one limb moves at a time —
-   the same three-points-of-contact rule real climbers use. */
+/* ═══ CLIMBER — side-on, four-beat gait ═══ */
 function limbPos(u,reach){
  if(u<0.28){const e=ease(u/0.28);return lerp(reach*0.42,-reach*0.42,e);}
  return lerp(-reach*0.42,reach*0.42,(u-0.28)/0.72);
 }
 function drawClimber(ex,ey,alt,ts,t){
  const climbing=phase==='climbing', fallen=phase==='fallen';
- const shallow=profileT(M,t);   // 1=gentle local terrain, 0=steep
- const rate=climbing?lerp(0.85,0.34,t)*lerp(0.55,1.3,shallow):0.09;   // laboured at altitude, quicker on shallow ground
+ const shallow=profileT(M,t);
+ const rate=climbing?lerp(0.85,0.34,t)*lerp(0.55,1.3,shallow):0.09;
  gait=(gait+rate*0.016)%1;
- const lean=clamp(0.06+slopeAngle(alt)*0.3,0,0.34);   // gentle baseline tilt keeps legs pressed into the face without overdoing it
+ const lean=clamp(0.06+slopeAngle(alt)*0.3,0,0.34);
  const col=fallen?'#ef4444':'#fff';
  const falling=fallen&&!roundSummit;
  const fallEl=falling?Math.max(0,(ts-fallTS)/1000):0;
  const dropX=fallEl*95, dropY=170*fallEl*fallEl;
+ const rope=tier>0?TIERS[tier].col:M.accent;
 
  ctx.save();
  ctx.translate(ex+15+dropX,ey-2+dropY);
@@ -723,11 +923,11 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.rotate(falling?1.1+fallEl*5.2+Math.sin(ts*0.02)*0.25:fallen?Math.sin(ts*0.009)*0.6+1.15:lean);
  ctx.lineCap='round';ctx.lineJoin='round';
 
- ctx.globalAlpha=.15;ctx.fillStyle=fallen?'#ef4444':M.accent;
+ ctx.globalAlpha=.15;ctx.fillStyle=fallen?'#ef4444':rope;
  ctx.beginPath();ctx.arc(0,-8,19,0,7);ctx.fill();ctx.globalAlpha=1;
 
  if(!fallen){
-  ctx.strokeStyle=M.accent;ctx.globalAlpha=.42;ctx.lineWidth=1.1;
+  ctx.strokeStyle=rope;ctx.globalAlpha=.42;ctx.lineWidth=1.1;
   ctx.beginPath();ctx.moveTo(-2,2);ctx.quadraticCurveTo(-14,20,-8,42);ctx.stroke();ctx.globalAlpha=1;
  }
 
@@ -755,7 +955,7 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.lineWidth=3.6;
  ctx.beginPath();ctx.moveTo(0,3);ctx.lineTo(-2,-9);ctx.stroke();
 
- ctx.fillStyle=fallen?'rgba(239,68,68,.85)':M.accent;
+ ctx.fillStyle=fallen?'rgba(239,68,68,.85)':rope;
  ctx.globalAlpha=.88;
  ctx.save();ctx.translate(3.2,-5);ctx.rotate(.12);
  ctx.beginPath();ctx.roundRect(0,-4,5,10,1.6);ctx.fill();ctx.restore();
@@ -793,21 +993,29 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.globalAlpha=1;
 }
 
-/* ═══ REWARDS ═══ */
+/* ═══ REWARDS PANEL ═══ */
 function renderRewards(){
- const lb=M.lossback===0?'—':M.lbCond>=999?M.lossback+'% on all falls':M.lossback+'% under '+M.lbCond.toFixed(2)+'×';
+ const T=TIERS[tier], bo=boostOn(M), r=effRake(M), lbC=effLbCond(M);
+ const capped=T.boost>bo;
+ const lb=M.lossback===0?'—':lbC>=999?M.lossback+'% on all falls':M.lossback+'% under '+lbC.toFixed(2)+'×';
+ const widened=M.lossback>0&&T.lbBonus>0;
  document.getElementById('rew').innerHTML=`
-  <div style="font-size:8.5px;color:var(--dim);letter-spacing:.15em;margin-bottom:7px">${M.name.toUpperCase()} · OFFERING</div>
-  <div class="rw-r"><span class="rw-l">Base RTP</span><span class="rw-v" style="color:#94a3b8">${M.baseRTP.toFixed(1)}%</span></div>
-  <div class="rw-r"><span class="rw-l">Rakeback</span><span class="rw-v" style="color:${M.rake?'#f59e0b':'#334155'}">${M.rake?M.rake.toFixed(1)+'%':'—'}</span></div>
-  <div class="rw-r"><span class="rw-l">Lossback</span><span class="rw-v" style="color:${M.lossback?'#60a5fa':'#334155'};font-size:8.5px">${lb}</span></div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px">
+   <span style="font-size:10.5px;color:var(--dim);letter-spacing:.15em">${M.name.toUpperCase()} · OFFERING</span>
+   <span style="font-size:11px;font-weight:700;color:${T.col};letter-spacing:.08em;cursor:pointer" onclick="openVIP()">${T.n.toUpperCase()} ▸</span>
+  </div>
+  <div class="rw-r"><span class="rw-l">Base RTP</span><span class="rw-v" style="color:#c2d1e8">${M.baseRTP.toFixed(1)}%</span></div>
+  <div class="rw-r"><span class="rw-l">Rakeback</span><span class="rw-v" style="color:${r?'#f59e0b':'#7c90ae'}">${r?r.toFixed(1)+'%':'—'}${bo?`<span class="vipflag" style="background:${T.col}22;color:${T.col}">+${bo.toFixed(1)}</span>`:''}</span></div>
+  <div class="rw-r"><span class="rw-l">Lossback</span><span class="rw-v" style="color:${M.lossback?'#7dd3fc':'#7c90ae'};font-size:11px">${lb}${widened?`<span class="vipflag" style="background:${T.col}22;color:${T.col}">+${T.lbBonus.toFixed(2)}×</span>`:''}</span></div>
   <div class="rw-r" style="border-top:1px solid var(--bd2);margin-top:5px;padding-top:5px">
    <span class="rw-l" style="color:var(--mu)">Effective RTP</span>
-   <span class="rw-v" style="color:${M.accent}">${M.effRTP.toFixed(1)}%</span></div>
-  <div style="font-size:8.5px;color:var(--dim);line-height:1.5;margin-top:7px">${M.offering}</div>`;
+   <span class="rw-v" style="color:${M.accent}">${tierEffRTP(M).toFixed(1)}%</span></div>
+  <div class="rw-r"><span class="rw-l">VM weight</span><span class="rw-v" style="color:#c2d1e8">×${M.vmW.toFixed(2)}</span></div>
+  <div style="font-size:11px;color:var(--mu);line-height:1.65;margin-top:9px">${M.offering}${
+   capped?`<br><span style="color:${T.col}">Boost trimmed to +${bo.toFixed(1)}% — this peak caps at ${RTP_CAP}% RTP.</span>`:''}</div>`;
 }
 
-/* ═══ BET PANELS — built once, inputs never rebuilt ═══ */
+/* ═══ BET PANELS ═══ */
 function buildBetPanel(i){
  document.getElementById('bet'+i).innerHTML=`
   <div class="bet-hd"><span class="bet-t">STAKE ${i+1}</span><span class="bet-st" id="bs${i}"></span></div>
@@ -835,7 +1043,7 @@ function updBet(i){
  if(!btn)return;
  let cls='place',txt='PLACE STAKE',s='',sc='var(--dim)';
  if(b){
-  if(b.state==='queued'){cls='queued';txt='✕ CANCEL · '+f2(b.stake)+' TKN';s='QUEUED';sc='#60a5fa';}
+  if(b.state==='queued'){cls='queued';txt='✕ CANCEL · '+f2(b.stake)+' TKN';s='QUEUED';sc='#7dd3fc';}
   else if(b.state==='next'){cls='queued';txt='✕ CANCEL NEXT · '+f2(b.stake);s='NEXT ROUND';sc='#818cf8';}
   else if(b.state==='live'){cls='cash';txt='TURN BACK · '+fx(mult);s='CLIMBING';sc='var(--gn)';}
   else if(b.state==='cashed'){cls='done';txt='✓ +'+f2(b.payout)+' TKN';s='TURNED BACK @ '+fx(b.cashMult);sc='var(--gn)';}
@@ -875,11 +1083,12 @@ function cashOut(i){
  const b=bets[i];
  if(!b||b.state!=='live'||phase!=='climbing')return;
  b.state='cashed';b.cashMult=rnd(mult);
- const win=rnd(b.stake*b.cashMult), rake=rnd(b.stake*M.rake/100);
+ const win=rnd(b.stake*b.cashMult), rake=rnd(b.stake*effRake(M)/100);
  b.payout=rnd(win+rake);
  balance=rnd(balance+b.payout);rewardsTotal=rnd(rewardsTotal+rake);
  updBal();updBet(i);
  addFeed('You',b.cashMult,win,true,true);
+ awardVM(vmFor(b.stake,altOf(b.cashMult),M));
  toast('+'+f2(win)+' TKN'+(rake>0?' · +'+f2(rake)+' rakeback':'')+' at '+fx(b.cashMult),'w');
 }
 function updBal(){
@@ -892,8 +1101,10 @@ function addFeed(n,m,v,win,you){
  const e=document.getElementById('feed-e');if(e)e.remove();
  const d=document.createElement('div');d.className='fi';
  const c=win?'#10b981':'#ef4444';
+ const T=TIERS[tier];
+ const tag=(you&&tier>=5)?`<span class="fi-tag" style="background:${T.col}22;color:${T.col}">${T.n.toUpperCase()}</span>`:'';
  d.innerHTML=`<div class="fi-av" style="background:${you?M.accent+'2a':'rgba(255,255,255,.05)'};color:${you?M.accent:'#64748b'}">${n.slice(0,2).toUpperCase()}</div>
-  <span class="fi-n" style="${you?'color:'+M.accent+';font-weight:700':''}">${n}</span>
+  <span class="fi-n" style="${you?'color:'+M.accent+';font-weight:700':''}">${n}</span>${tag}
   <span class="fi-m" style="color:${c}">${win?fx(m):'—'}</span>
   <span class="fi-v" style="color:${c}">${win?'+'+Math.round(v):'−'+Math.round(v)}</span>`;
  l.insertBefore(d,l.firstChild);
@@ -907,7 +1118,7 @@ function renderHist(){
 function setStatus(){
  const d=document.getElementById('dot'),s=document.getElementById('strip-t');
  const m={waiting:['#f59e0b','ACCEPTING STAKES'],climbing:['#10b981','ASCENT IN PROGRESS'],
-  fallen:['#ef4444','ROUND SETTLED']}[phase]||['#334155','—'];
+  fallen:['#ef4444','ROUND SETTLED']}[phase]||['#7c90ae','—'];
  d.style.background=m[0];d.style.boxShadow='0 0 7px '+m[0];s.textContent=m[1];
 }
 function updHUD(){
@@ -921,6 +1132,166 @@ function toast(m,t){
  const e=document.getElementById('toast');
  e.textContent=m;e.className=t+' on';
  clearTimeout(e._t);e._t=setTimeout(()=>e.className='',3000);
+}
+
+/* ═══ VIP OVERLAY ═══ */
+function openVIP(){
+ document.getElementById('vip').classList.add('on');
+ renderVIP();drawLadder();
+}
+function closeVIP(){document.getElementById('vip').classList.remove('on');}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeVIP();});
+
+function renderVIP(){
+ const T=TIERS[tier], nx=nextTier();
+ const need=nx?nx.vm-vm:0;
+ document.getElementById('vip-now').innerHTML=`
+  <div id="vn-top">
+   <div>
+    <div class="vn-lab">CURRENT CAMP</div>
+    <div id="vn-name" style="color:${T.col}">${T.n}</div>
+   </div>
+   <div style="text-align:right">
+    <div class="vn-lab">VERTICAL METRES BANKED</div>
+    <div id="vn-vm">${cm(vm)}</div>
+   </div>
+  </div>
+  <div id="vn-bar"><div id="vn-fill" style="width:${tierProg()*100}%;background:${nx?nx.col:T.col}"></div></div>
+  <div id="vn-note">${nx
+   ?`<span style="color:${nx.col};font-weight:700">${cm(need)} VM</span> to ${nx.n} — ${nx.perk}`
+   :'Top of the mountain. Nothing above this.'}</div>`;
+
+ document.getElementById('tier-tbl').innerHTML=`
+  <table class="tbl">
+   <tr><th>CAMP</th><th>ALTITUDE</th><th>VM</th><th>RAKEBACK</th><th>HOLD / MONTH</th><th>UNLOCKS</th></tr>
+   ${TIERS.map((t,i)=>`<tr class="${i===tier?'cur':i>tier?'locked':''}">
+    <td class="t-nm" style="color:${t.col}">${i===tier?'▲ ':''}${t.n}</td>
+    <td>${cm(t.alt)} m</td>
+    <td>${t.vm?cm(t.vm):'—'}</td>
+    <td style="color:${t.boost?'#f59e0b':'#7c90ae'}">${t.boost?'+'+t.boost.toFixed(1)+'%':'—'}</td>
+    <td style="color:${t.vm?'#64748b':'#7c90ae'}">${t.vm?cm(t.vm*0.3):'—'}</td>
+    <td style="color:#a8bcd8">${t.perk}</td></tr>`).join('')}
+  </table>`;
+
+ document.getElementById('rake-tbl').innerHTML=`
+  <table class="tbl">
+   <tr><th>PEAK</th><th>PEAK RAKE</th><th>YOUR BOOST</th><th>TOTAL</th><th>EFF. RTP</th><th>VM WEIGHT</th></tr>
+   ${MTN.map(m=>{
+    const bo=boostOn(m), cap=T.boost>bo;
+    return `<tr>
+     <td class="t-nm" style="color:${m.accent}">${m.name}</td>
+     <td>${m.rake?m.rake.toFixed(1)+'%':'—'}</td>
+     <td style="color:${bo?T.col:'#7c90ae'}">${bo?'+'+bo.toFixed(1)+'%':'—'}${cap?'<span style="color:#93a8c8"> (capped)</span>':''}</td>
+     <td style="color:#f59e0b;font-weight:700">${effRake(m)?effRake(m).toFixed(1)+'%':'—'}</td>
+     <td style="color:${tierEffRTP(m)>=RTP_CAP-.01?'#ef4444':'#f8fafc'};font-weight:700">${tierEffRTP(m).toFixed(1)}%</td>
+     <td>×${m.vmW.toFixed(2)}</td></tr>`;
+   }).join('')}
+  </table>`;
+}
+
+/* The ladder is Everest's own profile — camps sit at their
+   true altitudes, and the climber marker sits between them
+   in proportion to banked VM rather than at a fixed notch. */
+function drawLadder(){
+ const cn=document.getElementById('ladder');
+ if(!cn.clientWidth)return;
+ const c=cn.getContext('2d');
+ const dpr=Math.min(window.devicePixelRatio||1,2);
+ const w=cn.clientWidth, h=cn.clientHeight;
+ cn.width=w*dpr;cn.height=h*dpr;c.setTransform(dpr,0,0,dpr,0,0);
+
+ const T=TIERS[tier], nx=nextTier();
+ const AL=5000, AH=9100;
+ const Y=a=>h-24-((a-AL)/(AH-AL))*(h-52);
+ const X=a=>{
+  const t=clamp((a-AL)/(AH-AL),0,1);
+  return 46+Math.pow(t,1.55)*(w-118);
+ };
+
+ const g=c.createLinearGradient(0,0,0,h);
+ g.addColorStop(0,'#141d33');g.addColorStop(1,'#2b3a5e');
+ c.fillStyle=g;c.fillRect(0,0,w,h);
+
+ const sf=xmur3('ladder');
+ for(let i=0;i<60;i++){
+  const x=(sf()%10000)/10000*w,y=(sf()%10000)/10000*h*.6,r=(sf()%10)/10*1.1+.3;
+  c.globalAlpha=(sf()%100)/200+.25;c.fillStyle='#fff';
+  c.beginPath();c.arc(x,y,r,0,7);c.fill();
+ }
+ c.globalAlpha=1;
+
+ // the face
+ const pts=[];
+ for(let a=AL;a<=8849;a+=25){
+  const j=Math.sin(a*0.004)*4+Math.sin(a*0.011+1.3)*2.4;
+  pts.push([X(a)+j,Y(a)]);
+ }
+ c.beginPath();
+ c.moveTo(0,h);c.lineTo(0,Y(AL));
+ for(const p of pts)c.lineTo(p[0],p[1]);
+ c.lineTo(pts[pts.length-1][0],h);c.closePath();
+ c.fillStyle='#2e3053';c.fill();
+ c.beginPath();
+ pts.forEach((p,i)=>i===0?c.moveTo(p[0],p[1]):c.lineTo(p[0],p[1]));
+ c.strokeStyle='#a5b4fc';c.globalAlpha=.7;c.lineWidth=2;c.stroke();
+ c.globalAlpha=.14;c.lineWidth=9;c.stroke();c.globalAlpha=1;
+
+ // death zone band
+ c.fillStyle='rgba(239,68,68,.13)';
+ c.fillRect(0,Y(8849),w,Y(8000)-Y(8849));
+
+ // camps
+ c.font='700 11px "JetBrains Mono",monospace';
+ TIERS.forEach((t,i)=>{
+  const y=Y(t.alt), x=X(t.alt);
+  const on=i<=tier;
+  c.strokeStyle=t.col;c.globalAlpha=on?.8:.34;c.lineWidth=1.2;
+  c.setLineDash([3,4]);
+  c.beginPath();c.moveTo(x,y);c.lineTo(w-8,y);c.stroke();c.setLineDash([]);
+  c.globalAlpha=on?1:.55;
+  c.fillStyle=t.col;
+  c.beginPath();c.arc(x,y,on?5:3.4,0,7);c.fill();
+  if(on){c.globalAlpha=.22;c.beginPath();c.arc(x,y,9,0,7);c.fill();c.globalAlpha=1;}
+  c.globalAlpha=on?1:.6;
+  c.fillStyle=t.col;
+  c.textAlign='right';
+  c.shadowColor='rgba(0,0,0,.85)';c.shadowBlur=5;
+  c.fillText(t.n.toUpperCase(),w-12,y-7);
+  c.globalAlpha=on?.85:.5;
+  c.fillStyle='#cbd9ee';c.font='500 10px "JetBrains Mono",monospace';
+  c.fillText(cm(t.alt)+' m',w-12,y+11);
+  c.shadowBlur=0;
+  c.font='700 11px "JetBrains Mono",monospace';
+  c.textAlign='left';
+ });
+ c.globalAlpha=1;
+
+ // climber position — interpolated between camps by VM
+ const p=tierProg();
+ const posAlt=nx?lerp(T.alt,nx.alt,p):T.alt;
+ const px=X(posAlt), py=Y(posAlt);
+
+ // route travelled
+ c.beginPath();
+ for(let a=AL;a<=posAlt;a+=20){
+  const j=Math.sin(a*0.004)*4+Math.sin(a*0.011+1.3)*2.4;
+  a===AL?c.moveTo(X(a)+j+7,Y(a)):c.lineTo(X(a)+j+7,Y(a));
+ }
+ c.strokeStyle=T.col;c.globalAlpha=.9;c.lineWidth=2.2;c.stroke();
+ c.globalAlpha=.2;c.lineWidth=8;c.stroke();c.globalAlpha=1;
+
+ c.fillStyle=T.col;c.globalAlpha=.2;
+ c.beginPath();c.arc(px+7,py,13,0,7);c.fill();c.globalAlpha=1;
+ c.fillStyle='#fff';
+ c.beginPath();c.arc(px+7,py-4,3.2,0,7);c.fill();
+ c.strokeStyle='#fff';c.lineWidth=2;c.lineCap='round';
+ c.beginPath();c.moveTo(px+7,py-1);c.lineTo(px+7,py+5);c.stroke();
+ c.beginPath();c.moveTo(px+7,py+5);c.lineTo(px+3,py+10);c.moveTo(px+7,py+5);c.lineTo(px+11,py+10);c.stroke();
+ c.beginPath();c.moveTo(px+7,py+1);c.lineTo(px+2,py-3);c.stroke();
+
+ c.fillStyle=T.col;c.font='700 11.5px "JetBrains Mono",monospace';
+ c.shadowColor='rgba(0,0,0,.9)';c.shadowBlur=6;
+ c.fillText('YOU · '+cm(vm)+' VM',px+20,py+4);c.shadowBlur=0;
 }
 
 /* ═══ LIFECYCLE ═══ */
@@ -1004,18 +1375,20 @@ function endRound(){
  M.hist.unshift(rnd(crashAt));if(M.hist.length>24)M.hist.pop();
  renderHist();
  for(const s of sims)if(!s.done)addFeed(s.name,0,s.stake,false,false);
- let msg=null;
+ let msg=null, earned=0;
  for(let i=0;i<2;i++){
   const b=bets[i];
   if(b&&b.state==='live'){
    b.state='lost';
-   const rake=rnd(b.stake*M.rake/100);
-   const lb=(M.lossback>0&&crashAt<M.lbCond)?rnd(b.stake*M.lossback/100):0;
+   const rake=rnd(b.stake*effRake(M)/100);
+   const lb=(M.lossback>0&&crashAt<effLbCond(M))?rnd(b.stake*M.lossback/100):0;
    b.refund=rnd(rake+lb);
    if(b.refund>0){
     balance=rnd(balance+b.refund);rewardsTotal=rnd(rewardsTotal+b.refund);
     msg='Fell at '+fx(crashAt)+' · '+f2(b.refund)+' TKN returned';
    } else msg='Fell at '+fx(crashAt);
+   /* the climb still counts — a fall banks the metres reached */
+   earned+=vmFor(b.stake,altOf(crashAt),M);
    addFeed('You',0,b.stake,false,true);
   }
   updBet(i);
@@ -1023,6 +1396,7 @@ function endRound(){
  updBal();
  if(msg)toast(msg,'l');
  if(summit)toast('★ SUMMIT — '+M.name+' topped out at '+fx(crashAt),'w');
+ if(earned>0)setTimeout(()=>awardVM(earned),700);
  setStatus();loop();
  toI=setTimeout(startWait,4200);
 }
@@ -1033,6 +1407,7 @@ function loop(){
  raf=requestAnimationFrame(f);
 }
 
+updVIPChip();
 renderSelect();updBal();
 </script>
 </body>
