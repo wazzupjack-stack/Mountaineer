@@ -375,7 +375,7 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
  #hdr-r{flex-wrap:wrap;gap:6px 8px;width:100%}
  .lg-n{font-size:15px}
  .lg-m{font-size:15px}
- /* #acctstat (REWARDS/BALANCE/TOP UP/username/LOG OUT) had no wrap of its
+ /* #acctstat (BALANCE/TOP UP/username/LOG OUT) had no wrap of its
     own, so once logged in it overflowed straight off the edge of a phone
     screen — with body{overflow:hidden} that put TOP UP, the username, and
     LOG OUT completely off-screen and untappable, not just visually
@@ -473,8 +473,6 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
     <button class="btn-s" id="back-btn" style="display:none" onclick="toSelect()">◀ BASE CAMP</button>
     <div class="hdiv" id="hd1" style="display:none"></div>
     <div id="acctstat">
-      <div class="hstat"><span class="hstat-l">REWARDS</span><span class="hstat-v" id="rwtot" style="color:var(--am)">0.00</span></div>
-      <div class="hdiv"></div>
       <div class="hstat"><span class="hstat-l">BALANCE</span><span class="hstat-v" id="bal">0.00</span><span class="hstat-l">TKN</span></div>
       <button class="btn-s" onclick="topUp()" title="Demo faucet — add play tokens, no real value">+ TOP UP</button>
       <div class="hdiv"></div>
@@ -781,7 +779,7 @@ function updMuteBtn(){
 }
 
 let myUser=null;   // {id,username,balance} once logged in, else null
-let balance=0, rewardsTotal=0;
+let balance=0;
 let M=null, phase='idle', mult=1, crashAt=1, countdown=5, lastPulseInt=1, lastMultTxt='';
 let bets=[null,null], autoplay=[false,false];
 let raf=null,climbRaf=null,tickI=null,liveI=null,waitEnteredAt=0;
@@ -1670,7 +1668,6 @@ function cashOut(i){
 }
 function updBal(){
  document.getElementById('bal').textContent=f2(balance);
- document.getElementById('rwtot').textContent=f2(rewardsTotal);
 }
 async function topUp(){
  if(!myUser){openAuth('login');return;}
@@ -1763,14 +1760,14 @@ const PAGES={
   <p>Peaks with the lowest base return give the most back on a losing stake — see <strong>Rewards</strong> in this menu for exactly how that works.</p>`},
 
  rewards:{t:'Rewards',s:'WHAT COMES BACK ON A FALL',b:()=>`
-  <p>The <strong>REWARDS</strong> figure in the header is a running total of every stake refund you've been paid this session — it only ever grows when a round falls, never on a win. Two separate mechanics feed it.</p>
+  <p>Every mountain refunds a slice of your stake when a round falls — never on a win. Two separate mechanics feed that refund.</p>
   <h3>Rakeback</h3>
   <p>A fixed slice of your stake back on <strong>any</strong> fall, no conditions. Not every peak offers it — check a mountain's card, or <strong>The six peaks</strong> in this menu, for its rate. Mont Blanc offers none; K2 offers the most, at 8%.</p>
   <h3>Lossback</h3>
   <p>A second, separate refund on top of rakeback — but only when the round falls early, below that peak's own cutoff multiplier. Some peaks pay it on <em>any</em> fall regardless of where it stopped; most don't offer it at all. Again, check the peak's own card for its exact rate and cutoff.</p>
   <h3>Why this exists</h3>
   <p>A peak with a lower base <strong>return to player</strong> makes up the difference here instead — the money isn't gone, it's just handed back through rakeback and lossback rather than baked into every round's odds. That's why <strong>effective</strong> return varies by how a session actually plays out, while base RTP is the same for every player on that peak regardless of luck.</p>
-  <div class="note"><p>REWARDS is a live counter for this session only — it is not saved, and starts back at 0.00 the next time you log in or reload. Your account <strong>balance</strong> is the only figure that's actually persisted; every refund that built up your REWARDS total already landed in it the moment it was paid.</p></div>`},
+  <div class="note"><p>Every refund lands straight in your account <strong>balance</strong> the moment it's paid — that's the only figure that's actually persisted.</p></div>`},
 
  fair:{t:'Provably fair',s:'VERIFYING THE RESULT',b:()=>`
   <p>The result of every round is decided before the climb starts, and can be checked afterwards.</p>
@@ -2007,7 +2004,7 @@ function onWS(msg){
   case 'betSettled':{
    if(M&&M.id===msg.mountainId&&bets[msg.slot]){
     const b=bets[msg.slot];b.state='lost';b.refund=msg.refund;
-    rewardsTotal=rnd(rewardsTotal+msg.refund);updBal();updBet(msg.slot);
+    updBal();updBet(msg.slot);
     toast(msg.refund>0?'Fell at '+fx(msg.crashAt)+' · '+f2(msg.refund)+' TKN returned':'Fell at '+fx(msg.crashAt),'l');
    }
    break;
@@ -2328,7 +2325,7 @@ async function submitAuth(){
 }
 async function doLogout(){
  try{await fetch('/api/logout',{method:'POST',credentials:'same-origin'});}catch(e){}
- myUser=null;balance=0;rewardsTotal=0;setAcctUI();updBal();
+ myUser=null;balance=0;setAcctUI();updBal();
  /* the existing WS connection was authenticated at handshake time and
     won't notice the cookie just got cleared — close it so the automatic
     reconnect re-resolves as anonymous instead of staying privileged */
