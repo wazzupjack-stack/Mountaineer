@@ -178,8 +178,16 @@ padding:12px 18px;background:linear-gradient(180deg,rgba(6,10,20,.96),rgba(6,10,
 #dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 #strip-t{font-size:12px;letter-spacing:.13em;color:rgba(255,255,255,.9);font-weight:600}
 #hist{display:flex;gap:5px;margin-left:auto;overflow:hidden}
+/* overflow-y:auto (not hidden) because the two stake panels plus
+   jackpot/RTP/feed/provably-fair together can genuinely be taller than
+   the viewport on a shorter desktop screen (a laptop, a smaller display)
+   — with the old overflow:hidden that just clipped the bottom of the
+   panel with no way to reach it, not just on mobile. #feed no longer
+   tries to be its own independently-scrolling flex:1 region for the same
+   reason: one scroll container for the whole panel is simpler and
+   guarantees everything is reachable regardless of viewport height. */
 #side{width:368px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--bd);
-display:flex;flex-direction:column;overflow:hidden}
+display:flex;flex-direction:column;overflow-y:auto}
 .sec-h{padding:11px 18px 10px;font-size:11px;color:var(--dim);letter-spacing:.15em;
 border-bottom:1px solid var(--bd2);flex-shrink:0;display:flex;justify-content:space-between;
 background:rgba(160,190,235,.04)}
@@ -204,11 +212,6 @@ transition:border-color .18s,background .18s;-moz-appearance:textfield;font-weig
 input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
 input::placeholder{color:#6f84a4;font-size:20px}
 input:focus{border-color:#7dd3fc;background:rgba(10,16,30,.75)}
-select.wpsel{width:100%;background:rgba(10,16,30,.55);border:1px solid rgba(160,190,235,.28);
-border-radius:8px;padding:10px 12px;color:#fff;font-size:12.5px;font-family:inherit;outline:none;
-cursor:pointer;transition:border-color .18s,background .18s}
-select.wpsel:focus{border-color:#7dd3fc;background:rgba(10,16,30,.75)}
-select.wpsel option{background:#16203a;color:#fff}
 .qk{display:flex;gap:5px;margin-bottom:10px}
 .qk button{flex:1;padding:8px 0;font-size:12px;font-family:inherit;background:rgba(160,190,235,.10);
 border:1px solid rgba(160,190,235,.2);border-radius:6px;color:var(--mu);cursor:pointer;transition:.14s;font-weight:700}
@@ -230,8 +233,8 @@ font-size:19px;padding:22px 0}
 .act.done{background:rgba(52,211,153,.16);border:1px solid rgba(52,211,153,.45);color:#6ee7b7;cursor:default}
 .act.dead{background:rgba(248,113,113,.14);border:1px solid rgba(248,113,113,.4);color:#fca5a5;cursor:default}
 @keyframes pg{0%,100%{box-shadow:0 4px 20px rgba(16,185,129,.45)}50%{box-shadow:0 4px 40px rgba(16,185,129,.8)}}
-#feed{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0}
-#feed-l{flex:1;overflow-y:auto}
+#feed{flex:none;display:flex;flex-direction:column;min-height:0}
+#feed-l{overflow-y:visible}
 .fi{display:flex;align-items:center;gap:8px;padding:7px 16px;
 border-bottom:1px solid rgba(160,190,235,.07);animation:sl .26s ease}
 @keyframes sl{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
@@ -356,13 +359,11 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
  #mult-bar-n{font-family:'Futura PT','Futura','Century Gothic',-apple-system,BlinkMacSystemFont,sans-serif;
   font-weight:800;font-size:clamp(26px,8vw,36px);color:#fff;line-height:1}
  #stage{flex:0 0 auto;height:44dvh;min-height:240px}
- /* #side now exactly fills whatever's left (never adds to stage's height
-    to overflow the viewport) and scrolls internally if its content is
-    still taller than that — the game view above always stays put while
-    the bet panel/feed scroll, rather than the whole page scrolling. */
- #side{flex:1;min-height:0;width:100%;border-left:none;border-top:1px solid var(--bd);overflow-y:auto}
- #feed{flex:none}
- #feed-l{overflow-y:visible;max-height:none}
+ /* #side already scrolls (see the base rule) — here it just needs to
+    exactly fill whatever's left below #stage instead of its fixed
+    desktop width, so the game view above stays put while the bet
+    panel/feed scroll, rather than the whole page scrolling. */
+ #side{flex:1;min-height:0;width:100%;border-left:none;border-top:1px solid var(--bd)}
 }
 @media(max-width:640px){
  /* Buttons/header made smaller on request — they were eating too much of
@@ -460,6 +461,7 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
           <button class="mdi" onclick="openMenu('play')">How it works</button>
           <button class="mdi" onclick="openMenu('peaks')">The six peaks</button>
           <button class="mdi" onclick="openMenu('maths')">The numbers</button>
+          <button class="mdi" onclick="openMenu('rewards')">Rewards</button>
           <button class="mdi" onclick="openMenu('fair')">Provably fair</button>
           <button class="mdi" onclick="openMenu('rg')">Responsible play</button>
           <button class="mdi" onclick="openMenu('legal')">Legal</button>
@@ -594,12 +596,13 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
               out at x] = (1-p0)·x^(1-alpha), so any alpha != 1
               would mean the displayed RTP is only true at one
               specific target and silently rewards or punishes
-              a particular strategy. baseRTP/effRTP below are
-              NOT stored — they're derived from p0/rake in code
-              (see baseRTPof/baseEffRTP) so they can't drift out
-              of sync if p0 or rake is retuned later.
-   rake     = % of every stake returned regardless of result
-   lossback = % of lost stake returned when condition met
+              a particular strategy. baseRTP below is NOT stored
+              — it's derived from p0 in code (see baseRTPof) so
+              it can't drift out of sync if p0 is retuned later.
+   rake     = % of a losing stake returned, on any fall
+   lossback = % of lost stake returned when condition met — a
+              second, separately-conditional refund on top of
+              rake, not an alternative to it
 ═══════════════════════════════════════════════════════ */
 const MTN=[
 {
@@ -617,7 +620,7 @@ const MTN=[
  id:'aconcagua',name:'Aconcagua',elev:6961,base:0,region:'Argentina · Andes',
  risk:'LOW',accent:'#fbbf24',ceiling:69.61,p0:0.04,alpha:1,growth:0.0347,
  rake:1.0,lossback:5,lbCond:1.5,
- offering:'5% back on any fall under 1.50× — protection against the early bust, plus 1% rakeback.',
+ offering:'5% back on any fall under 1.50× — protection against the early bust, plus 1% back on any other fall.',
  climate:'Highest peak outside Asia. Extremely arid Andean desert air. The viento blanco — a white wind — arrives with almost no warning and drives gusts past 160 km/h.',
  zones:[[6000,'HIGH CAMP','#fcd34d'],[6700,'SUMMIT RIDGE','#fef3c7']],
  rock:'#4c3c20',snowC:'#f5f0e0',skyLo:'#493c22',skyHi:'#1a1c2d',
@@ -639,7 +642,7 @@ const MTN=[
  id:'denali',name:'Denali',elev:6190,base:0,region:'Alaska · 63°N',
  risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,p0:0.08,alpha:1,growth:0.0377,
  rake:5.0,lossback:0,lbCond:0,
- offering:'5% rakeback on every stake, win or lose. Built for high-volume play.',
+ offering:'5% rakeback on every losing stake. Built for high-volume play.',
  climate:'Coldest of the six despite modest height. At 63° north the barometric pressure is far lower than the same altitude in the Himalaya, so 6,190 m climbs like 7,000 m. Lows near −73 °C.',
  zones:[[5200,'HEADWALL','#7dd3fc'],[5900,'SUMMIT RIDGE','#e0f2fe']],
  rock:'#2a3e55',snowC:'#e6f4fd',skyLo:'#2a496c',skyHi:'#151c30',
@@ -650,7 +653,7 @@ const MTN=[
  id:'everest',name:'Everest',elev:8849,base:0,region:'Nepal–Tibet · Himalaya',
  risk:'HIGH',accent:'#818cf8',ceiling:88.49,p0:0.12,alpha:1,growth:0.0407,
  rake:3.0,lossback:0,lbCond:0,
- offering:'Highest ceiling on the platform at 88×, with 3% rakeback on every stake.',
+ offering:'Highest ceiling on the platform at 88×, with 3% rakeback on every losing stake.',
  climate:'Above 8,000 m the death zone offers a third of sea-level oxygen. The jet stream parks on the summit for most of the year, driving winds past 280 km/h, lifting only for a narrow May window.',
  zones:[[7000,'LHOTSE FACE','#a5b4fc'],[8000,'DEATH ZONE','#ef4444'],[8700,'HILLARY STEP','#e0e7ff']],
  rock:'#2e3053',snowC:'#e9ecfb',skyLo:'#333568',skyHi:'#131528',
@@ -661,7 +664,7 @@ const MTN=[
  id:'k2',name:'K2',elev:8611,base:0,region:'Pakistan–China · Karakoram',
  risk:'EXTREME',accent:'#ef4444',ceiling:86.11,p0:0.22,alpha:1,growth:0.0443,
  rake:8.0,lossback:15,lbCond:1.01,
- offering:'Lowest base RTP, largest rewards: 8% rakeback plus 15% back on instant falls.',
+ offering:'Lowest base RTP, largest rewards: 8% rakeback on every fall, plus 15% more back on instant falls.',
  climate:'The Savage Mountain. 238 m lower than Everest but roughly six times deadlier. Storms arrive without warning, there is no reliable weather window, and the Bottleneck serac collapses without pattern.',
  zones:[[6800,'BLACK PYRAMID','#fca5a5'],[8000,'DEATH ZONE','#ef4444'],[8200,'THE BOTTLENECK','#dc2626']],
  rock:'#3e272c',snowC:'#f3e8e8',skyLo:'#45262a',skyHi:'#15131f',
@@ -784,6 +787,10 @@ let bets=[null,null], autoplay=[false,false];
 let raf=null,climbRaf=null,tickI=null,liveI=null,waitEnteredAt=0;
 let W=0,H=0,DPR=1;
 let camAlt=0, camX=0, gait=0, shake=0, flash=0, fallTS=0, roundSummit=false;
+/* {start,from} while a genuine summit's last stretch is being visibly
+   climbed in the normal close-up view, before cutting to the zoomed-out
+   reveal — see handleRoundEnd/beginSummitReveal. */
+let finalPush=null;
 let puffs=[], trail=[], confetti=[];
 let flashColor='#ef4444';
 let faceTable=null;
@@ -795,15 +802,17 @@ const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 /* ═══ RTP — derived, not hand-authored ═══
    With alpha=1 fixed on every peak, base RTP is exactly
    (1-p0) regardless of what multiplier a player targets —
-   no calibration point, no strategy-dependence. effRTP adds
-   only the deterministic rake on top; lossback is conditional
-   on where the round actually crashed, so it's shown to
-   players as its own separate, clearly conditional line
-   rather than folded into one number that would misrepresent
-   it. Both figures recompute automatically from p0/rake, so
-   they can never drift out of sync if those are retuned. */
+   no calibration point, no strategy-dependence. rake and
+   lossback are both only ever paid out on a losing bet (see
+   Room.cashOut/endRound server-side), so neither is a
+   guaranteed, outcome-independent boost — folding either into
+   one flat "effective RTP" number would overstate what a
+   winning bet actually gets, so both are shown to players as
+   their own separate, clearly loss-conditional lines instead.
+   Recomputes automatically from p0, so it can never drift out
+   of sync if that's retuned. */
 function baseRTPof(m){return (1-m.p0)*100;}
-function baseEffRTP(m){return baseRTPof(m)+m.rake;}
+function baseEffRTP(m){return baseRTPof(m);}
 
 /* ═══ FACE GEOMETRY — side-on profile ═══ */
 function profileT(m,t){
@@ -860,18 +869,29 @@ function slopeAngle(alt){
  const d=6;
  return Math.atan2(faceX(alt+d)-faceX(alt-d), d*2);
 }
-/* Visual climb-position curve: lt^0.6 is what keeps the summit approach
-   feeling snappy (see multForAlt below), but that same exponent has an
-   infinite slope at lt=0, which made the climber rocket up the lower
-   slopes the instant a round started. CLIMB_K covers the low end with a
-   quintic ramp that starts flat (zero velocity AND zero acceleration at
-   lt=0) and joins the lt^0.6 curve at lt=CLIMB_K matching value, velocity,
-   AND acceleration (C2-continuous). Matching value+velocity alone (a cubic
+/* Visual climb-position curve: lt^CLIMB_P is what keeps the summit
+   approach feeling snappy — lowered from 0.6 to 0.5 since even 0.6 still
+   left a bit too much distance to close out in the last stretch (e.g.
+   6.1% of the climb still remaining at 90% of the way there, now 5.1%).
+   That same exponent has an infinite slope at
+   lt=0, which made the climber rocket up the lower slopes the instant a
+   round started. CLIMB_K covers the low end with a quintic ramp that
+   starts flat (zero velocity AND zero acceleration at lt=0) and joins
+   the lt^CLIMB_P curve at lt=CLIMB_K matching value, velocity, AND
+   acceleration (C2-continuous) — matching value+velocity alone (a cubic
    Hermite) still left a jump in acceleration right at the join — nearly
    every round crosses it, since it sits at a low, commonly-reached
    multiplier — which read as a visible jerk/stutter rather than a smooth
-   climb. Everything above CLIMB_K is the original, untouched curve. */
-const CLIMB_P=0.6, CLIMB_K=0.25;
+   climb. Everything above CLIMB_K is the plain power curve.
+   CLIMB_K itself lowered from 0.25 to 0.17: at 0.25 the ramp didn't
+   rejoin the (faster) main curve until ~2.6-3.1x depending on the
+   mountain's ceiling, meaning the whole 1.00x-2.00x range players
+   actually spend most rounds in was still inside the deliberately-slow
+   ease-in — e.g. only 12.9% of the climb was done by 1.50x. At 0.17 the
+   ramp rejoins right around 1.9-2.1x on every mountain instead, so
+   1.00x-2.00x is now visibly faster (23.0% done by 1.50x) while lt=0
+   still has the same zero-velocity, no-teleport start. */
+const CLIMB_P=0.5, CLIMB_K=0.17;
 const CLIMB_A=Math.pow(CLIMB_K,CLIMB_P);                                        // value at the join
 const CLIMB_B=CLIMB_K*CLIMB_P*Math.pow(CLIMB_K,CLIMB_P-1);                      // d(t)/d(s) at the join
 const CLIMB_C=CLIMB_K*CLIMB_K*CLIMB_P*(CLIMB_P-1)*Math.pow(CLIMB_K,CLIMB_P-2);  // d2(t)/d(s)2 at the join
@@ -889,16 +909,6 @@ function climbEase(lt){
  }
  return Math.pow(lt,CLIMB_P);
 }
-function climbEaseInv(t){
- if(t<=0)return 0;
- if(t>=1)return 1;
- if(t<CLIMB_A){
-  let lo=0,hi=CLIMB_K;
-  for(let i=0;i<40;i++){const mid=(lo+hi)/2;if(climbEase(mid)<t)lo=mid;else hi=mid;}
-  return (lo+hi)/2;
- }
- return Math.pow(t,1/CLIMB_P);
-}
 function altOf(m){
  if(!M)return 0;
  const lt=clamp(Math.log(Math.max(m,1))/Math.log(M.ceiling),0,1);
@@ -913,14 +923,6 @@ function altOf(m){
 }
 function zoneAt(a){let z=null;for(const q of M.zones)if(a>=q[0])z=q;return z;}
 
-/* ═══ altOf() only ever reads the currently-active global M, so the
-   waypoint targets (computed per-card and per-panel, across mountains
-   that may not be the active one) need a version taking the mountain
-   explicitly. ═══ */
-function multForAlt(m,alt){
- const t=clamp((alt-m.base)/(m.elev-m.base),0,1);
- return Math.pow(m.ceiling,climbEaseInv(t));
-}
 /* Fraction of the way up the mountain the long-term community climb
    has reached — pure metres of accumulated progress, nothing to do
    with any single round's crash multiplier. */
@@ -931,16 +933,6 @@ function jackpotFrac(m){
    real risk, so it's flagged on the card as its own named zone. */
 const SUMMIT_PUSH_FRAC=0.95;
 function inSummitPush(m){return jackpotFrac(m)>=SUMMIT_PUSH_FRAC&&jackpotFrac(m)<1;}
-
-const WAYPOINTS=[['Base Camp 1',.10],['Base Camp 2',.22],['Camp 1',.38],
- ['Camp 2',.55],['Camp 3',.72],['High Camp',.88],['Summit',1]];
-function waypointsFor(m){
- return WAYPOINTS.map(([name,frac])=>{
-  const alt=m.base+(m.elev-m.base)*frac;
-  const mult=frac>=1?m.ceiling:Math.max(1.05,multForAlt(m,alt));
-  return {name,mult:rnd(mult)};
- });
-}
 
 /* ═══ THUMBNAILS ═══ */
 function thumb(m,cn){
@@ -1039,12 +1031,9 @@ function renderSelect(){
       :'🧗 climber at '+Math.round(m.base+m.progress).toLocaleString()+' m of '+m.elev.toLocaleString()+' m'}</div>
     </div>
     <div class="mc-off">
-     <div class="off-r"><span class="off-l">BASE RTP</span><span class="off-v" style="color:#c2d1e8">${baseRTPof(m).toFixed(1)}%</span></div>
+     <div class="off-r"><span class="off-l">BASE RTP</span><span class="off-v" style="color:${a}">${baseRTPof(m).toFixed(1)}%</span></div>
      <div class="off-r"><span class="off-l">RAKEBACK</span><span class="off-v" style="color:${m.rake?'#f59e0b':'#7c90ae'}">${rk}</span></div>
      <div class="off-r"><span class="off-l">LOSSBACK</span><span class="off-v" style="color:${m.lossback?'#7dd3fc':'#7c90ae'};font-size:9px">${lb}</span></div>
-     <div class="off-r" style="border-top:1px solid var(--bd2);margin-top:4px;padding-top:5px">
-      <span class="off-l" style="color:var(--mu)">EFFECTIVE RTP</span>
-      <span class="off-v" style="color:${a}">${baseEffRTP(m).toFixed(1)}%</span></div>
     </div>
     <div class="mc-st">
      <div><div class="ms-l">CEILING</div><div class="ms-v" style="color:${a}">${m.ceiling.toFixed(0)}×</div></div>
@@ -1118,6 +1107,7 @@ function stopAll(){
  if(raf){cancelAnimationFrame(raf);raf=null;}
  stopClimbAnim();
  if(tickI){clearInterval(tickI);tickI=null;}
+ finalPush=null;
 }
 function resize(){
  const s=document.getElementById('stage');
@@ -1137,11 +1127,49 @@ const CXS=()=>W*0.40;
 
 function draw(ts){
  if(!M)return;
+ if(finalPush){
+  /* only the climber's on-screen position (via mult -> altOf) animates
+     here — the readout stays fixed on the true crashAt the whole time
+     (set in handleRoundEnd/beginSummitReveal) rather than visibly racing
+     up toward M.ceiling and then correcting back down to the real payout
+     multiplier once the reveal cuts in, which would just trade one
+     "wait, that's not what I actually won" moment for another. */
+  /* the WS handler applies the round's new (often reset-to-0) progress
+     to M.progress synchronously, right after handleRoundEnd() kicks this
+     tween off — altOf() anchors off M.progress, so without re-pinning it
+     back to what was actually climbed on every frame here, the climber
+     would jump to start the final stretch from the WRONG base altitude
+     the instant that message lands, not just at the end. */
+  M.progress=finalPush.oldProgress;
+  const DUR=650;
+  const p=clamp((ts-finalPush.start)/DUR,0,1);
+  const eased=1-Math.pow(1-p,3);
+  mult=lerp(finalPush.from,M.ceiling,eased);
+  updHUD();
+  if(p>=1){
+   M.progress=finalPush.newProgress;
+   finalPush=null;
+   beginSummitReveal();
+  }
+ }
  if(phase==='fallen'&&roundSummit){drawSummitReveal(ts);return;}
  const a=M.accent, ppm=PPM(), cy=CY(), cxs=CXS();
  const alt=altOf(mult);
- camAlt=lerp(camAlt,alt,0.22);
- camX  =lerp(camX,faceX(alt),0.22);
+ if(finalPush){
+  /* the final-push tween above is already a deliberately-eased animation
+     — running it through the normal per-frame camera lerp on top would
+     be a second, independent layer of smoothing that can't guarantee it
+     keeps up, especially during the tween's fast opening burst. If the
+     camera falls behind there, the climber (drawn at the true tweened
+     alt, not the lagging camera's) shoots toward or past the top edge of
+     the screen in the instant right before the cut to the reveal — the
+     "looks broken at the summit" this was meant to fix, just moved a few
+     hundred ms later. Track it exactly instead. */
+  camAlt=alt;camX=faceX(alt);
+ } else {
+  camAlt=lerp(camAlt,alt,0.22);
+  camX  =lerp(camX,faceX(alt),0.22);
+ }
  const t=clamp((camAlt-M.base)/(M.elev-M.base),0,1);
  const wx=w=>cxs+(faceX(w)-camX);
  const wy=w=>cy-(w-camAlt)*ppm;
@@ -1513,17 +1541,27 @@ function renderRewards(){
    <div class="rw-n" style="color:${r?'#fbbf24':'#7c90ae'}">${r?r.toFixed(1)+'%':'—'}</div>
   </div>
   <div style="font-size:22px;color:var(--dim);line-height:1">›</div>`;
- document.getElementById('rew').onclick=()=>openMenu('peaks');
+ document.getElementById('rew').onclick=()=>openMenu('rewards');
 }
 function updJackpotUI(){
  if(!M)return;
- const push=inSummitPush(M);
+ /* M.progress (the long-term community climb) only ratchets forward once
+    a round actually ends — but the climber sprite and the "CURRENT
+    HEIGHT" HUD both already show this round's live position while it's
+    still climbing, which made this box look frozen well below where the
+    climber visibly was. A round can only ever end at or above its live
+    position (mult only ever increases), so showing that live position
+    here early is never overstating anything — it's exactly what this
+    will become the moment the round settles. */
+ const liveProgress=phase==='climbing'?clamp(altOf(mult)-M.base,0,M.elev-M.base):(M.progress||0);
+ const frac=clamp(liveProgress/(M.elev-M.base),0,1);
+ const push=frac>=SUMMIT_PUSH_FRAC&&frac<1;
  document.getElementById('jk-amt').textContent=f2(M.jackpot);
  document.getElementById('jackpot').classList.toggle('push',push);
  document.getElementById('jk-lab').textContent=push?'🚨 SUMMIT PUSH':'🎰 SUMMIT JACKPOT';
  document.getElementById('jk-sub').textContent=push
-  ?'🚩 climber at '+Math.round(M.base+M.progress).toLocaleString()+' m — final push, small chance of a late fall'
-  :'🧗 climber at '+Math.round(M.base+M.progress).toLocaleString()+' m of '+M.elev.toLocaleString()+' m';
+  ?'🚩 climber at '+Math.round(M.base+liveProgress).toLocaleString()+' m — final push, small chance of a late fall'
+  :'🧗 climber at '+Math.round(M.base+liveProgress).toLocaleString()+' m of '+M.elev.toLocaleString()+' m';
 }
 
 /* ═══ BET PANELS ═══ */
@@ -1535,13 +1573,6 @@ function buildBetPanel(i){
     <input type="number" id="s${i}" value="10" min="1" step="1"></div>
    <div class="fld"><div class="fld-l">AUTO TURN-BACK (×)</div>
     <input type="number" id="a${i}" value="" placeholder="—" min="1.01" step="0.01"></div>
-  </div>
-  <div class="fld" style="margin-bottom:10px">
-   <div class="fld-l">OR TARGET A WAYPOINT</div>
-   <select class="wpsel" id="wp${i}" onchange="setWaypoint(${i})">
-    <option value="">— choose a point on ${M.name} —</option>
-    ${waypointsFor(M).map(w=>`<option value="${w.mult}">${w.name} · ${fx(w.mult)}</option>`).join('')}
-   </select>
   </div>
   <div class="qk">
    <button onclick="qm(${i},.5)">½</button><button onclick="qm(${i},2)">2×</button>
@@ -1583,15 +1614,6 @@ function qm(i,f){const e=document.getElementById('s'+i);e.value=Math.max(1,Math.
 function qs(i,v){document.getElementById('s'+i).value=v;}
 function qx(i){document.getElementById('s'+i).value=Math.floor(balance);}
 function tgl(i){const c=document.getElementById('c'+i);c.classList.toggle('on');c.textContent=c.classList.contains('on')?'✓':'';}
-function setWaypoint(i){
- const sel=document.getElementById('wp'+i);
- if(!sel.value)return;
- document.getElementById('a'+i).value=sel.value;
- const c=document.getElementById('c'+i);
- if(!c.classList.contains('on')){c.classList.add('on');c.textContent='✓';}
- toast('Auto turn-back set for '+sel.selectedOptions[0].textContent,'i');
- sel.selectedIndex=0;
-}
 function tglAP(i){
  autoplay[i]=!autoplay[i];
  const c=document.getElementById('ap'+i);
@@ -1738,7 +1760,17 @@ const PAGES={
   <h3>RTP</h3>
   <p><strong>Return to player</strong> is the share of all money staked that comes back to players across the long run. 97% RTP means £97 returned per £100 staked, averaged over a very large number of rounds. It says nothing about any single round, and it is not a prediction of what you will get.</p>
   <h3>Money back</h3>
-  <p><strong>Rakeback</strong> returns a slice of every stake regardless of the result. <strong>Lossback</strong> refunds part of a losing stake, usually only when the round ended early. Peaks with the lowest base return give the most back this way.</p>`},
+  <p>Peaks with the lowest base return give the most back on a losing stake — see <strong>Rewards</strong> in this menu for exactly how that works.</p>`},
+
+ rewards:{t:'Rewards',s:'WHAT COMES BACK ON A FALL',b:()=>`
+  <p>The <strong>REWARDS</strong> figure in the header is a running total of every stake refund you've been paid this session — it only ever grows when a round falls, never on a win. Two separate mechanics feed it.</p>
+  <h3>Rakeback</h3>
+  <p>A fixed slice of your stake back on <strong>any</strong> fall, no conditions. Not every peak offers it — check a mountain's card, or <strong>The six peaks</strong> in this menu, for its rate. Mont Blanc offers none; K2 offers the most, at 8%.</p>
+  <h3>Lossback</h3>
+  <p>A second, separate refund on top of rakeback — but only when the round falls early, below that peak's own cutoff multiplier. Some peaks pay it on <em>any</em> fall regardless of where it stopped; most don't offer it at all. Again, check the peak's own card for its exact rate and cutoff.</p>
+  <h3>Why this exists</h3>
+  <p>A peak with a lower base <strong>return to player</strong> makes up the difference here instead — the money isn't gone, it's just handed back through rakeback and lossback rather than baked into every round's odds. That's why <strong>effective</strong> return varies by how a session actually plays out, while base RTP is the same for every player on that peak regardless of luck.</p>
+  <div class="note"><p>REWARDS is a live counter for this session only — it is not saved, and starts back at 0.00 the next time you log in or reload. Your account <strong>balance</strong> is the only figure that's actually persisted; every refund that built up your REWARDS total already landed in it the moment it was paid.</p></div>`},
 
  fair:{t:'Provably fair',s:'VERIFYING THE RESULT',b:()=>`
   <p>The result of every round is decided before the climb starts, and can be checked afterwards.</p>
@@ -1785,7 +1817,7 @@ const PAGES={
   <p>Telegram and X links go here once the channels are live.</p>`}
 };
 const NAV=[['play','How to play'],['peaks','The six peaks'],['maths','The numbers'],
- ['fair','Provably fair'],['rg','Responsible play'],
+ ['rewards','Rewards'],['fair','Provably fair'],['rg','Responsible play'],
  ['legal','Legal'],['about','About'],['contact','Contact']];
 let menuPage='play';
 
@@ -1929,7 +1961,18 @@ function onWS(msg){
   case 'roundEnd':{
    const m=MTN.find(x=>x.id===msg.mountainId); if(!m)break;
    if(M&&M.id===m.id)handleRoundEnd(msg);
-   m.progress=msg.progress; m.jackpot=msg.jackpot;
+   m.jackpot=msg.jackpot;
+   /* m.progress is deliberately NOT applied here. altOf() re-anchors its
+      whole climb curve off M.progress (see altOf's comment), so bumping
+      it immediately — while this mountain is still sitting on the
+      "FELL AT X M" reveal, mult still pinned at crashAt — makes the very
+      next frame reinterpret that same crashAt against the NEW, already-
+      advanced start point and reproject it further up the slope. The
+      climber visibly "blipped" a thousand-plus metres above the altitude
+      the reveal text had just shown. The upcoming phase:'waiting'
+      broadcast (below, in the 'phase' case) carries this exact same
+      progress value and applies it once the fallen pause is actually
+      over — that's the only time it's safe to move. */
    /* keep the re-hydration cache in sync too — otherwise leaving and
       re-entering (or reloading) a mountain during the brief post-round
       pause would show it stuck at the old climb's multiplier/altitude
@@ -1957,7 +2000,7 @@ function onWS(msg){
    if(M&&M.id===msg.mountainId&&bets[msg.slot]){
     const b=bets[msg.slot];b.state='cashed';b.cashMult=msg.cashMult;b.payout=msg.payout;
     sfxCash();updBet(msg.slot);
-    toast('+'+f2(msg.payout-msg.rake)+' TKN'+(msg.rake>0?' · +'+f2(msg.rake)+' rakeback':'')+' at '+fx(msg.cashMult),'w');
+    toast('+'+f2(msg.payout)+' TKN at '+fx(msg.cashMult),'w');
    }
    break;
   }
@@ -2105,6 +2148,7 @@ function startClimbAnim(){
    mn.classList.remove('pulse');void mn.offsetWidth;mn.classList.add('pulse');
   }
   updHUD();
+  updJackpotUI();
   for(let i=0;i<2;i++)updBetLive(i);
   climbRaf=requestAnimationFrame(step);
  }
@@ -2157,7 +2201,8 @@ function showJkWin(outcome){
    was shown live during the climb. */
 function handleRoundEnd(msg){
  stopClimbAnim();
- phase='fallen';crashAt=msg.crashAt;
+ crashAt=msg.crashAt;
+ const oldProgress=M.progress;   // captured before the caller (onWS) applies msg.progress to M — see finalPush below
  /* the camera/canvas position (draw() reads the global `mult`, via
     altOf(mult)) must snap to the true final crashAt here — otherwise it
     stays wherever the last periodic 'sync' left it, up to ~180ms of
@@ -2167,24 +2212,68 @@ function handleRoundEnd(msg){
     look far short of the number actually shown. */
  mult=crashAt;
  const summit=msg.summit;
- roundSummit=summit;fallTS=performance.now();
  lastRound={n:msg.nonce,seed:msg.serverSeed,hash:msg.serverSeedHash,clientSeed:msg.clientSeed,crashAt:msg.crashAt};
  renderPFReveal();
- const n=document.getElementById('mult-n');
- n.textContent=fx(crashAt);
- n.style.color=summit?M.accent:'#ef4444';
- document.getElementById('mult-lab').textContent=summit?'★ SUMMIT REACHED':'FELL AT';
- document.getElementById('mult-sub').textContent=summit
-  ?M.name.toUpperCase()+' · '+M.elev.toLocaleString()+' M'
-  :Math.round(altOf(crashAt)).toLocaleString()+' M';
- /* a summit is the big moment, not the crash — it should hit harder,
-    not softer. Gold flash instead of the danger-red one falls get. */
- flashColor=summit?'#fbbf24':'#ef4444';
- shake=reduceMotion?0:(summit?16:14);flash=reduceMotion?0:(summit?0.85:1);
- if(summit)spawnConfetti();
- summit?sfxSummit():sfxCrash();
  M.hist.unshift(rnd(crashAt));if(M.hist.length>24)M.hist.pop();
  renderHist();
+
+ if(summit){
+  /* A round can be granted a summit well before crashAt's own altitude
+     would naturally reach the true peak — see the server's isSummit()
+     "summit push" easier-finish condition, which only needs most (not
+     all) of a mountain's final stretch closed once the long-term climb
+     is already almost there. Cutting straight to the zoomed-out reveal
+     at that point visibly skipped whatever was left of the climb, which
+     read as the game just declaring a win rather than the climber
+     actually reaching it. So: keep the normal close-up view running and
+     visibly close the remaining distance up to the true summit first
+     (mult eased from crashAt to M.ceiling — altOf(M.ceiling) is exactly
+     M.elev, never short of it), then cut to the reveal once that
+     finishes — the number and the climber both genuinely finish the
+     climb before anything is claimed. */
+  const n0=document.getElementById('mult-n');
+  n0.textContent=fx(crashAt);n0.style.color=M.accent;
+  if(reduceMotion){ mult=M.ceiling; beginSummitReveal(); }
+  else finalPush={start:performance.now(), from:crashAt, oldProgress, newProgress:msg.progress};
+  return;
+ }
+
+ phase='fallen';roundSummit=false;fallTS=performance.now();
+ const n=document.getElementById('mult-n');
+ n.textContent=fx(crashAt);
+ n.style.color='#ef4444';
+ document.getElementById('mult-lab').textContent='FELL AT';
+ document.getElementById('mult-sub').textContent=Math.round(altOf(crashAt)).toLocaleString()+' M';
+ flashColor='#ef4444';
+ shake=reduceMotion?0:14;flash=reduceMotion?0:1;
+ sfxCrash();
+ setStatus();loop();
+}
+/* Cuts over to the zoomed-out summit reveal — called once the close-up
+   "final push" tween above (or immediately, under reduced motion) has
+   genuinely brought the climber to M.elev. */
+function beginSummitReveal(){
+ phase='fallen';roundSummit=true;fallTS=performance.now();
+ /* drawSummitReveal() renders the climber through the same drawClimber()
+    used for the normal close-up view, which also draws whatever's left
+    in puffs[] — any breath/ice puff spawned during the climb (or the
+    final-push tween) that hadn't finished fading yet carries its old
+    close-up screen coordinates straight into the reveal's completely
+    different zoomed-out composition, where they mean nothing. Read as a
+    random floating blob stuck to the mountain, unrelated to the climber
+    or the confetti. Nothing here should survive the cut. */
+ puffs=[];
+ const n=document.getElementById('mult-n');
+ n.textContent=fx(crashAt);
+ n.style.color=M.accent;
+ document.getElementById('mult-lab').textContent='★ SUMMIT REACHED';
+ document.getElementById('mult-sub').textContent=M.name.toUpperCase()+' · '+M.elev.toLocaleString()+' M';
+ /* a summit is the big moment, not the crash — it should hit harder,
+    not softer. Gold flash instead of the danger-red one falls get. */
+ flashColor='#fbbf24';
+ shake=reduceMotion?0:16;flash=reduceMotion?0:0.85;
+ spawnConfetti();
+ sfxSummit();
  setStatus();loop();
 }
 
