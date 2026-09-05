@@ -108,7 +108,7 @@ text-shadow:0 0 22px rgba(251,191,36,.5)}
 .off-r{display:flex;justify-content:space-between;align-items:center;padding:3px 0;gap:8px}
 .off-l{font-size:10.5px;color:var(--dim);letter-spacing:.05em}
 .off-v{font-size:12px;font-weight:700;text-align:right}
-.mc-st{display:grid;grid-template-columns:repeat(2,1fr);margin-bottom:12px;gap:6px}
+.mc-st{display:grid;grid-template-columns:1fr;margin-bottom:12px;gap:6px}
 .ms-l{font-size:9.5px;color:var(--dim);letter-spacing:.1em;margin-bottom:4px}
 .ms-v{font-size:15px;font-weight:700;color:#fff}
 .mc-hist{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
@@ -177,7 +177,31 @@ text-shadow:0 4px 22px rgba(0,0,0,.7)}
 padding:12px 18px;background:linear-gradient(180deg,rgba(6,10,20,.96),rgba(6,10,20,.5) 60%,transparent)}
 #dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 #strip-t{font-size:12px;letter-spacing:.13em;color:rgba(255,255,255,.9);font-weight:600}
-#hist{display:flex;gap:5px;margin-left:auto;overflow:hidden}
+/* Was overflow:hidden (silently cropping whichever chips didn't fit) —
+   now a real horizontal scroller so every stored round is reachable, not
+   just however many happened to fit the strip's width. Chips get
+   flex-shrink:0 below so scrolling kicks in instead of squeezing them
+   unreadably small. */
+#hist{display:flex;gap:5px;margin-left:auto;overflow-x:auto;overflow-y:hidden;
+-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:100%}
+#hist::-webkit-scrollbar{display:none}
+#hist .hchip{flex-shrink:0;cursor:pointer;transition:.12s}
+#hist .hchip:hover,#hist .hchip:active{filter:brightness(1.3)}
+/* ══ HIST DETAIL POPOVER — "did I have a stake on this round?" ══ */
+#hist-pop{position:fixed;z-index:120;left:50%;transform:translateX(-50%);
+background:#16203a;border:1px solid var(--bd);border-radius:12px;padding:12px 14px;
+min-width:200px;max-width:calc(100vw - 32px);box-shadow:0 16px 44px rgba(0,0,0,.55);display:none}
+#hist-pop.on{display:block}
+#hist-pop-hd{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:8px}
+#hist-pop-mult{font-family:'Futura PT','Futura','Century Gothic',-apple-system,BlinkMacSystemFont,sans-serif;
+font-weight:800;font-size:15px;color:#fff}
+#hist-pop-x{background:none;border:none;color:var(--mu);cursor:pointer;font-size:13px;padding:2px 4px;line-height:1}
+#hist-pop-x:hover{color:#fff}
+.hp-bet{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+padding:6px 0;font-size:12px;color:var(--mu);border-top:1px solid var(--bd2)}
+.hp-bet:first-child{border-top:none}
+.hp-bet b{font-weight:700}
+.hp-empty{font-size:12px;color:var(--dim);padding:2px 0}
 /* overflow-y:auto (not hidden) because the two stake panels plus
    jackpot/RTP/feed/provably-fair together can genuinely be taller than
    the viewport on a shorter desktop screen (a laptop, a smaller display)
@@ -261,32 +285,21 @@ transition:.26s;pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgb
 
 #menu-ttl{font-family:'Futura PT','Futura','Century Gothic',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:800;font-size:23px;color:#fff;letter-spacing:.02em}
 
-/* ══ ACCOUNT / AUTH ══ */
-#acctstat{display:none;align-items:center;gap:15px}
-#acctstat.on{display:flex}
-#authstat{display:flex;align-items:center;gap:8px}
-#authstat.off{display:none}
-#authmodal{position:fixed;inset:0;z-index:300;background:rgba(8,13,24,.82);backdrop-filter:blur(6px);
-display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
-#authmodal.on{display:flex}
-#authbox{width:100%;max-width:360px;background:#16203a;border:1px solid var(--bd);border-radius:14px;
-padding:26px 24px;box-shadow:0 20px 60px rgba(0,0,0,.55)}
-#auth-ttl{font-family:'Futura PT','Futura','Century Gothic',-apple-system,BlinkMacSystemFont,sans-serif;
-font-weight:800;font-size:20px;color:#fff;margin-bottom:18px}
-.authinput{width:100%;background:rgba(10,16,30,.55);border:1px solid rgba(160,190,235,.28);
-border-radius:8px;padding:11px 12px;color:#fff;font-size:14px;font-family:inherit;outline:none;
-transition:border-color .18s,background .18s}
-.authinput:focus{border-color:#7dd3fc;background:rgba(10,16,30,.75)}
-#auth-err{font-size:12px;color:var(--rd);margin:-4px 0 12px;min-height:14px}
-#auth-switch{font-size:12px;color:var(--mu);margin-top:14px;text-align:center}
-#auth-switch a{color:#7dd3fc;text-decoration:none}
-#auth-close{width:100%;margin-top:10px}
+/* ══ ACCOUNT ══
+   No login/signup here any more — every visitor is silently given a guest
+   identity server-side (see refreshMe()), so this bar has no logged-out
+   state to toggle between and can just always be visible. */
+#acctstat{display:flex;align-items:center;gap:15px}
+#avatar{width:30px;height:30px;flex-shrink:0;border-radius:50%;background:rgba(160,190,235,.14);
+border:1px solid var(--bd);color:var(--mu);display:flex;align-items:center;justify-content:center;
+cursor:default;transition:.15s}
+#avatar:hover{background:rgba(160,190,235,.24);color:#fff}
 
 /* ══ MENU ══ */
 #menuwrap{position:relative}
-#menubtn{padding:9px 14px;font-size:13px;font-family:'Futura PT','Futura','Century Gothic',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:800;
-letter-spacing:.06em;background:rgba(160,190,235,.10);border:1px solid var(--bd);
-border-radius:8px;color:var(--mu);cursor:pointer;transition:.15s;display:flex;align-items:center;gap:8px}
+#menubtn{padding:9px 11px;font-family:'Futura PT','Futura','Century Gothic',-apple-system,BlinkMacSystemFont,sans-serif;font-weight:800;
+background:rgba(160,190,235,.10);border:1px solid var(--bd);
+border-radius:8px;color:var(--mu);cursor:pointer;transition:.15s;display:flex;align-items:center;justify-content:center}
 #menubtn:hover{background:rgba(160,190,235,.2);color:#fff}
 #menudd{position:absolute;top:100%;left:0;padding-top:9px;opacity:0;visibility:hidden;
 transform:translateY(-6px);transition:opacity .15s,transform .15s,visibility .15s;z-index:60}
@@ -371,25 +384,28 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
     mountain was visible). Shrunk padding/font on every header control
     below, and gave the reclaimed height straight to #stage rather than
     letting it default back to the bet panel. */
- #hdr{flex-wrap:wrap;height:auto;padding:7px 12px;gap:6px 8px}
- #hdr-r{flex-wrap:wrap;gap:6px 8px;width:100%}
- .lg-n{font-size:15px}
- .lg-m{font-size:15px}
- /* #acctstat (BALANCE/TOP UP/username/LOG OUT) had no wrap of its
-    own, so once logged in it overflowed straight off the edge of a phone
-    screen — with body{overflow:hidden} that put TOP UP, the username, and
-    LOG OUT completely off-screen and untappable, not just visually
-    clipped. */
- #acctstat{flex-wrap:wrap;gap:6px 8px;row-gap:6px}
- .hstat-l{font-size:9.5px}
- .hstat-v{font-size:14px}
- .btn-s{padding:6px 10px;font-size:10px}
- #menubtn{padding:6px 10px;font-size:11px;gap:6px}
- #back-btn{font-size:10px}
+ /* Header is kept to one line on mobile (was previously allowed to wrap
+    onto 2-3 rows, eating a big chunk of the screen before any mountain
+    was visible) — nowrap everywhere below plus shrinking each control
+    lets it all fit in the strip's own height instead. */
+ #hdr{flex-wrap:nowrap;height:auto;padding:7px 8px;gap:4px}
+ #hdr-r{flex-wrap:nowrap;gap:4px;flex-shrink:1;min-width:0;justify-content:flex-end}
+ .lg{gap:6px;min-width:0;flex-shrink:1}
+ .lg-n{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .lg-m{font-size:15px;flex-shrink:0}
+ /* #acctstat (BALANCE/TOP UP/avatar) no longer wraps either — everything
+    inside it shrinks instead so the whole header stays one row. */
+ #acctstat{flex-wrap:nowrap;gap:5px;flex-shrink:0}
+ .hstat{gap:3px}
+ .hstat-l{font-size:9px}
+ .hstat-v{font-size:13px}
+ .btn-s{padding:6px 8px;font-size:10px;white-space:nowrap}
+ #menubtn{padding:6px 9px}
+ #avatar{width:26px;height:26px}
  .hdiv{height:16px}
  #sel-t{font-size:clamp(22px,7vw,28px)}
  .mc-n{font-size:19px}
- #stage{height:42dvh;min-height:230px}
+ #stage{height:40dvh;min-height:220px}
  #mult-bar-n{font-size:clamp(24px,9vw,32px)}
  #hud-mtn{font-size:14px}
  #hud-alt-lab{font-size:8.5px}
@@ -408,21 +424,61 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
  #menu-body{padding:20px 18px 40px}
  #vip-body{padding:20px 16px 40px}
  #ladder{height:320px}
- #authbox{max-width:none}
  #toast{max-width:calc(100vw - 32px);white-space:normal;text-align:center}
+ /* Placing a stake meant scrolling well past the mountain view first —
+    #side's own content (jackpot box, RTP row, two full stake panels) ran
+    to ~930px on a 390-wide phone against ~340px of actually-visible
+    height, all of it still using desktop's roomy padding. None of that
+    padding was load-bearing on a phone — it exists to keep the desktop
+    sidebar from feeling cramped next to a much taller stage. Tightened
+    every block here so STAKE 1's own "PLACE STAKE" button lands inside
+    the first screenful instead of a scroll below it. */
+ #jackpot{padding:7px 14px}
+ #jackpot .jkbox-amt{font-size:21px}
+ .jk-sub{margin-top:3px}
+ #rew{padding:6px 14px}
+ .rw-k{margin-bottom:2px}
+ .bet{padding:8px 14px}
+ .bet-hd{margin-bottom:5px}
+ .row{margin-bottom:5px}
+ .fld-l{margin-bottom:2px}
+ input[type=number]{padding:8px 10px;font-size:18px}
+ input::placeholder{font-size:16px}
+ .qk{margin-bottom:5px}
+ .qk button{padding:9px 0}
+ .auto-row{margin-bottom:4px}
+ .act{padding:13px 0;font-size:15px}
+ .act.cash{padding:15px 0;font-size:16px}
+}
+/* Below ~480px the header row (logo + mute + menu + balance + top up +
+   avatar) no longer fits on one line even at the max-width:640px sizes
+   above. The wordmark stays (the .lg-n rule in the 640px block above
+   already ellipsizes it rather than wrapping/overflowing if it's ever
+   the tightest fit), but the BALANCE/TKN labels trim down to just the
+   number, which is the space that actually matters for keeping the row
+   on one line. */
+@media(max-width:480px){
+ .lg-n{font-size:12px;letter-spacing:.05em}
+ .hstat-l{display:none}
+ .hstat{gap:0}
+ .btn-s{padding:6px 7px;font-size:9px}
 }
 @media(max-width:420px){
  #mult-bar-n{font-size:clamp(22px,10vw,28px)}
  #jkwin{padding:18px 26px}
  #jkwin-ttl{font-size:26px}
  #jkwin-amt{font-size:32px}
- /* below ~380px "ASCENT IN PROGRESS" (the longest strip status string) no
-    longer fits next to the history chips on one line — it wrapped to 3
-    lines and, since #strip/#hud-tl/#hud-tr are all independently
+ /* below ~380px "ASCENT IN PROGRESS" (the longest strip status string)
+    used to not fit next to the history chips on one line — it wrapped to
+    3 lines and, since #strip/#hud-tl/#hud-tr are all independently
     absolutely-positioned, that extra unaccounted-for height just
-    overlapped everything below it rather than pushing it down. The chips
-    are a nice-to-have here, not essential, so they're the one to drop. */
- #hist{display:none}
+    overlapped everything below it. #strip-t staying nowrap (below) is
+    what actually fixes that; shrinking the chips instead of dropping
+    them keeps the previous-round history visible, with #hist's own
+    overflow:hidden quietly clipping whichever tail chips don't fit
+    rather than wrapping or pushing anything else around. */
+ #hist{gap:3px}
+ .hchip{padding:2px 5px;font-size:9px}
  #strip-t{white-space:nowrap}
  #hud-tl{max-width:68%}
  #hud-tr{max-width:34%}
@@ -443,8 +499,14 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
    silently re-inflate .btn-s back past what the max-width:640px block
    asked for. */
 @media(max-width:640px) and (pointer:coarse){
- .btn-s{padding:6px 10px}
- #menubtn{padding:6px 10px}
+ .btn-s{padding:6px 8px}
+ #menubtn{padding:6px 9px}
+ /* same reason as .btn-s/#menubtn above — the generic touch bump
+    (.qk button padding:11px, .chk 25x25) was winning the cascade here
+    too and quietly re-inflating the stake panel back past what the
+    max-width:640px block just trimmed it down to. */
+ .qk button{padding:7px 0}
+ .chk{width:20px;height:20px}
 }
 </style>
 </head>
@@ -455,7 +517,7 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
   <div id="hdr-r">
     <button class="btn-s" id="mutebtn" onclick="toggleMute()" title="Mute/unmute sound">🔊</button>
     <div id="menuwrap">
-      <button id="menubtn">☰ MENU</button>
+      <button id="menubtn" aria-label="Menu"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg></button>
       <div id="menudd">
         <div id="menudd-in">
           <button class="mdi" onclick="openMenu('play')">How it works</button>
@@ -470,41 +532,13 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
         </div>
       </div>
     </div>
-    <button class="btn-s" id="back-btn" style="display:none" onclick="toSelect()">◀ BASE CAMP</button>
     <div class="hdiv" id="hd1" style="display:none"></div>
     <div id="acctstat">
       <div class="hstat"><span class="hstat-l">BALANCE</span><span class="hstat-v" id="bal">0.00</span><span class="hstat-l">TKN</span></div>
       <button class="btn-s" onclick="topUp()" title="Demo faucet — add play tokens, no real value">+ TOP UP</button>
       <div class="hdiv"></div>
-      <span class="hstat-l" id="whoami">—</span>
-      <button class="btn-s" onclick="doLogout()">LOG OUT</button>
+      <div id="avatar" title="—" aria-label="Account"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path></svg></div>
     </div>
-    <div id="authstat">
-      <button class="btn-s" onclick="openAuth('login')">LOG IN</button>
-      <button class="btn-s" onclick="openAuth('signup')">SIGN UP</button>
-    </div>
-  </div>
-</div>
-
-<div id="authmodal">
-  <div id="authbox">
-    <div id="auth-ttl">Log in</div>
-    <div class="fld" id="auth-email-fld" style="margin-bottom:10px">
-      <div class="fld-l">EMAIL</div>
-      <input type="email" id="auth-email" class="authinput" placeholder="you@example.com">
-    </div>
-    <div class="fld" style="margin-bottom:10px">
-      <div class="fld-l">USERNAME</div>
-      <input type="text" id="auth-username" class="authinput" placeholder="3-20 letters, numbers, _">
-    </div>
-    <div class="fld" style="margin-bottom:14px">
-      <div class="fld-l">PASSWORD</div>
-      <input type="password" id="auth-password" class="authinput" placeholder="At least 8 characters">
-    </div>
-    <div id="auth-err"></div>
-    <button class="act place" id="auth-submit" onclick="submitAuth()">Log in</button>
-    <div id="auth-switch">New here? <a href="javascript:void(0)" onclick="switchAuth()">Create an account</a></div>
-    <button class="btn-s" id="auth-close" onclick="closeAuth()">CLOSE ✕</button>
   </div>
 </div>
 
@@ -541,6 +575,13 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
     </div>
     <div id="strip">
       <div id="dot"></div><span id="strip-t">—</span><div id="hist"></div>
+    </div>
+    <div id="hist-pop">
+      <div id="hist-pop-hd">
+        <span id="hist-pop-mult">—</span>
+        <button id="hist-pop-x" onclick="closeHistPop()" aria-label="Close">✕</button>
+      </div>
+      <div id="hist-pop-body"></div>
     </div>
   </div>
 
@@ -605,7 +646,7 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
 const MTN=[
 {
  id:'kilimanjaro',name:'Kilimanjaro',elev:5895,base:0,region:'Tanzania · 3°S',
- risk:'VERY LOW',accent:'#34d399',ceiling:58.95,p0:0.02,alpha:1,growth:0.0327,
+ risk:'VERY LOW',accent:'#34d399',ceiling:58.95,rngCap:58950,p0:0.02,alpha:0.8552,growth:0.0327,
  rake:1.0,lossback:0,lbCond:0,
  offering:'Highest base return on the platform. No insurance — you simply keep more of every win.',
  climate:'Equatorial free-standing volcano. Five climate zones from rainforest to arctic summit. Stable, predictable weather. Altitude sickness, not storms, is the hazard.',
@@ -616,7 +657,7 @@ const MTN=[
 },
 {
  id:'aconcagua',name:'Aconcagua',elev:6961,base:0,region:'Argentina · Andes',
- risk:'LOW',accent:'#fbbf24',ceiling:69.61,p0:0.04,alpha:1,growth:0.0347,
+ risk:'LOW',accent:'#fbbf24',ceiling:69.61,rngCap:69610,p0:0.04,alpha:0.8168,growth:0.0347,
  rake:1.0,lossback:5,lbCond:1.5,
  offering:'5% back on any fall under 1.50× — protection against the early bust, plus 1% back on any other fall.',
  climate:'Highest peak outside Asia. Extremely arid Andean desert air. The viento blanco — a white wind — arrives with almost no warning and drives gusts past 160 km/h.',
@@ -627,7 +668,7 @@ const MTN=[
 },
 {
  id:'montblanc',name:'Mont Blanc',elev:4808,base:0,region:'France–Italy · Alps',
- risk:'MEDIUM',accent:'#a78bfa',ceiling:48.08,p0:0.07,alpha:1,growth:0.0363,
+ risk:'MEDIUM',accent:'#a78bfa',ceiling:48.08,rngCap:48080,p0:0.07,alpha:0.8867,growth:0.0363,
  rake:0,lossback:10,lbCond:999,
  offering:'10% back on every single fall, no conditions attached. The insurance peak.',
  climate:'Lowest ceiling on the platform but deceptively lethal — around a hundred deaths a year. Alpine weather turns in minutes and the Grand Couloir rockfall kills regardless of forecast.',
@@ -638,7 +679,7 @@ const MTN=[
 },
 {
  id:'denali',name:'Denali',elev:6190,base:0,region:'Alaska · 63°N',
- risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,p0:0.08,alpha:1,growth:0.0377,
+ risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,rngCap:61900,p0:0.08,alpha:0.8298,growth:0.0377,
  rake:5.0,lossback:0,lbCond:0,
  offering:'5% rakeback on every losing stake. Built for high-volume play.',
  climate:'Coldest of the six despite modest height. At 63° north the barometric pressure is far lower than the same altitude in the Himalaya, so 6,190 m climbs like 7,000 m. Lows near −73 °C.',
@@ -649,9 +690,9 @@ const MTN=[
 },
 {
  id:'everest',name:'Everest',elev:8849,base:0,region:'Nepal–Tibet · Himalaya',
- risk:'HIGH',accent:'#818cf8',ceiling:88.49,p0:0.12,alpha:1,growth:0.0407,
+ risk:'HIGH',accent:'#818cf8',ceiling:88.49,rngCap:88490,p0:0.12,alpha:0.7537,growth:0.0407,
  rake:3.0,lossback:0,lbCond:0,
- offering:'Highest ceiling on the platform at 88×, with 3% rakeback on every losing stake.',
+ offering:'Guarantees a summit highest of any peak, at 88×, with 3% rakeback on every losing stake.',
  climate:'Above 8,000 m the death zone offers a third of sea-level oxygen. The jet stream parks on the summit for most of the year, driving winds past 280 km/h, lifting only for a narrow May window.',
  zones:[[7000,'LHOTSE FACE','#a5b4fc'],[8000,'DEATH ZONE','#ef4444'],[8700,'HILLARY STEP','#e0e7ff']],
  rock:'#2e3053',snowC:'#e9ecfb',skyLo:'#333568',skyHi:'#131528',
@@ -660,7 +701,7 @@ const MTN=[
 },
 {
  id:'k2',name:'K2',elev:8611,base:0,region:'Pakistan–China · Karakoram',
- risk:'EXTREME',accent:'#ef4444',ceiling:86.11,p0:0.22,alpha:1,growth:0.0443,
+ risk:'EXTREME',accent:'#ef4444',ceiling:86.11,rngCap:86110,p0:0.22,alpha:0.7312,growth:0.0443,
  rake:8.0,lossback:15,lbCond:1.01,
  offering:'Lowest base RTP, largest rewards: 8% rakeback on every fall, plus 15% more back on instant falls.',
  climate:'The Savage Mountain. 238 m lower than Everest but roughly six times deadlier. Storms arrive without warning, there is no reliable weather window, and the Bottleneck serac collapses without pattern.',
@@ -712,7 +753,7 @@ function crashFromSeed(m,seed,cSeed,n){
  if(r<m.p0)return 1.00;
  const u=(r-m.p0)/(1-m.p0);
  const c=Math.pow(1-u,-1/m.alpha);
- if(c>=m.ceiling)return rnd(m.ceiling);
+ if(c>=m.rngCap)return rnd(m.rngCap);
  return Math.max(1.00,rnd(c));
 }
 async function sha256Hex(str){
@@ -778,7 +819,7 @@ function updMuteBtn(){
  if(b)b.textContent=muted?'🔇':'🔊';
 }
 
-let myUser=null;   // {id,username,balance} once logged in, else null
+let myUser=null;   // {id,username,balance} — a guest identity assigned by the server, see refreshMe()
 let balance=0;
 let M=null, phase='idle', mult=1, crashAt=1, countdown=5, lastPulseInt=1, lastMultTxt='';
 let bets=[null,null], autoplay=[false,false];
@@ -793,7 +834,7 @@ let puffs=[], trail=[], confetti=[];
 let flashColor='#ef4444';
 let faceTable=null;
 let serverSeedHash=null, clientSeed=null, nonce=0, lastRound=null;
-let ws=null, authMode='login';
+let ws=null;
 
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 
@@ -880,7 +921,7 @@ function slopeAngle(alt){
    Hermite) still left a jump in acceleration right at the join — nearly
    every round crosses it, since it sits at a low, commonly-reached
    multiplier — which read as a visible jerk/stutter rather than a smooth
-   climb. Everything above CLIMB_K is the plain power curve.
+   climb.
    CLIMB_K itself lowered from 0.25 to 0.17: at 0.25 the ramp didn't
    rejoin the (faster) main curve until ~2.6-3.1x depending on the
    mountain's ceiling, meaning the whole 1.00x-2.00x range players
@@ -888,8 +929,66 @@ function slopeAngle(alt){
    ease-in — e.g. only 12.9% of the climb was done by 1.50x. At 0.17 the
    ramp rejoins right around 1.9-2.1x on every mountain instead, so
    1.00x-2.00x is now visibly faster (23.0% done by 1.50x) while lt=0
-   still has the same zero-velocity, no-teleport start. */
-const CLIMB_P=0.5, CLIMB_K=0.17;
+   still has the same zero-velocity, no-teleport start.
+   lt^CLIMB_P is a SQRT-SHAPED curve (P<1): steep early, then its own
+   slope (d/dlt = P·lt^(P-1)) keeps shrinking all the way to lt=1 — by
+   design, to make the early climb feel snappy, but it means the closer a
+   round got to a mountain's true ceiling, the SLOWER the climber moved,
+   continuously, for the entire back half of the climb (confirmed by
+   simulating the real growth formula: on Kilimanjaro the on-screen speed
+   fell from a ~220 m/s peak to under 80 m/s and only partially recovered
+   by the time it reached the top — a real, sustained crawl, not just a
+   last-few-metres thing, and exactly what read as "painfully slow at the
+   very top"). CLIMB_MID caps that decay: above lt=CLIMB_MID the curve
+   switches to a straight line back up to (1,1), so from there to the
+   true summit the climber's speed can only ever hold steady or
+   accelerate (dlt/dt itself keeps accelerating the whole climb, per the
+   growth formula) — never decelerate — no matter how far above CLIMB_MID
+   a round's crash point lands. The line's slope is fixed by requiring it
+   pass through both (CLIMB_MID, CLIMB_MID^CLIMB_P) and (1,CLIMB_TREF)
+   exactly, not by matching the incoming curve's slope at CLIMB_MID —
+   matching both would overshoot past the target before lt=1 (the tangent
+   to a concave curve always runs above it). That leaves a single one-off
+   slope drop right at CLIMB_MID, then a strictly non-decreasing climb
+   from there on — a world better than the multi-second continuous decay
+   it replaces, and CLIMB_MID=0.4 sits well past the 1.00x-2.00x range so
+   none of that earlier fix is touched (still exactly 23.0%/41.2% done at
+   1.50x/2.00x on every mountain).
+   CLIMB_TREF — there is deliberately no hard cap on the multiplier any
+   more (see crashFromSeed's m.rngCap, ~1000x a mountain's `ceiling`
+   instead of clamping the draw AT `ceiling`) — a big win shouldn't get
+   silently truncated down to `ceiling` just because it drew higher. But
+   climbEase still has to stay inside [0,1]: lt=1 (mult=ceiling) no longer
+   maps to the true summit (1.0) — it maps to CLIMB_TREF=0.95, leaving a
+   5% reserve above lt=1 for `ceiling`-beating draws to climb into instead
+   of hard-freezing at the peak.
+   That reserve's own shape went through two attempts. First was a single
+   exponential decay from (1,CLIMB_TREF) toward 1 as lt→∞, matching the
+   incoming line's slope at lt=1 so there was no kink at all there. It
+   looked right in every check at the time — smooth, monotonic, still
+   visibly climbing at 100x/300x/1000x above `ceiling` — but a full
+   real-time simulation out to a mountain's actual rngCap told a different
+   story: an exponential decay is, unavoidably, still an exponential decay
+   — d(alt)/dlt shrinks faster than dlt/dt (which keeps accelerating, per
+   the growth formula) can ever catch up, so past some point the climber's
+   on-screen speed doesn't just slow down, it converges to exactly zero.
+   On Kilimanjaro that meant sitting completely motionless, pixel for
+   pixel, for 12+ real seconds while the number climbed from ~1,500x into
+   the tens of thousands — a full freeze, just delayed rather than
+   removed, and after lowering alpha (see crashFromSeed) draws that deep
+   into the tail are meaningfully more reachable than they used to be.
+   The reserve is now two straight lines instead: (CLIMB_MID,CLIMB_MID_V)
+   to (1,CLIMB_TREF), then a second, shallower line from there to
+   (CLIMB_TAIL_LT_END,1) — CLIMB_TAIL_LT_END=2.8 comfortably covers every
+   mountain's own rngCap (they land between lt≈2.54-2.78). A straight
+   line's slope never decays, so speed in that second stretch settles to
+   a constant floor (driven by dlt/dt, which is still accelerating) and
+   never reaches zero, all the way out to the true maximum multiplier —
+   slower than the rest of the climb, genuinely, but a steady walk, not a
+   stop. The trade is a single one-off kink in speed right at `ceiling`
+   (same trade already made once at CLIMB_MID, just larger here), which
+   only the ~3% of rounds that ever cross `ceiling` will ever see. */
+const CLIMB_P=0.5, CLIMB_K=0.17, CLIMB_MID=0.4, CLIMB_TREF=0.95, CLIMB_TAIL_LT_END=2.8;
 const CLIMB_A=Math.pow(CLIMB_K,CLIMB_P);                                        // value at the join
 const CLIMB_B=CLIMB_K*CLIMB_P*Math.pow(CLIMB_K,CLIMB_P-1);                      // d(t)/d(s) at the join
 const CLIMB_C=CLIMB_K*CLIMB_K*CLIMB_P*(CLIMB_P-1)*Math.pow(CLIMB_K,CLIMB_P-2);  // d2(t)/d(s)2 at the join
@@ -898,24 +997,53 @@ const CLIMB_C=CLIMB_K*CLIMB_K*CLIMB_P*(CLIMB_P-1)*Math.pow(CLIMB_K,CLIMB_P-2);  
 const CLIMB_A3=10*CLIMB_A-4*CLIMB_B+0.5*CLIMB_C;
 const CLIMB_A4=-15*CLIMB_A+7*CLIMB_B-CLIMB_C;
 const CLIMB_A5=6*CLIMB_A-3*CLIMB_B+0.5*CLIMB_C;
+const CLIMB_MID_V=Math.pow(CLIMB_MID,CLIMB_P);                    // value of lt^CLIMB_P at CLIMB_MID
+const CLIMB_LINE_M=(CLIMB_TREF-CLIMB_MID_V)/(1-CLIMB_MID);        // slope of the closing line, (CLIMB_MID,CLIMB_MID_V) -> (1,CLIMB_TREF)
+const CLIMB_LINE_B=CLIMB_MID_V-CLIMB_LINE_M*CLIMB_MID;
+const CLIMB_TAIL_M=(1-CLIMB_TREF)/(CLIMB_TAIL_LT_END-1);          // slope of the reserve line, (1,CLIMB_TREF) -> (CLIMB_TAIL_LT_END,1)
+const CLIMB_TAIL_B=CLIMB_TREF-CLIMB_TAIL_M;
 function climbEase(lt){
  if(lt<=0)return 0;
- if(lt>=1)return 1;
  if(lt<CLIMB_K){
   const s=lt/CLIMB_K;
   return s*s*s*(CLIMB_A3+s*(CLIMB_A4+s*CLIMB_A5));
  }
- return Math.pow(lt,CLIMB_P);
+ if(lt<CLIMB_MID)return Math.pow(lt,CLIMB_P);
+ if(lt<1)return CLIMB_LINE_M*lt+CLIMB_LINE_B;
+ if(lt<CLIMB_TAIL_LT_END)return CLIMB_TAIL_M*lt+CLIMB_TAIL_B;
+ return 1;
+}
+/* Inverse of climbEase — given an altitude fraction, finds the lt (and so
+   the mult) that produces it. climbEase has no clean closed form once the
+   ramp is folded in, but it's monotonic over its whole domain, so plain
+   bisection is exact enough (2^-40) with negligible cost. Used by the
+   final-push tween (see draw()'s finalPush block) to drive the climber at
+   a constant on-screen speed: that tween needs "what mult puts him at
+   this altitude", the opposite direction from every other use of
+   climbEase/altOf in the file. */
+function climbEaseInv(t){
+ t=clamp(t,0,1);
+ if(t<=0)return 0;
+ let lo=0,hi=CLIMB_TAIL_LT_END;
+ for(let i=0;i<48;i++){
+  const mid=(lo+hi)/2;
+  if(climbEase(mid)<t)lo=mid;else hi=mid;
+ }
+ return (lo+hi)/2;
 }
 function altOf(m){
  if(!M)return 0;
- const lt=clamp(Math.log(Math.max(m,1))/Math.log(M.ceiling),0,1);
+ const lt=Math.max(Math.log(Math.max(m,1))/Math.log(M.ceiling),0);
  const t=climbEase(lt);
  /* the visual climb starts wherever the long-term community climber
     last fell, not back at base camp — mult itself is untouched (still
     1.00× to crashAt, same fair Pareto draw), only the on-screen
     altitude this maps to is re-anchored to the current progress point.
-    At mult=ceiling this still lands exactly on the true summit. */
+    mult=ceiling no longer lands exactly on the true summit (see
+    CLIMB_TREF) — only mult=∞ does, in the limit; genuinely reaching the
+    summit is instead a discrete event the game explicitly grants (see
+    isSummit() server-side, and beginSummitReveal() here), not something
+    altOf() itself can produce for any finite, real multiplier. */
  const startAlt=M.base+(M.progress||0);
  return startAlt+(M.elev-startAlt)*t;
 }
@@ -1034,7 +1162,6 @@ function renderSelect(){
      <div class="off-r"><span class="off-l">LOSSBACK</span><span class="off-v" style="color:${m.lossback?'#7dd3fc':'#7c90ae'};font-size:9px">${lb}</span></div>
     </div>
     <div class="mc-st">
-     <div><div class="ms-l">CEILING</div><div class="ms-v" style="color:${a}">${m.ceiling.toFixed(0)}×</div></div>
      <div><div class="ms-l">FALL RATE</div><div class="ms-v">${(m.p0*100).toFixed(0)}%</div></div>
     </div>
     <div class="mc-hist">${chips}</div>
@@ -1081,7 +1208,6 @@ function enter(id){
  buildFace(M);
  document.getElementById('select').style.display='none';
  document.getElementById('game').classList.add('on');
- document.getElementById('back-btn').style.display='';
  document.getElementById('hd1').style.display='';
  document.getElementById('hud-mtn').textContent=M.name+' · '+M.elev.toLocaleString()+' m';
  setHudRewards();
@@ -1090,14 +1216,13 @@ function enter(id){
 }
 function setHudRewards(){
  const hr=document.getElementById('hud-rw');
- hr.textContent=`MAX ${M.ceiling.toFixed(0)}× · ${(M.p0*100).toFixed(0)}% INSTANT FALL`;
+ hr.textContent=`SUMMIT ${M.ceiling.toFixed(0)}× · ${(M.p0*100).toFixed(0)}% INSTANT FALL`;
  hr.style.color=M.accent;
 }
 function toSelect(){
  stopAll(); M=null; phase='idle';
  document.getElementById('game').classList.remove('on');
  document.getElementById('select').style.display='';
- document.getElementById('back-btn').style.display='none';
  document.getElementById('hd1').style.display='none';
  renderSelect();
 }
@@ -1141,8 +1266,25 @@ function draw(ts){
   M.progress=finalPush.oldProgress;
   const DUR=650;
   const p=clamp((ts-finalPush.start)/DUR,0,1);
-  const eased=1-Math.pow(1-p,3);
-  mult=lerp(finalPush.from,M.ceiling,eased);
+  /* Driving this tween through mult (the old `lerp(from,ceiling,eased)`)
+     ran it straight through climbEase's compressive curve — the same
+     curve that deliberately makes each unit of mult buy LESS altitude the
+     closer it gets to the ceiling, so the ordinary climb keeps feeling
+     snappy. Fine for a round that's still actually climbing, but here it
+     meant a round granted a summit while still well below the peak (see
+     the isSummit() "summit push" comment below) would rocket through
+     ~99% of its remaining distance in the tween's first ~20ms and then
+     visibly crawl the last few metres for the rest of the 650ms — exactly
+     the "takes longer near the top" complaint, since the climber really
+     was moving far slower there than anywhere else on the mountain.
+     Interpolating the ALTITUDE linearly instead — then solving backwards
+     for whatever mult produces it — keeps his on-screen speed constant
+     for the whole tween, no different from any other stretch of the
+     climb. */
+  const startAlt=M.base+finalPush.oldProgress;
+  const targetAlt=lerp(finalPush.fromAlt,M.elev,p);
+  const tFrac=M.elev>startAlt?clamp((targetAlt-startAlt)/(M.elev-startAlt),0,1):1;
+  mult=Math.pow(M.ceiling,climbEaseInv(tFrac));
   updHUD();
   if(p>=1){
    M.progress=finalPush.newProgress;
@@ -1262,8 +1404,24 @@ function draw(ts){
   ctx.beginPath();ctx.moveTo(x-170,y+20);ctx.lineTo(x,y);ctx.stroke();
  }
 
+ /* Ruler ticks every 10m (was 100m) — with no hard multiplier cap any
+    more, the climb can spend a long stretch of a round compressed into a
+    tiny sliver of altitude near/above a mountain's `ceiling` (see
+    CLIMB_TREF). 100m ticks would show nothing moving at all through that
+    whole stretch; 10m ticks still visibly advance, so there's always a
+    felt sense of "still climbing" even while the number keeps racing up
+    far faster than the ruler does. Labelling every one of those, though,
+    put 20+ overlapping "5,xxx m" strings on screen at once — unreadable.
+    So: a short unlabelled mark every 10m for the felt motion, a full
+    labelled tick only every 50m for something actually legible. */
+ ctx.strokeStyle='rgba(255,255,255,.16)';ctx.lineWidth=1;
+ for(let al=Math.ceil(botAlt/10)*10;al<topAlt;al+=10){
+  if(al>M.elev||al%50===0)continue;   // the %50 marks get the full labelled tick below
+  const y=wy(al),x=wx(al);
+  ctx.beginPath();ctx.moveTo(x+13,y);ctx.lineTo(x+24,y);ctx.stroke();
+ }
  ctx.font='600 11px "JetBrains Mono",monospace';
- for(let al=Math.ceil(botAlt/100)*100;al<topAlt;al+=100){
+ for(let al=Math.ceil(botAlt/50)*50;al<topAlt;al+=50){
   if(al>M.elev)continue;   // no ruler ticks above the true summit — nothing there to mark
   const y=wy(al),x=wx(al);
   ctx.strokeStyle='rgba(255,255,255,.28)';ctx.lineWidth=1;
@@ -1432,10 +1590,36 @@ function drawClimber(ex,ey,alt,ts,t){
     should look dead (red, tumbling); reaching the top should still look
     triumphant, not like he just died at the exact moment he made it. */
  const falling=fallen&&!roundSummit;
- const col=falling?'#ef4444':'#fff';
  const fallEl=falling?Math.max(0,(ts-fallTS)/1000):0;
- const dropX=fallEl*95, dropY=170*fallEl*fallEl;
+ /* A real fall used to just tumble off-screen forever (dropX/dropY grew
+    unbounded with fallEl²), with nothing on screen tying that motion back
+    to where the NEXT round actually starts — the community climb persists
+    at exactly the fall altitude (see visualAltOf in room.js), so the
+    climber picking back up from open space read as disconnected from
+    that. Capping the freefall at ROPE_CATCH and settling into a taut,
+    gently swinging hang instead gives the fall a visible anchor point:
+    this is where he's caught, and where next round resumes. */
+ const ROPE_CATCH=0.55, ROPE_SETTLE=0.5;
+ const fallClamped=falling?Math.min(fallEl,ROPE_CATCH):0;
+ const dropX=fallClamped*95, dropY=170*fallClamped*fallClamped;
+ const caught=falling&&fallEl>ROPE_CATCH;
+ const hangT=caught?clamp((fallEl-ROPE_CATCH)/ROPE_SETTLE,0,1):0;
+ // once settled into the hang, the panic-red fades to a calm, neutral tone
+ const danger=falling&&hangT<1;
+ const col=falling?(danger?'#ef4444':'#cbd5e1'):'#fff';
  const rope=M.accent;
+
+ if(falling){
+  /* the rope itself, drawn in world space back to the exact point he fell
+     from — slack while still in freefall, straight and taut once caught. */
+  const ax=ex+15, ay=ey-2, cx=ex+15+dropX, cy=ey-2+dropY;
+  ctx.save();
+  ctx.strokeStyle=rope;ctx.globalAlpha=.6;ctx.lineWidth=1.3;
+  ctx.beginPath();ctx.moveTo(ax,ay);
+  ctx.quadraticCurveTo((ax+cx)/2+(1-hangT)*16,(ay+cy)/2,cx,cy);
+  ctx.stroke();ctx.globalAlpha=1;
+  ctx.restore();
+ }
 
  ctx.save();
  ctx.translate(ex+15+dropX,ey-2+dropY);
@@ -1445,8 +1629,14 @@ function drawClimber(ex,ey,alt,ts,t){
     roundSummit) — that used to reuse a "settling on the ground" tilt of
     over a full radian, which is why it looked like he'd collapsed even
     once the colour was fixed. A standing climber gets a small idle sway
-    instead, same as the resting sway used mid-climb, just upright. */
- ctx.rotate(falling?1.1+fallEl*5.2+Math.sin(ts*0.02)*0.25:fallen?Math.sin(ts*0.0018)*0.09:lean);
+    instead, same as the resting sway used mid-climb, just upright. Once
+    the rope catches a real fall, the tumble rotation eases into a gentle,
+    decaying pendulum swing around a settled hanging tilt instead of
+    spinning forever. */
+ const tumbleRot=1.1+fallClamped*5.2+Math.sin(ts*0.02)*0.25;
+ const hangSwing=Math.sin((fallEl-ROPE_CATCH)*2.6)*0.3*Math.exp(-(fallEl-ROPE_CATCH)*1.1);
+ const hangRot=0.55+hangSwing;
+ ctx.rotate(falling?lerp(tumbleRot,hangRot,hangT):fallen?Math.sin(ts*0.0018)*0.09:lean);
  ctx.lineCap='round';ctx.lineJoin='round';
 
  /* this soft aura is meant to ground the climber against the rock during
@@ -1455,7 +1645,7 @@ function drawClimber(ex,ey,alt,ts,t){
     sprite and reads as a dark blob/portal around him instead, which is
     exactly the "looks weird" complaint. Only draw it up close. */
  if(!(fallen&&!falling)){
-  ctx.globalAlpha=.15;ctx.fillStyle=falling?'#ef4444':rope;
+  ctx.globalAlpha=.15;ctx.fillStyle=danger?'#ef4444':rope;
   ctx.beginPath();ctx.arc(0,-8,19,0,7);ctx.fill();ctx.globalAlpha=1;
  }
 
@@ -1488,7 +1678,7 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.lineWidth=3.6;
  ctx.beginPath();ctx.moveTo(0,3);ctx.lineTo(-2,-9);ctx.stroke();
 
- ctx.fillStyle=falling?'rgba(239,68,68,.85)':rope;
+ ctx.fillStyle=danger?'rgba(239,68,68,.85)':rope;
  ctx.globalAlpha=.88;
  ctx.save();ctx.translate(3.2,-5);ctx.rotate(.12);
  ctx.beginPath();ctx.roundRect(0,-4,5,10,1.6);ctx.fill();ctx.restore();
@@ -1502,13 +1692,13 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.beginPath();ctx.moveTo(-2,-7);
  ctx.lineTo(-8+(swLH?5:0),-7+yLH*.55-3);ctx.lineTo(-10,-7+yLH-6);ctx.stroke();
 
- ctx.strokeStyle=falling?'#ef4444':'#9aa8bd';ctx.lineWidth=1.9;
+ ctx.strokeStyle=danger?'#ef4444':'#9aa8bd';ctx.lineWidth=1.9;
  ctx.beginPath();ctx.moveTo(-11,-7+yRH-6);ctx.lineTo(-14,-7+yRH-9.5);ctx.stroke();
  ctx.beginPath();ctx.moveTo(-10,-7+yLH-6);ctx.lineTo(-13,-7+yLH-9.5);ctx.stroke();
 
  ctx.fillStyle=col;
  ctx.beginPath();ctx.arc(-2.5,-13.5,4.1,0,7);ctx.fill();
- ctx.fillStyle=falling?'#7f1d1d':'#0d1626';
+ ctx.fillStyle=danger?'#7f1d1d':'#0d1626';
  ctx.save();ctx.translate(-2.5,-14);ctx.rotate(.1);ctx.fillRect(-3.4,-1.3,6.8,2.5);ctx.restore();
  ctx.restore();
 
@@ -1638,7 +1828,7 @@ function betAction(i){
  if(b&&b.state==='live'){cashOut(i);return;}
  if(b&&(b.state==='queued'||b.state==='next')){cancelStake(i);return;}
  if(b&&(b.state==='pending'||b.state==='cashed'||b.state==='lost'))return;
- if(!myUser){openAuth('login');return;}
+ if(!myUser){toast('Still connecting — try again in a moment','i');return;}
  const s=+document.getElementById('s'+i).value||0;
  const a=+document.getElementById('a'+i).value||null;
  if(s<=0){toast('Enter a stake amount','i');return;}
@@ -1670,7 +1860,7 @@ function updBal(){
  document.getElementById('bal').textContent=f2(balance);
 }
 async function topUp(){
- if(!myUser){openAuth('login');return;}
+ if(!myUser){toast('Still connecting — try again in a moment','i');return;}
  try{
   const res=await fetch('/api/topup',{method:'POST',credentials:'same-origin'});
   const data=await res.json();
@@ -1695,8 +1885,39 @@ function addFeed(n,m,v,win,you){
 }
 function renderHist(){
  document.getElementById('hist').innerHTML=
-  M.hist.slice(0,10).map(v=>`<span class="hchip" style="${chipCSS(v)}">${fx(v)}</span>`).join('');
+  M.hist.map((v,i)=>`<span class="hchip" style="${chipCSS(v)}" onclick="showHistDetail(${i})">${fx(v)}</span>`).join('');
 }
+/* Shows whether *this* player had a stake on a past round (and what
+   happened to it) when they tap one of the history chips — M.histBets is
+   kept index-aligned with M.hist, both unshifted together in
+   handleRoundEnd, so M.histBets[i] is always "my bets, if any, for the
+   round M.hist[i] came from". */
+function showHistDetail(i){
+ const mult=M.hist[i];
+ const hb=(M.histBets&&M.histBets[i])||[null,null];
+ document.getElementById('hist-pop-mult').textContent=
+  (mult>=M.ceiling?'★ SUMMIT · ':'FELL AT ')+fx(mult);
+ const rows=hb.map((b,slot)=>{
+  if(!b)return '';
+  if(b.state==='cashed')return `<div class="hp-bet"><span>STAKE ${slot+1} · ${f2(b.stake)} TKN</span>`+
+   `<b style="color:var(--gn)">TURNED BACK @ ${fx(b.cashMult)} · +${f2(b.payout)} TKN</b></div>`;
+  if(b.state==='lost')return `<div class="hp-bet"><span>STAKE ${slot+1} · ${f2(b.stake)} TKN</span>`+
+   `<b style="color:var(--rd)">FELL${b.refund>0?' · +'+f2(b.refund)+' TKN back':''}</b></div>`;
+  return '';
+ }).filter(Boolean).join('');
+ document.getElementById('hist-pop-body').innerHTML=rows||'<div class="hp-empty">You didn\'t play this round.</div>';
+ const stripRect=document.getElementById('strip').getBoundingClientRect();
+ const pop=document.getElementById('hist-pop');
+ pop.style.top=(stripRect.bottom+8)+'px';
+ pop.classList.add('on');
+}
+function closeHistPop(){document.getElementById('hist-pop').classList.remove('on');}
+document.addEventListener('click',e=>{
+ const pop=document.getElementById('hist-pop');
+ if(!pop.classList.contains('on'))return;
+ if(pop.contains(e.target)||e.target.classList.contains('hchip'))return;
+ closeHistPop();
+});
 function setStatus(){
  const d=document.getElementById('dot'),s=document.getElementById('strip-t');
  const m={waiting:['#f59e0b','ACCEPTING STAKES'],climbing:['#10b981','ASCENT IN PROGRESS'],
@@ -1728,7 +1949,7 @@ const PAGES={
   <h3>3 · Turn back</h3>
   <p>Hit <strong>TURN BACK</strong> to bank your win. Or set an <strong>auto turn-back</strong> target and the game does it for you the instant that number is reached.</p>
   <h3>Summiting</h3>
-  <p>Every mountain has a maximum. Reach it and you have summited — the rarest and biggest result on that peak.</p>
+  <p>Every mountain has a <strong>SUMMIT AT</strong> figure — reach it and you're guaranteed to have summited, the rarest result on that peak. It isn't a ceiling on how big a win can get, though: a round is free to climb higher still, and the payout is always exactly what the number reads when you turn back.</p>
   <div class="note"><p>Past results tell you nothing about the next round. Every round is independent and its outcome is fixed before the climb begins.</p></div>`},
 
  peaks:{t:'The six peaks',s:'WHAT MAKES EACH ONE DIFFERENT',b:()=>MTN.map(m=>{
@@ -1740,7 +1961,7 @@ const PAGES={
    <div class="pk-b">${m.climate}</div>
    <div class="pk-b" style="margin-top:9px;color:${m.accent}">${m.offering}</div>
    <div class="pk-s">
-    <div>MAX WIN<b>${m.ceiling.toFixed(0)}×</b></div>
+    <div>SUMMIT AT<b>${m.ceiling.toFixed(0)}×</b></div>
     <div>INSTANT FALL<b>${(m.p0*100).toFixed(0)}%</b></div>
     <div>RTP<b>${baseEffRTP(m).toFixed(1)}%</b></div>
     <div>MONEY BACK<b>${m.rake?m.rake.toFixed(1)+'%':'—'}</b></div>
@@ -1749,11 +1970,11 @@ const PAGES={
 
  maths:{t:'The numbers',s:'HOW THE PEAKS ARE BUILT',b:()=>`
   <p>Every mountain is generated from its real-world data rather than tuned by hand.</p>
-  <h3>Maximum win = real height ÷ 100</h3>
-  <p>Everest is 8,849 m, so it tops out at 88×. Mont Blanc is 4,808 m, so it tops out at 48×. Nothing else sets the ceiling.</p>
+  <h3>Summit at = real height ÷ 100</h3>
+  <p>Everest is 8,849 m, so reaching it guarantees a summit at 88×. Mont Blanc is 4,808 m, so its own guaranteed-summit point is 48×. Nothing else sets that figure — and it's a floor for the biggest possible result on a peak, not a ceiling: a round can climb well past it, no maximum win in place.</p>
   <h3>Fall rate = real fatality rate</h3>
   <p>The chance a round ends instantly at 1.00× comes from how deadly the mountain actually is. Kilimanjaro sits at 2%. K2 sits at 22%.</p>
-  <p>K2 is only 238 m shorter than Everest, so their maximums are almost identical — but K2 ends early roughly six times as often. Same top prize, completely different game.</p>
+  <p>K2 is only 238 m shorter than Everest, so they guarantee a summit at almost the same multiplier — but K2 ends early roughly six times as often. Same peak, completely different game.</p>
   <h3>RTP</h3>
   <p><strong>Return to player</strong> is the share of all money staked that comes back to players across the long run. 97% RTP means £97 returned per £100 staked, averaged over a very large number of rounds. It says nothing about any single round, and it is not a prediction of what you will get.</p>
   <h3>Money back</h3>
@@ -2015,7 +2236,6 @@ function onWS(msg){
   }
   case 'error':{
    toast(msg.message||'Something went wrong','l');
-   if(msg.code==='auth_required')openAuth('login');
    break;
   }
  }
@@ -2120,8 +2340,32 @@ function startClimbAnim(){
  function step(now){
   if(phase!=='climbing'){climbRaf=null;return;}
   const dt=Math.min((now-last)/1000,.1);last=now;
-  const frac=clamp(Math.log(mult)/Math.log(M.ceiling),0,1);
-  mult*=Math.exp(M.growth*(1+4.2*Math.pow(frac,1.35))*dt);
+  /* frac used to clamp at 1 once mult passed M.ceiling, capping the
+     growth-rate multiplier at a flat 5.2x forever after — any round that
+     climbed past ceiling settled into an unchanging pace no matter how
+     much further it had left, which is what read as boring/too-slow near
+     the top. Only clamping the lower bound lets mult keep genuinely
+     accelerating past ceiling instead of plateauing.
+     BUDGET_SPEEDUP fixes a bigger, separate problem: altOf() scales a
+     round's whole visual climb into whatever metres are left between
+     M.progress and the true summit — fine when that's most of the
+     mountain, but progress spends most of ITS time sitting close to the
+     top (only a genuine, rare summit resets it), not freshly reset. A
+     real round measured 29m from the summit took 37+ seconds to grow
+     from 1x to 6x, moving under half a metre — no curve shape fixes that,
+     there's just almost no distance left to render. Scaling the growth
+     rate up as the remaining budget shrinks (capped so a near-zero budget
+     doesn't finish in a single frame) keeps the on-screen metres/second
+     close to a normal round's regardless of how little mountain is left.
+     Must match the server's identical, identically-motivated change in
+     round.js's stepMult exactly — same growth formula run independently
+     on both sides, and REF_BUDGET/MAX_BUDGET_SPEEDUP have to agree or the
+     client's predicted mult drifts from the server's authoritative one
+     between syncs. */
+  const frac=Math.max(Math.log(mult)/Math.log(M.ceiling),0);
+  const remainingBudget=Math.max(M.elev-M.base-(M.progress||0),1);
+  const budgetSpeedup=clamp(1000/remainingBudget,1,20);
+  mult*=Math.exp(M.growth*budgetSpeedup*(1+4.2*Math.pow(frac,1.35))*dt);
   const al=altOf(mult);
   if(trail.length===0||al-trail[trail.length-1]>5){trail.push(al);if(trail.length>150)trail.shift();}
   const mn=document.getElementById('mult-n');
@@ -2211,6 +2455,13 @@ function handleRoundEnd(msg){
  const summit=msg.summit;
  lastRound={n:msg.nonce,seed:msg.serverSeed,hash:msg.serverSeedHash,clientSeed:msg.clientSeed,crashAt:msg.crashAt};
  renderPFReveal();
+ /* Snapshot *my* bet outcomes for this round before applyPhase's next
+    'waiting' transition clears bets[] for the upcoming round — kept
+    index-aligned with M.hist via the same unshift/pop, so a clicked
+    chip can always look its own bet slots back up later. */
+ if(!M.histBets)M.histBets=new Array(M.hist.length).fill(null);
+ M.histBets.unshift(bets.map(b=>b?{stake:b.stake,state:b.state,cashMult:b.cashMult,payout:b.payout,refund:b.refund}:null));
+ if(M.histBets.length>24)M.histBets.pop();
  M.hist.unshift(rnd(crashAt));if(M.hist.length>24)M.hist.pop();
  renderHist();
 
@@ -2231,7 +2482,11 @@ function handleRoundEnd(msg){
   const n0=document.getElementById('mult-n');
   n0.textContent=fx(crashAt);n0.style.color=M.accent;
   if(reduceMotion){ mult=M.ceiling; beginSummitReveal(); }
-  else finalPush={start:performance.now(), from:crashAt, oldProgress, newProgress:msg.progress};
+  /* fromAlt has to be captured here, before this function returns and the
+     caller (onWS) applies msg.progress to M — see the comment on
+     M.progress below. altOf(crashAt) right now still reads the OLD
+     progress, i.e. exactly where the climber is actually standing. */
+  else finalPush={start:performance.now(), from:crashAt, fromAlt:altOf(crashAt), oldProgress, newProgress:msg.progress};
   return;
  }
 
@@ -2280,63 +2535,34 @@ function loop(){
  raf=requestAnimationFrame(f);
 }
 
-/* ═══ ACCOUNT / AUTH ═══ */
+/* ═══ ACCOUNT ═══
+   No login/signup screens — the server hands every visitor a silent guest
+   identity (cookie-backed session, auto-created on first /api/me call) so
+   there's always a `myUser` by the time this resolves. See
+   backend/src/auth/session.js's resolveOrCreateSession. */
 function setAcctUI(){
- document.getElementById('acctstat').classList.toggle('on',!!myUser);
- document.getElementById('authstat').classList.toggle('off',!!myUser);
- if(myUser){document.getElementById('whoami').textContent='@'+myUser.username;balance=myUser.balance;updBal();}
+ if(myUser){
+  const av=document.getElementById('avatar');
+  av.title='@'+myUser.username; av.setAttribute('aria-label','@'+myUser.username);
+  balance=myUser.balance; updBal();
+ }
 }
 async function refreshMe(){
  try{
   const res=await fetch('/api/me',{credentials:'same-origin'});
-  if(res.ok){myUser=await res.json();}else{myUser=null;}
- }catch(e){myUser=null;}
+  if(res.ok)myUser=await res.json();
+ }catch(e){}
  setAcctUI();
-}
-function openAuth(mode){
- authMode=mode||'login';
- document.getElementById('auth-err').textContent='';
- document.getElementById('auth-email-fld').style.display=authMode==='signup'?'':'none';
- document.getElementById('auth-ttl').textContent=authMode==='signup'?'Create an account':'Log in';
- document.getElementById('auth-submit').textContent=authMode==='signup'?'Create account':'Log in';
- document.getElementById('auth-switch').innerHTML=authMode==='signup'
-  ?'Already have an account? <a href="javascript:void(0)" onclick="switchAuth()">Log in</a>'
-  :'New here? <a href="javascript:void(0)" onclick="switchAuth()">Create an account</a>';
- document.getElementById('authmodal').classList.add('on');
-}
-function closeAuth(){ document.getElementById('authmodal').classList.remove('on'); }
-function switchAuth(){ openAuth(authMode==='signup'?'login':'signup'); }
-async function submitAuth(){
- const username=document.getElementById('auth-username').value.trim();
- const password=document.getElementById('auth-password').value;
- const email=document.getElementById('auth-email').value.trim();
- const errEl=document.getElementById('auth-err');
- errEl.textContent='';
- try{
-  const res=await fetch('/api/'+authMode,{
-   method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',
-   body:JSON.stringify(authMode==='signup'?{username,email,password}:{username,password})
-  });
-  const data=await res.json();
-  if(!res.ok){errEl.textContent=data.message||'Something went wrong';return;}
-  myUser=data;setAcctUI();closeAuth();
-  toast('Welcome, '+myUser.username+'.','w');
- }catch(e){errEl.textContent='Network error — try again.';}
-}
-async function doLogout(){
- try{await fetch('/api/logout',{method:'POST',credentials:'same-origin'});}catch(e){}
- myUser=null;balance=0;setAcctUI();updBal();
- /* the existing WS connection was authenticated at handshake time and
-    won't notice the cookie just got cleared — close it so the automatic
-    reconnect re-resolves as anonymous instead of staying privileged */
- if(ws)ws.close();
- toast('Logged out','i');
 }
 
 updMuteBtn();
 renderSelect();
-connectWS();
-refreshMe();
+/* the guest cookie is only guaranteed to exist once /api/me has actually
+   round-tripped — opening the WebSocket before that landed would connect
+   anonymously (no userId), and betting would silently fail with
+   'auth_required' until the next reconnect. Await it first so the very
+   first connection already carries the session cookie. */
+(async()=>{ await refreshMe(); connectWS(); })();
 </script>
 </body>
 </html>
