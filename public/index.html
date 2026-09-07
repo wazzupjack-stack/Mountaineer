@@ -825,7 +825,7 @@ let M=null, phase='idle', mult=1, crashAt=1, countdown=5, lastPulseInt=1, lastMu
 let bets=[null,null], autoplay=[false,false];
 let raf=null,climbRaf=null,tickI=null,liveI=null,waitEnteredAt=0;
 let W=0,H=0,DPR=1;
-let camAlt=0, camX=0, gait=0, shake=0, flash=0, fallTS=0, roundSummit=false;
+let camAlt=0, camX=0, gait=0, shake=0, flash=0, fallTS=0, roundSummit=false, ropeCaught=false;
 /* {start,from} while a genuine summit's last stretch is being visibly
    climbed in the normal close-up view, before cutting to the zoomed-out
    reveal — see handleRoundEnd/beginSummitReveal. */
@@ -1603,26 +1603,64 @@ function drawClimber(ex,ey,alt,ts,t){
  const fallClamped=falling?Math.min(fallEl,ROPE_CATCH):0;
  const dropX=fallClamped*95, dropY=170*fallClamped*fallClamped;
  const caught=falling&&fallEl>ROPE_CATCH;
- const hangT=caught?clamp((fallEl-ROPE_CATCH)/ROPE_SETTLE,0,1):0;
- // once settled into the hang, the panic-red fades to a calm, neutral tone
- const danger=falling&&hangT<1;
- const col=falling?(danger?'#ef4444':'#cbd5e1'):'#fff';
+ const hangEl=caught?fallEl-ROPE_CATCH:0;
+ const hangT=caught?clamp(hangEl/ROPE_SETTLE,0,1):0;
+ /* Two layered oscillations once caught, instead of one plain decaying
+    sine, so the catch reads as an actual jerk of tension rather than
+    motion just gently stopping: `twang` is fast and sharply-decaying —
+    the initial elastic jolt — and `swing` is the slower pendulum settle
+    that follows it. Both drive the rope, the body's rotation, AND a
+    little lateral drift together, so all three read as one coherent
+    hang instead of independently-animated parts. */
+ const twang=caught?Math.sin(hangEl*30)*7*Math.exp(-hangEl*9):0;
+ const swing=caught?Math.sin(hangEl*2.6)*0.3*Math.exp(-hangEl*1.1):0;
+ const swayX=caught?swing*26+twang:0;
+ // once settled into the hang, the panic-red fades to a calm, neutral
+ // tone rather than snapping between the two — mix() is the same hex
+ // interpolation helper the sky gradient uses.
+ const col=falling?mix('#ef4444','#cbd5e1',hangT):'#fff';
+ const dangerCol=neutral=>falling?mix('#ef4444',neutral,hangT):neutral;
  const rope=M.accent;
+ const bx=ex+15+dropX+swayX, by=ey-2+dropY;
 
  if(falling){
-  /* the rope itself, drawn in world space back to the exact point he fell
-     from — slack while still in freefall, straight and taut once caught. */
-  const ax=ex+15, ay=ey-2, cx=ex+15+dropX, cy=ey-2+dropY;
+  if(caught&&!ropeCaught){
+   // one-shot "thud" the instant the rope actually bites — a handful of
+   // knocked-loose chalk/ice puffs plus a quick, separate shake pulse
+   // (the initial crash shake has long since decayed away by ROPE_CATCH).
+   ropeCaught=true;
+   shake=Math.max(shake,5);
+   for(let i=0;i<7;i++)
+    puffs.push({x:bx,y:by,r:1+Math.random()*1.2,o:.5,
+     vx:(Math.random()-0.5)*1.8,vy:-0.3-Math.random()*0.6,ice:true});
+  }
+  /* the rope, drawn in world space back to the exact point he fell from —
+     visible slack while still in freefall, whipping taut with a brief
+     overshoot the instant it catches. A soft glow pass under a crisp
+     core plus a thin bright highlight — the same double-stroke treatment
+     the rest of the mountain's line work already uses — reads as an
+     actual rope rather than a flat single-width line, and a small
+     carabiner marks the anchor point. */
+  const ax=ex+15, ay=ey-2;
+  const midX=(ax+bx)/2+(1-hangT)*16, midY=(ay+by)/2;
   ctx.save();
-  ctx.strokeStyle=rope;ctx.globalAlpha=.6;ctx.lineWidth=1.3;
-  ctx.beginPath();ctx.moveTo(ax,ay);
-  ctx.quadraticCurveTo((ax+cx)/2+(1-hangT)*16,(ay+cy)/2,cx,cy);
-  ctx.stroke();ctx.globalAlpha=1;
+  ctx.lineCap='round';
+  ctx.strokeStyle=rope;
+  ctx.globalAlpha=.18;ctx.lineWidth=4.5;
+  ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(midX,midY,bx,by);ctx.stroke();
+  ctx.globalAlpha=.8;ctx.lineWidth=1.4;
+  ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(midX,midY,bx,by);ctx.stroke();
+  ctx.globalAlpha=.55;ctx.lineWidth=.6;ctx.strokeStyle='#fff';
+  ctx.beginPath();ctx.moveTo(ax,ay);ctx.quadraticCurveTo(midX,midY,bx,by);ctx.stroke();
+  ctx.globalAlpha=1;
+  ctx.fillStyle='#8b96a8';ctx.beginPath();ctx.arc(ax,ay,2.6,0,7);ctx.fill();
+  ctx.strokeStyle='#e2e8f0';ctx.globalAlpha=.9;ctx.lineWidth=1;
+  ctx.beginPath();ctx.arc(ax,ay,2.6,0,7);ctx.stroke();ctx.globalAlpha=1;
   ctx.restore();
  }
 
  ctx.save();
- ctx.translate(ex+15+dropX,ey-2+dropY);
+ ctx.translate(bx,by);
  ctx.scale(1.2,1.2);
  /* fallen-but-not-falling is exclusively the summit pose (falling is
     fallen&&!roundSummit, so the only way to be fallen without falling is
@@ -1634,8 +1672,7 @@ function drawClimber(ex,ey,alt,ts,t){
     decaying pendulum swing around a settled hanging tilt instead of
     spinning forever. */
  const tumbleRot=1.1+fallClamped*5.2+Math.sin(ts*0.02)*0.25;
- const hangSwing=Math.sin((fallEl-ROPE_CATCH)*2.6)*0.3*Math.exp(-(fallEl-ROPE_CATCH)*1.1);
- const hangRot=0.55+hangSwing;
+ const hangRot=0.55+swing+twang*0.02;
  ctx.rotate(falling?lerp(tumbleRot,hangRot,hangT):fallen?Math.sin(ts*0.0018)*0.09:lean);
  ctx.lineCap='round';ctx.lineJoin='round';
 
@@ -1645,7 +1682,7 @@ function drawClimber(ex,ey,alt,ts,t){
     sprite and reads as a dark blob/portal around him instead, which is
     exactly the "looks weird" complaint. Only draw it up close. */
  if(!(fallen&&!falling)){
-  ctx.globalAlpha=.15;ctx.fillStyle=danger?'#ef4444':rope;
+  ctx.globalAlpha=.15;ctx.fillStyle=dangerCol(rope);
   ctx.beginPath();ctx.arc(0,-8,19,0,7);ctx.fill();ctx.globalAlpha=1;
  }
 
@@ -1655,10 +1692,22 @@ function drawClimber(ex,ey,alt,ts,t){
  }
 
  const R=15;
- const yRH=limbPos(gait,R), yLF=limbPos((gait+.25)%1,R),
-       yLH=limbPos((gait+.5)%1,R), yRF=limbPos((gait+.75)%1,R);
+ let yRH=limbPos(gait,R), yLF=limbPos((gait+.25)%1,R),
+     yLH=limbPos((gait+.5)%1,R), yRF=limbPos((gait+.75)%1,R);
  const mv=u=>u<0.28;
- const swRH=mv(gait), swLF=mv((gait+.25)%1), swLH=mv((gait+.5)%1), swRF=mv((gait+.75)%1);
+ let swRH=mv(gait), swLF=mv((gait+.25)%1), swLH=mv((gait+.5)%1), swRF=mv((gait+.75)%1);
+ /* `rate` above never actually drops to 0 once off the wall (it's a
+    constant idle 0.09 for every non-climbing phase), so the summit
+    reveal used to keep running the same four-beat climbing gait forever
+    — "reaching the top" visibly kept climbing in place instead of
+    celebrating. Plant both feet and thrust both arms up into a fist-pump
+    instead, with a slow bounce so it still reads as alive rather than a
+    frozen screenshot. */
+ if(fallen&&!falling){
+  const pump=Math.sin(ts*0.0032)*3;
+  yLF=0;yRF=0;swLF=false;swRF=false;
+  yRH=-R*1.35+pump;yLH=yRH;swRH=false;swLH=false;
+ }
 
  ctx.strokeStyle=col;ctx.lineWidth=2.7;
  ctx.globalAlpha=.62;
@@ -1678,7 +1727,7 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.lineWidth=3.6;
  ctx.beginPath();ctx.moveTo(0,3);ctx.lineTo(-2,-9);ctx.stroke();
 
- ctx.fillStyle=danger?'rgba(239,68,68,.85)':rope;
+ ctx.fillStyle=dangerCol(rope);
  ctx.globalAlpha=.88;
  ctx.save();ctx.translate(3.2,-5);ctx.rotate(.12);
  ctx.beginPath();ctx.roundRect(0,-4,5,10,1.6);ctx.fill();ctx.restore();
@@ -1692,13 +1741,13 @@ function drawClimber(ex,ey,alt,ts,t){
  ctx.beginPath();ctx.moveTo(-2,-7);
  ctx.lineTo(-8+(swLH?5:0),-7+yLH*.55-3);ctx.lineTo(-10,-7+yLH-6);ctx.stroke();
 
- ctx.strokeStyle=danger?'#ef4444':'#9aa8bd';ctx.lineWidth=1.9;
+ ctx.strokeStyle=dangerCol('#9aa8bd');ctx.lineWidth=1.9;
  ctx.beginPath();ctx.moveTo(-11,-7+yRH-6);ctx.lineTo(-14,-7+yRH-9.5);ctx.stroke();
  ctx.beginPath();ctx.moveTo(-10,-7+yLH-6);ctx.lineTo(-13,-7+yLH-9.5);ctx.stroke();
 
  ctx.fillStyle=col;
  ctx.beginPath();ctx.arc(-2.5,-13.5,4.1,0,7);ctx.fill();
- ctx.fillStyle=danger?'#7f1d1d':'#0d1626';
+ ctx.fillStyle=dangerCol('#0d1626');
  ctx.save();ctx.translate(-2.5,-14);ctx.rotate(.1);ctx.fillRect(-3.4,-1.3,6.8,2.5);ctx.restore();
  ctx.restore();
 
@@ -2111,7 +2160,14 @@ async function renderPFReveal(){
 function connectWS(){
  const proto=location.protocol==='https:'?'wss':'ws';
  ws=new WebSocket(proto+'://'+location.host+'/ws');
- ws.onopen=()=>{ for(const m of MTN) wsSend({type:'subscribe',mountainId:m.id}); };
+ /* refreshMe() re-syncs balance on every (re)connect, not just at boot —
+    a 'balance' push for anything that settled while this socket was
+    down (a win, a lossback refund, a jackpot) is sent to the OLD, by-then
+    -dead socket and never arrives on the new one. Without this, the
+    displayed balance could silently drift below the real one after any
+    drop/reconnect — e.g. a laptop sleeping mid-round, or a wifi blip —
+    even though the actual balance was always correct server-side. */
+ ws.onopen=()=>{ refreshMe(); for(const m of MTN) wsSend({type:'subscribe',mountainId:m.id}); };
  ws.onclose=()=>{ setTimeout(connectWS,1500); };
  ws.onmessage=e=>{
   let msg; try{msg=JSON.parse(e.data);}catch(err){return;}
@@ -2490,7 +2546,7 @@ function handleRoundEnd(msg){
   return;
  }
 
- phase='fallen';roundSummit=false;fallTS=performance.now();
+ phase='fallen';roundSummit=false;fallTS=performance.now();ropeCaught=false;
  const n=document.getElementById('mult-n');
  n.textContent=fx(crashAt);
  n.style.color='#ef4444';
