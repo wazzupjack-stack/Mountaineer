@@ -646,7 +646,7 @@ padding:16px 18px;margin-bottom:12px;max-width:820px}
 const MTN=[
 {
  id:'kilimanjaro',name:'Kilimanjaro',elev:5895,base:0,region:'Tanzania · 3°S',
- risk:'VERY LOW',accent:'#34d399',ceiling:58.95,rngCap:58950,p0:0.02,alpha:0.8552,growth:0.0327,
+ risk:'VERY LOW',accent:'#34d399',ceiling:58.95,rngCap:58950,p0:0.02,alpha:0.8552,growth:0.0693,
  rake:1.0,lossback:0,lbCond:0,
  offering:'Highest base return on the platform. No insurance — you simply keep more of every win.',
  climate:'Equatorial free-standing volcano. Five climate zones from rainforest to arctic summit. Stable, predictable weather. Altitude sickness, not storms, is the hazard.',
@@ -657,7 +657,7 @@ const MTN=[
 },
 {
  id:'aconcagua',name:'Aconcagua',elev:6961,base:0,region:'Argentina · Andes',
- risk:'LOW',accent:'#fbbf24',ceiling:69.61,rngCap:69610,p0:0.04,alpha:0.8168,growth:0.0347,
+ risk:'LOW',accent:'#fbbf24',ceiling:69.61,rngCap:69610,p0:0.04,alpha:0.8168,growth:0.0736,
  rake:1.0,lossback:5,lbCond:1.5,
  offering:'5% back on any fall under 1.50× — protection against the early bust, plus 1% back on any other fall.',
  climate:'Highest peak outside Asia. Extremely arid Andean desert air. The viento blanco — a white wind — arrives with almost no warning and drives gusts past 160 km/h.',
@@ -668,7 +668,7 @@ const MTN=[
 },
 {
  id:'montblanc',name:'Mont Blanc',elev:4808,base:0,region:'France–Italy · Alps',
- risk:'MEDIUM',accent:'#a78bfa',ceiling:48.08,rngCap:48080,p0:0.07,alpha:0.8867,growth:0.0363,
+ risk:'MEDIUM',accent:'#a78bfa',ceiling:48.08,rngCap:48080,p0:0.07,alpha:0.8867,growth:0.0770,
  rake:0,lossback:10,lbCond:999,
  offering:'10% back on every single fall, no conditions attached. The insurance peak.',
  climate:'Lowest ceiling on the platform but deceptively lethal — around a hundred deaths a year. Alpine weather turns in minutes and the Grand Couloir rockfall kills regardless of forecast.',
@@ -679,7 +679,7 @@ const MTN=[
 },
 {
  id:'denali',name:'Denali',elev:6190,base:0,region:'Alaska · 63°N',
- risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,rngCap:61900,p0:0.08,alpha:0.8298,growth:0.0377,
+ risk:'MEDIUM',accent:'#38bdf8',ceiling:61.90,rngCap:61900,p0:0.08,alpha:0.8298,growth:0.0799,
  rake:5.0,lossback:0,lbCond:0,
  offering:'5% rakeback on every losing stake. Built for high-volume play.',
  climate:'Coldest of the six despite modest height. At 63° north the barometric pressure is far lower than the same altitude in the Himalaya, so 6,190 m climbs like 7,000 m. Lows near −73 °C.',
@@ -690,7 +690,7 @@ const MTN=[
 },
 {
  id:'everest',name:'Everest',elev:8849,base:0,region:'Nepal–Tibet · Himalaya',
- risk:'HIGH',accent:'#818cf8',ceiling:88.49,rngCap:88490,p0:0.12,alpha:0.7537,growth:0.0407,
+ risk:'HIGH',accent:'#818cf8',ceiling:88.49,rngCap:88490,p0:0.12,alpha:0.7537,growth:0.0863,
  rake:3.0,lossback:0,lbCond:0,
  offering:'Guarantees a summit highest of any peak, at 88×, with 3% rakeback on every losing stake.',
  climate:'Above 8,000 m the death zone offers a third of sea-level oxygen. The jet stream parks on the summit for most of the year, driving winds past 280 km/h, lifting only for a narrow May window.',
@@ -701,7 +701,7 @@ const MTN=[
 },
 {
  id:'k2',name:'K2',elev:8611,base:0,region:'Pakistan–China · Karakoram',
- risk:'EXTREME',accent:'#ef4444',ceiling:86.11,rngCap:86110,p0:0.22,alpha:0.7312,growth:0.0443,
+ risk:'EXTREME',accent:'#ef4444',ceiling:86.11,rngCap:86110,p0:0.22,alpha:0.7312,growth:0.0939,
  rake:8.0,lossback:15,lbCond:1.01,
  offering:'Lowest base RTP, largest rewards: 8% rakeback on every fall, plus 15% more back on instant falls.',
  climate:'The Savage Mountain. 238 m lower than Everest but roughly six times deadlier. Storms arrive without warning, there is no reliable weather window, and the Bottleneck serac collapses without pattern.',
@@ -825,16 +825,13 @@ let M=null, phase='idle', mult=1, crashAt=1, countdown=5, lastPulseInt=1, lastMu
 let bets=[null,null], autoplay=[false,false];
 let raf=null,climbRaf=null,tickI=null,liveI=null,waitEnteredAt=0;
 let W=0,H=0,DPR=1;
-let camAlt=0, camX=0, gait=0, shake=0, flash=0, fallTS=0, roundSummit=false, ropeCaught=false;
-/* {start,from} while a genuine summit's last stretch is being visibly
-   climbed in the normal close-up view, before cutting to the zoomed-out
-   reveal — see handleRoundEnd/beginSummitReveal. */
-let finalPush=null;
+let camAlt=0, camX=0, gait=0, shake=0, flash=0, fallTS=0, roundSummit=false, ropeCaught=false, hitStopUntil=0;
+let climbVel=0, velAlt=null, velTs=0;
 let puffs=[], trail=[], confetti=[];
 let flashColor='#ef4444';
 let faceTable=null;
 let serverSeedHash=null, clientSeed=null, nonce=0, lastRound=null;
-let ws=null;
+let ws=null, lastWsMsgAt=Date.now();
 
 const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
 
@@ -1013,24 +1010,30 @@ function climbEase(lt){
  if(lt<CLIMB_TAIL_LT_END)return CLIMB_TAIL_M*lt+CLIMB_TAIL_B;
  return 1;
 }
-/* Inverse of climbEase — given an altitude fraction, finds the lt (and so
-   the mult) that produces it. climbEase has no clean closed form once the
-   ramp is folded in, but it's monotonic over its whole domain, so plain
-   bisection is exact enough (2^-40) with negligible cost. Used by the
-   final-push tween (see draw()'s finalPush block) to drive the climber at
-   a constant on-screen speed: that tween needs "what mult puts him at
-   this altitude", the opposite direction from every other use of
-   climbEase/altOf in the file. */
-function climbEaseInv(t){
- t=clamp(t,0,1);
- if(t<=0)return 0;
- let lo=0,hi=CLIMB_TAIL_LT_END;
- for(let i=0;i<48;i++){
-  const mid=(lo+hi)/2;
-  if(climbEase(mid)<t)lo=mid;else hi=mid;
- }
- return (lo+hi)/2;
-}
+// Must match backend/src/game/round.js's PROGRESS_GAMMA_MIN exactly —
+// that file's visualAltOf() is what actually gets persisted as next
+// round's starting progress, and it needs to reproduce exactly what this
+// function shows live or the next climb visibly starts from the wrong
+// spot (see that file's comment on the "falling at 496m but persisting
+// 1096m" bug this exact mismatch used to cause).
+const PROGRESS_GAMMA_MIN=0.12;
+// `trueRemaining*fraction` converges toward M.elev but, on paper, never
+// truly reaches it without a genuine summit — floating point doesn't have
+// infinite precision though, and fraction lands well above 0.5 once
+// gamma's small-exponent regime kicks in near the top, so trueRemaining
+// gets multiplied down FAST. Measured: from ~8m remaining, 13 ordinary
+// (non-summit) rounds shrank it to a literal, exact 0 in double-precision
+// arithmetic — and 0 remaining stays 0 forever after, permanently
+// stranding the climber at the summit for every round from then on until
+// a genuine summit (rare) resets it. This is the actual mechanism behind
+// the "climber stuck at the summit, round not ending" report — caught
+// live, three real mountains were already pinned at exactly their elev
+// mid-session. DISPLAY_RESERVE_FRAC reserves a small slice of each
+// mountain's height (0.1%) the continuous formula can never close no
+// matter how many rounds compound, so trueRemaining always has a real
+// floor above zero to shrink toward — this exact underflow becomes
+// structurally impossible. Must match round.js's identical constant.
+const DISPLAY_RESERVE_FRAC=0.001;
 function altOf(m){
  if(!M)return 0;
  const lt=Math.max(Math.log(Math.max(m,1))/Math.log(M.ceiling),0);
@@ -1045,7 +1048,31 @@ function altOf(m){
     isSummit() server-side, and beginSummitReveal() here), not something
     altOf() itself can produce for any finite, real multiplier. */
  const startAlt=M.base+(M.progress||0);
- return startAlt+(M.elev-startAlt)*t;
+ /* Re-anchoring the fraction (climbEase(lt)) purely against whatever's
+    left made a round's contribution shrink toward nothing once progress
+    was already high — the mountain raced through its first ~85% then
+    crawled through many, barely-visible rounds for the last ~15%.
+    Reshaping the FRACTION itself (t^gamma, gamma running from 1 at the
+    base down to PROGRESS_GAMMA_MIN near the summit) keeps a typical round
+    worth a comparable number of on-screen metres throughout the climb —
+    and because t^gamma has the same two fixed points as t itself (0->0,
+    1->1, for any gamma), `trueRemaining*t^gamma` can never exceed
+    trueRemaining, so this can never overshoot M.elev and never needs a
+    clamp (a first version of this fix blended the WINDOW instead and
+    needed one — that clamp could fire from an ordinary round and
+    permanently strand progress at exactly M.elev, since 0 remaining
+    distance raised to any power is still 0; caught live before shipping,
+    see round.js's comment for the full story). */
+ const fullRange=M.elev-M.base;
+ const trueRemaining=Math.max(M.elev-startAlt,0);
+ const progressFrac=clamp((startAlt-M.base)/fullRange,0,1);
+ const gamma=1-(1-PROGRESS_GAMMA_MIN)*progressFrac;
+ const fraction=Math.pow(t,gamma);
+ const raw=startAlt+trueRemaining*fraction;
+ // Math.max(cap,startAlt) instead of a bare cap: never regress below
+ // wherever progress already legitimately is.
+ const cap=Math.max(M.elev-DISPLAY_RESERVE_FRAC*fullRange,startAlt);
+ return Math.min(raw,cap);
 }
 function zoneAt(a){let z=null;for(const q of M.zones)if(a>=q[0])z=q;return z;}
 
@@ -1057,7 +1084,11 @@ function jackpotFrac(m){
 }
 /* The final stretch to the summit — closest to the top, still carries
    real risk, so it's flagged on the card as its own named zone. */
-const SUMMIT_PUSH_FRAC=0.95;
+// Must match backend/src/game/round.js's SUMMIT_PUSH_FRAC exactly — this
+// only drives the "🚩 SUMMIT PUSH" banner text, but showing it at a
+// different threshold than where the server's actual odds change would
+// mislead players about when the push is real.
+const SUMMIT_PUSH_FRAC=0.97;
 function inSummitPush(m){return jackpotFrac(m)>=SUMMIT_PUSH_FRAC&&jackpotFrac(m)<1;}
 
 /* ═══ THUMBNAILS ═══ */
@@ -1230,7 +1261,6 @@ function stopAll(){
  if(raf){cancelAnimationFrame(raf);raf=null;}
  stopClimbAnim();
  if(tickI){clearInterval(tickI);tickI=null;}
- finalPush=null;
 }
 function resize(){
  const s=document.getElementById('stage');
@@ -1248,74 +1278,66 @@ const PPM=()=>H/210;
 const CY =()=>H*0.62;
 const CXS=()=>W*0.40;
 
+/* The starfield is fully deterministic (seeded by mountain id) and never
+   moves — only its overall brightness (via a separate globalAlpha at the
+   call site) changes as the camera climbs. Recomputing all 80-90 star
+   positions through the PRNG and re-issuing a beginPath/arc/fill per star
+   every single animation frame was pure waste for something that never
+   actually changes shape. Render it once to an offscreen canvas (single-
+   entry cache, rebuilt only when the id/size/params actually differ — i.e.
+   effectively only on resize or mountain switch) and blit it as one
+   drawImage per frame instead. Baked at w*DPR/h*DPR with a matching
+   internal scale so it stays pixel-crisp on high-DPI screens despite being
+   stretched onto the DPR-scaled destination via explicit dw/dh. */
+let starFieldCache=null, starFieldKey=null;
+function getStarField(id,seedSuffix,w,h,hFrac,count,rScale){
+ const key=id+'|'+seedSuffix+'|'+Math.round(w*DPR)+'|'+Math.round(h*DPR)+'|'+hFrac+'|'+count+'|'+rScale;
+ if(starFieldKey!==key){
+  const c=document.createElement('canvas');
+  c.width=Math.max(1,Math.round(w*DPR));c.height=Math.max(1,Math.round(h*DPR));
+  const cctx=c.getContext('2d');
+  cctx.scale(DPR,DPR);
+  const sf=xmur3(id+seedSuffix);
+  for(let i=0;i<count;i++){
+   const x=(sf()%10000)/10000*w,y=(sf()%10000)/10000*h*hFrac,r=(sf()%10)/10*rScale+.3;
+   cctx.globalAlpha=(sf()%100)/150+.25;
+   cctx.fillStyle='#fff';cctx.beginPath();cctx.arc(x,y,r,0,7);cctx.fill();
+  }
+  starFieldCache=c;starFieldKey=key;
+ }
+ return starFieldCache;
+}
+
 function draw(ts){
  if(!M)return;
- if(finalPush){
-  /* only the climber's on-screen position (via mult -> altOf) animates
-     here — the readout stays fixed on the true crashAt the whole time
-     (set in handleRoundEnd/beginSummitReveal) rather than visibly racing
-     up toward M.ceiling and then correcting back down to the real payout
-     multiplier once the reveal cuts in, which would just trade one
-     "wait, that's not what I actually won" moment for another. */
-  /* the WS handler applies the round's new (often reset-to-0) progress
-     to M.progress synchronously, right after handleRoundEnd() kicks this
-     tween off — altOf() anchors off M.progress, so without re-pinning it
-     back to what was actually climbed on every frame here, the climber
-     would jump to start the final stretch from the WRONG base altitude
-     the instant that message lands, not just at the end. */
-  M.progress=finalPush.oldProgress;
-  const DUR=650;
-  const p=clamp((ts-finalPush.start)/DUR,0,1);
-  /* Driving this tween through mult (the old `lerp(from,ceiling,eased)`)
-     ran it straight through climbEase's compressive curve — the same
-     curve that deliberately makes each unit of mult buy LESS altitude the
-     closer it gets to the ceiling, so the ordinary climb keeps feeling
-     snappy. Fine for a round that's still actually climbing, but here it
-     meant a round granted a summit while still well below the peak (see
-     the isSummit() "summit push" comment below) would rocket through
-     ~99% of its remaining distance in the tween's first ~20ms and then
-     visibly crawl the last few metres for the rest of the 650ms — exactly
-     the "takes longer near the top" complaint, since the climber really
-     was moving far slower there than anywhere else on the mountain.
-     Interpolating the ALTITUDE linearly instead — then solving backwards
-     for whatever mult produces it — keeps his on-screen speed constant
-     for the whole tween, no different from any other stretch of the
-     climb. */
-  const startAlt=M.base+finalPush.oldProgress;
-  const targetAlt=lerp(finalPush.fromAlt,M.elev,p);
-  const tFrac=M.elev>startAlt?clamp((targetAlt-startAlt)/(M.elev-startAlt),0,1):1;
-  mult=Math.pow(M.ceiling,climbEaseInv(tFrac));
-  updHUD();
-  if(p>=1){
-   M.progress=finalPush.newProgress;
-   finalPush=null;
-   beginSummitReveal();
-  }
- }
+ // a brief freeze-frame right on impact — classic game-feel "hit-stop":
+ // holding the very last climbing frame on screen for a beat before the
+ // fall plays makes the crash land with more weight than an unbroken,
+ // continuous animation ever reads as. Summiting skips this on purpose —
+ // that moment should flow straight into the reveal, not jar to a stop.
+ if(ts<hitStopUntil)return;
  if(phase==='fallen'&&roundSummit){drawSummitReveal(ts);return;}
  const a=M.accent, ppm=PPM(), cy=CY(), cxs=CXS();
  const alt=altOf(mult);
- if(finalPush){
-  /* the final-push tween above is already a deliberately-eased animation
-     — running it through the normal per-frame camera lerp on top would
-     be a second, independent layer of smoothing that can't guarantee it
-     keeps up, especially during the tween's fast opening burst. If the
-     camera falls behind there, the climber (drawn at the true tweened
-     alt, not the lagging camera's) shoots toward or past the top edge of
-     the screen in the instant right before the cut to the reveal — the
-     "looks broken at the summit" this was meant to fix, just moved a few
-     hundred ms later. Track it exactly instead. */
-  camAlt=alt;camX=faceX(alt);
- } else {
-  camAlt=lerp(camAlt,alt,0.22);
-  camX  =lerp(camX,faceX(alt),0.22);
- }
+ // how close the live multiplier is to this mountain's ceiling — drives
+ // both the climb curve's colour and a low-level tension shake that
+ // builds through a climb (see below), same way a classic crash game's
+ // line and screen intensity ramp up as the risk does.
+ const riskT=clamp(Math.log(Math.max(mult,1))/Math.log(M.ceiling),0,1);
+ camAlt=lerp(camAlt,alt,0.22);
+ camX  =lerp(camX,faceX(alt),0.22);
  const t=clamp((camAlt-M.base)/(M.elev-M.base),0,1);
  const wx=w=>cxs+(faceX(w)-camX);
  const wy=w=>cy-(w-camAlt)*ppm;
 
  ctx.save();
- if(shake>0.1){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.88;}
+ // a subtle, continuously-rising shake as the climb gets riskier — on top
+ // of (not replacing) the existing discrete impact shake below, which
+ // still decays normally on its own.
+ const tension=phase==='climbing'&&!reduceMotion?Math.pow(riskT,3)*2.4:0;
+ const totalShake=shake+tension;
+ if(totalShake>0.1)ctx.translate((Math.random()-.5)*totalShake,(Math.random()-.5)*totalShake);
+ if(shake>0.1)shake*=.88;
 
  const g=ctx.createLinearGradient(0,0,0,H);
  g.addColorStop(0,mix(M.skyHi,'#000000',t*.40));
@@ -1323,12 +1345,8 @@ function draw(ts){
  g.addColorStop(1,mix(M.skyLo,'#000000',t*.14));
  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 
- const sf=xmur3(M.id+'st');
- for(let i=0;i<80;i++){
-  const x=(sf()%10000)/10000*W,y=(sf()%10000)/10000*H*.72,r=(sf()%10)/10*1.3+.3;
-  ctx.globalAlpha=clamp(t*1.2-.05,0,.9)*((sf()%100)/150+.25);
-  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
- }
+ ctx.globalAlpha=clamp(t*1.2-.05,0,.9);
+ ctx.drawImage(getStarField(M.id,'st',W,H,.72,80,1.3),0,0,W,H);
  ctx.globalAlpha=1;
 
  ctx.fillStyle='rgba(255,255,255,.07)';
@@ -1439,17 +1457,50 @@ function draw(ts){
   ctx.fillText(z[1],x+10,y-6);ctx.shadowBlur=0;
  }
 
- /* rope trail — takes the camp colour from Base Camp up */
+ /* the climb curve — the classic crash-game "rising line" (Aviator/
+    Bustabit etc.), drawn right over the actual climb path instead of as
+    a separate abstract chart, since here the climb genuinely IS the
+    curve. Colour eases from the mountain's own accent toward danger-red
+    as the multiplier nears ceiling, with a gradient fill under the line
+    and a glowing leading dot — the genre's signature look, laid onto the
+    mountain instead of replacing it. */
  if(trail.length>1){
-  const tc=a;
+  const rc=hexRGB(a), dc=hexRGB('#ef4444');
+  const lr=Math.round(lerp(rc[0],dc[0],riskT)), lg=Math.round(lerp(rc[1],dc[1],riskT)), lb=Math.round(lerp(rc[2],dc[2],riskT));
+  const lineRGB=phase==='fallen'?'239,68,68':`${lr},${lg},${lb}`;
+  const pts=trail.map(al=>[wx(al)+15,wy(al)]);
+  const lastX=pts[pts.length-1][0], lastY=pts[pts.length-1][1];
+
+  /* the fill's bottom edge has to be the trail's OWN starting altitude
+     (pts[0]), not the bottom of the canvas — early in a climb the trail
+     only covers a few metres near the climber, and closing the shape all
+     the way down to the canvas edge regardless stretched a thin sliver
+     of colour off the bottom of the screen that read as the climber
+     trailing/lagging downward, not as an area-under-the-curve fill. */
+  const baseY=pts[0][1];
   ctx.beginPath();
-  for(let i=0;i<trail.length;i++){
-   const x=wx(trail[i])+15,y=wy(trail[i]);
-   i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  ctx.moveTo(pts[0][0],baseY);
+  for(const[x,y]of pts)ctx.lineTo(x,y);
+  ctx.lineTo(lastX,baseY);
+  ctx.closePath();
+  const fg=ctx.createLinearGradient(0,lastY,0,baseY);
+  fg.addColorStop(0,`rgba(${lineRGB},.30)`);
+  fg.addColorStop(1,`rgba(${lineRGB},0)`);
+  ctx.fillStyle=fg;ctx.fill();
+
+  ctx.beginPath();
+  for(let i=0;i<pts.length;i++) i===0?ctx.moveTo(pts[i][0],pts[i][1]):ctx.lineTo(pts[i][0],pts[i][1]);
+  ctx.strokeStyle=`rgb(${lineRGB})`;
+  ctx.globalAlpha=.18;ctx.lineWidth=8;ctx.stroke();
+  ctx.globalAlpha=.9;ctx.lineWidth=2.2;ctx.stroke();
+  ctx.globalAlpha=1;
+
+  if(phase==='climbing'){
+   ctx.beginPath();ctx.arc(lastX,lastY,8,0,7);
+   ctx.fillStyle=`rgba(${lineRGB},.28)`;ctx.fill();
+   ctx.beginPath();ctx.arc(lastX,lastY,4.5,0,7);
+   ctx.fillStyle=`rgb(${lineRGB})`;ctx.fill();
   }
-  ctx.strokeStyle=phase==='fallen'?'rgba(239,68,68,.55)':tc;
-  ctx.globalAlpha=.6;ctx.lineWidth=1.5;ctx.stroke();
-  ctx.globalAlpha=.13;ctx.lineWidth=7;ctx.stroke();ctx.globalAlpha=1;
  }
 
  if(M.elev-camAlt<cy/ppm){
@@ -1516,13 +1567,7 @@ function drawSummitReveal(ts){
  g.addColorStop(0,M.skyHi);g.addColorStop(1,M.skyLo);
  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
 
- const sf=xmur3(M.id+'summitst');
- for(let i=0;i<90;i++){
-  const x=(sf()%10000)/10000*W,y=(sf()%10000)/10000*H*.6,r=(sf()%10)/10*1.4+.3;
-  ctx.globalAlpha=(sf()%100)/150+.25;ctx.fillStyle='#fff';
-  ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill();
- }
- ctx.globalAlpha=1;
+ ctx.drawImage(getStarField(M.id,'summitst',W,H,.6,90,1.4),0,0,W,H);
 
  const apexX=W*0.5, apexY=H*0.16, baseY=H*0.95;
  const baseL=-W*0.1, baseR=W*1.1;
@@ -1583,7 +1628,28 @@ function limbPos(u,reach){
 function drawClimber(ex,ey,alt,ts,t){
  const climbing=phase==='climbing', fallen=phase==='fallen';
  const shallow=profileT(M,t);
- const rate=climbing?lerp(0.85,0.34,t)*lerp(0.55,1.3,shallow)*1.9:0.09;
+ /* the height/terrain-based pacing below (lerp(0.85,0.34,t)) deliberately
+    gives a "getting tired" feel as the climb gets higher — but it's blind
+    to how fast the round is ACTUALLY moving. A round accelerating hard
+    (a big multiplier surge) could still show a slow, tired-looking shuffle
+    purely because of where on the mountain it happened to be, which read
+    as the climber randomly slowing or stalling while the number kept
+    racing up. Track real on-screen altitude velocity and let it set a
+    FLOOR under the gait rate — never slower than the pace actually
+    warrants, while leaving the original height-based pacing untouched
+    for genuinely slow stretches of a climb. */
+ if(velAlt===null){velAlt=alt;velTs=ts;}
+ const dtv=ts-velTs;
+ if(climbing&&dtv>16){
+  const inst=Math.max((alt-velAlt)/(dtv/1000),0);
+  climbVel=lerp(climbVel,inst,clamp(dtv/220,0,1));
+  velAlt=alt;velTs=ts;
+ } else if(!climbing){
+  climbVel=0;velAlt=alt;velTs=ts;
+ }
+ const refVel=(M.elev-M.base)/45;   // "climbing the whole mountain in ~45s" as a 1.0x pace reference
+ const velFactor=clamp(climbVel/Math.max(refVel,1),0,1.3);
+ const rate=climbing?Math.max(lerp(0.85,0.34,t)*lerp(0.55,1.3,shallow),velFactor)*1.9:0.09;
  gait=(gait+rate*0.016)%1;
  const lean=clamp(0.06+slopeAngle(alt)*0.3,0,0.34);
  /* "fallen" covers BOTH a real crash and a summit — only a real crash
@@ -2167,14 +2233,36 @@ function connectWS(){
     displayed balance could silently drift below the real one after any
     drop/reconnect — e.g. a laptop sleeping mid-round, or a wifi blip —
     even though the actual balance was always correct server-side. */
- ws.onopen=()=>{ refreshMe(); for(const m of MTN) wsSend({type:'subscribe',mountainId:m.id}); };
+ ws.onopen=()=>{ lastWsMsgAt=Date.now(); refreshMe(); for(const m of MTN) wsSend({type:'subscribe',mountainId:m.id}); };
  ws.onclose=()=>{ setTimeout(connectWS,1500); };
  ws.onmessage=e=>{
+  lastWsMsgAt=Date.now();
   let msg; try{msg=JSON.parse(e.data);}catch(err){return;}
   onWS(msg);
  };
 }
 function wsSend(o){ if(ws&&ws.readyState===1) ws.send(JSON.stringify(o)); }
+
+/* A plain WebSocket has no built-in way to notice a half-open connection —
+   a laptop sleeping, a wifi switch, or a proxy silently dropping the TCP
+   stream can all leave `ws` reporting readyState OPEN forever with no
+   onclose ever firing, so connectWS's own reconnect logic never triggers.
+   The client is then stuck showing whatever local state it had — most
+   visibly, a 'climbing' phase whose local mult prediction keeps running
+   with nothing left to ever stop it (see startClimbAnim's own rngCap
+   clamp for the resulting worst case). During normal play a `sync`
+   arrives every ~150-200ms while climbing and a `phase`/`state` broadcast
+   at least every few seconds regardless — so going this long with zero
+   messages of any kind is never legitimate, and force-reconnecting is
+   always safe (hydrateActive() re-syncs everything from the fresh
+   snapshot the resubscribe brings back). */
+setInterval(()=>{
+ if(Date.now()-lastWsMsgAt>20000){
+  lastWsMsgAt=Date.now();
+  if(ws){ws.onclose=null;try{ws.close();}catch(e){}}
+  connectWS();
+ }
+},5000);
 
 function onWS(msg){
  switch(msg.type){
@@ -2402,26 +2490,33 @@ function startClimbAnim(){
      much further it had left, which is what read as boring/too-slow near
      the top. Only clamping the lower bound lets mult keep genuinely
      accelerating past ceiling instead of plateauing.
-     BUDGET_SPEEDUP fixes a bigger, separate problem: altOf() scales a
-     round's whole visual climb into whatever metres are left between
-     M.progress and the true summit — fine when that's most of the
-     mountain, but progress spends most of ITS time sitting close to the
-     top (only a genuine, rare summit resets it), not freshly reset. A
-     real round measured 29m from the summit took 37+ seconds to grow
-     from 1x to 6x, moving under half a metre — no curve shape fixes that,
-     there's just almost no distance left to render. Scaling the growth
-     rate up as the remaining budget shrinks (capped so a near-zero budget
-     doesn't finish in a single frame) keeps the on-screen metres/second
-     close to a normal round's regardless of how little mountain is left.
-     Must match the server's identical, identically-motivated change in
-     round.js's stepMult exactly — same growth formula run independently
-     on both sides, and REF_BUDGET/MAX_BUDGET_SPEEDUP have to agree or the
-     client's predicted mult drifts from the server's authoritative one
-     between syncs. */
+     Deliberately no separate speedup term tied to how little of the
+     mountain is left — mult grows at exactly the same rate every round,
+     regardless of community progress, so nothing about a climb's pace
+     changes just because it's close to (or far from) the summit. Must
+     match the server's identical growth formula in round.js's stepMult
+     exactly, or the client's predicted mult drifts from the server's
+     authoritative one between syncs. */
   const frac=Math.max(Math.log(mult)/Math.log(M.ceiling),0);
-  const remainingBudget=Math.max(M.elev-M.base-(M.progress||0),1);
-  const budgetSpeedup=clamp(1000/remainingBudget,1,20);
-  mult*=Math.exp(M.growth*budgetSpeedup*(1+4.2*Math.pow(frac,1.35))*dt);
+  mult*=Math.exp(M.growth*(1+4.2*Math.pow(frac,1.35))*dt);
+  /* This is local, unauthoritative prediction only — the server alone
+     decides when a round actually ends, and if its roundEnd/sync messages
+     ever stop arriving for a stretch (a dropped message, a long tab
+     freeze, a reconnect gap) this loop has nothing else telling it to
+     stop. The (1+4.2*frac^1.35) term above is deliberately explosive once
+     frac climbs past ~1 — that's what makes a rare high-multiplier round
+     still feel like it's accelerating instead of crawling — but left
+     completely unchecked that same explosiveness reaches actual
+     Infinity in under two minutes of real time (measured), which is
+     exactly the "multiplier just says Infinity and the climb never
+     ends" bug: a real desync, made catastrophically visible by this
+     formula's own runaway shape. No real round can ever legitimately
+     need mult above rngCap — the server's crashFromSeed hard-clamps
+     every draw there — so clamping the local guess to it is always
+     safe: it can never show a number the server couldn't have produced,
+     and it guarantees this loop can never again render nonsense while
+     it waits for the next real message to correct it. */
+  if(mult>M.rngCap)mult=M.rngCap;
   const al=altOf(mult);
   if(trail.length===0||al-trail[trail.length-1]>5){trail.push(al);if(trail.length>150)trail.shift();}
   const mn=document.getElementById('mult-n');
@@ -2438,6 +2533,11 @@ function startClimbAnim(){
    lastMultTxt=txt;
    mn.textContent=txt;
    mn.classList.remove('tick');void mn.offsetWidth;mn.classList.add('tick');
+   // the readout itself heats up as the climb gets riskier — white,
+   // through amber, into danger-red approaching ceiling — the same
+   // "temperature" cue the climb curve uses.
+   const riskT=clamp(frac,0,1);
+   mn.style.color=riskT<0.6?mix('#ffffff','#fbbf24',riskT/0.6):mix('#fbbf24','#ef4444',(riskT-0.6)/0.4);
   }
   const wholeNow=Math.floor(mult);
   if(wholeNow>lastPulseInt){
@@ -2499,7 +2599,6 @@ function showJkWin(outcome){
 function handleRoundEnd(msg){
  stopClimbAnim();
  crashAt=msg.crashAt;
- const oldProgress=M.progress;   // captured before the caller (onWS) applies msg.progress to M — see finalPush below
  /* the camera/canvas position (draw() reads the global `mult`, via
     altOf(mult)) must snap to the true final crashAt here — otherwise it
     stays wherever the last periodic 'sync' left it, up to ~180ms of
@@ -2522,38 +2621,27 @@ function handleRoundEnd(msg){
  renderHist();
 
  if(summit){
-  /* A round can be granted a summit well before crashAt's own altitude
-     would naturally reach the true peak — see the server's isSummit()
-     "summit push" easier-finish condition, which only needs most (not
-     all) of a mountain's final stretch closed once the long-term climb
-     is already almost there. Cutting straight to the zoomed-out reveal
-     at that point visibly skipped whatever was left of the climb, which
-     read as the game just declaring a win rather than the climber
-     actually reaching it. So: keep the normal close-up view running and
-     visibly close the remaining distance up to the true summit first
-     (mult eased from crashAt to M.ceiling — altOf(M.ceiling) is exactly
-     M.elev, never short of it), then cut to the reveal once that
-     finishes — the number and the climber both genuinely finish the
-     climb before anything is claimed. */
-  const n0=document.getElementById('mult-n');
-  n0.textContent=fx(crashAt);n0.style.color=M.accent;
-  if(reduceMotion){ mult=M.ceiling; beginSummitReveal(); }
-  /* fromAlt has to be captured here, before this function returns and the
-     caller (onWS) applies msg.progress to M — see the comment on
-     M.progress below. altOf(crashAt) right now still reads the OLD
-     progress, i.e. exactly where the climber is actually standing. */
-  else finalPush={start:performance.now(), from:crashAt, fromAlt:altOf(crashAt), oldProgress, newProgress:msg.progress};
+  /* A round can be granted a summit before crashAt's own altitude would
+     naturally reach the true peak — see the server's isSummit() "summit
+     push" easier-finish condition. Cut straight to the reveal at whatever
+     crashAt actually is: no artificial tween racing the number or the
+     climber the rest of the way up first. mult is already crashAt (set
+     above), and that's exactly what's paid out — the multiplier climbs at
+     the same rate as any other round and the summit pays whatever it
+     genuinely reached, nothing more. */
+  beginSummitReveal();
   return;
  }
 
  phase='fallen';roundSummit=false;fallTS=performance.now();ropeCaught=false;
+ hitStopUntil=reduceMotion?0:performance.now()+90;
  const n=document.getElementById('mult-n');
  n.textContent=fx(crashAt);
  n.style.color='#ef4444';
  document.getElementById('mult-lab').textContent='FELL AT';
  document.getElementById('mult-sub').textContent=Math.round(altOf(crashAt)).toLocaleString()+' M';
  flashColor='#ef4444';
- shake=reduceMotion?0:14;flash=reduceMotion?0:1;
+ shake=reduceMotion?0:18;flash=reduceMotion?0:1;
  sfxCrash();
  setStatus();loop();
 }
